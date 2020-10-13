@@ -90,4 +90,7 @@ export default {
    ** See https://nuxtjs.org/api/configuration-build/
    */
   build: {},
+  env: {
+    APIURL: 'https://localhost:5001'
+  }
 }
