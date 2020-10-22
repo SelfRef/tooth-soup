@@ -41,14 +41,10 @@ namespace ToothSoupAPI.Controllers
 			return CreatedAtAction(nameof(Put), user);
 		}
 
-		// [HttpDelete]
-		// public async Task<ActionResult> Delete()
-		// {
-		// 	var user = await _db.Users.FindAsync(id); // TODO: Get user id
-		// 	if (user == null) return NotFound();
-		// 	_db.Users.Remove(user);
-		// 	await _db.SaveChangesAsync();
-		// 	return Ok();
-		// }
+		[HttpPost]
+		public async Task<ActionResult<Appointment>> RegisterAppointment(Appointment appointment)
+		{
+			return CreatedAtAction(nameof(RegisterAppointment), appointment);
+		}
 	}
 }
