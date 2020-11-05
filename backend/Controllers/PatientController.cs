@@ -7,11 +7,13 @@ using Microsoft.Extensions.Logging;
 using ToothSoupAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ToothSoupAPI.Controllers
 {
 	[ApiController]
-	[Route("[controller]")]
+	[Authorize]
+	[Route("api/[controller]")]
 	public class PatientController : ControllerBase
 	{
 		private readonly Database _db;

@@ -50,7 +50,7 @@ namespace ToothSoupAPI
 				});
 
 			services.AddCors();
-			services.AddControllers();
+			services.AddControllers().AddNewtonsoftJson();
 
 			// Register the Swagger services
 			services.AddSwaggerDocument();

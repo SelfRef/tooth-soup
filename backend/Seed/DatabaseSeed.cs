@@ -12,22 +12,26 @@ namespace ToothSoupAPI.Seed
 				new User {
 					Id = 1,
 					Email = "dentist1@test.pl",
-					Password = "qwerty"
+					Password = "qwerty",
+					Role = UserRole.Dentist
 				},
 				new User {
 					Id = 2,
 					Email = "dentist2@test.pl",
-					Password = "qwerty"
+					Password = "qwerty",
+					Role = UserRole.Dentist
 				},
 				new User {
 					Id = 3,
 					Email = "patient1@test.pl",
-					Password = "qwerty"
+					Password = "qwerty",
+					Role = UserRole.Patient
 				},
 				new User {
 					Id = 4,
 					Email = "patient2@test.pl",
-					Password = "qwerty"
+					Password = "qwerty",
+					Role = UserRole.Patient
 				}
 			);
 
@@ -37,6 +41,13 @@ namespace ToothSoupAPI.Seed
 					FirstName = "Jan",
 					LastName = "Kowalski",
 					UserId = 1,
+				},
+				new Dentist
+				{
+					Id = 2,
+					FirstName = "Marcin",
+					LastName = "Nowak",
+					UserId = 2,
 				}
 			);
 

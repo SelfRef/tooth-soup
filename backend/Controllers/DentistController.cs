@@ -7,11 +7,13 @@ using Microsoft.Extensions.Logging;
 using ToothSoupAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ToothSoupAPI.Controllers
 {
 	[ApiController]
-	[Route("[controller]")]
+	[Authorize]
+	[Route("api/[controller]")]
 	public class DentistController : ControllerBase
 	{
 		private readonly Database _db;
@@ -24,7 +26,10 @@ namespace ToothSoupAPI.Controllers
 		[HttpGet("Patients")]
 		public async Task<ActionResult<IEnumerable<PatientResult>>> GetPatients()
 		{
-			return await _db.Patients.Select(p => new PatientResult {
+			var id = GetDentistId();
+			if (id == null) return Unauthorized();
+
+			return await _db.Patients.Where(p => p.DentistId.ToString() == id).Select(p => new PatientResult {
 				Id = p.Id,
 				FirstName = p.FirstName,
 				LastName = p.LastName,
@@ -35,7 +40,10 @@ namespace ToothSoupAPI.Controllers
 		[HttpGet("Patient/{id}")]
 		public async Task<ActionResult<Patient>> GetPatient(int patientId)
 		{
-			var patient = await _db.Patients.Include(p => p.User).FirstOrDefaultAsync(p => p.Id == patientId);
+			var id = GetDentistId();
+			if (id == null) return Unauthorized();
+
+			var patient = await _db.Patients.Where(p => p.DentistId.ToString() == id).Include(p => p.User).FirstOrDefaultAsync(p => p.Id == patientId);
 			if (patient == null) return NotFound();
 			return patient;
 		}
@@ -43,8 +51,11 @@ namespace ToothSoupAPI.Controllers
 		[HttpGet("Appointments")]
 		public async Task<ActionResult<IEnumerable<Appointment>>> GetAppointments()
 		{
+			var id = GetDentistId();
+			if (id == null) return Unauthorized();
+
 			var appointments = await _db.Appointments
-				//.Where(a => a.DoctorId == ) // TODO: Add filtering
+				.Where(a => a.DentistId.ToString() == id)
 				.ToListAsync();
 			return appointments;
 		}
@@ -52,9 +63,12 @@ namespace ToothSoupAPI.Controllers
 		[HttpGet("Appointment/{id}")]
 		public async Task<ActionResult<Appointment>> GetAppointment(int appointmentId)
 		{
+			var id = GetDentistId();
+			if (id == null) return Unauthorized();
+
 			var appointment = await _db.Appointments
-				//.Where(a => a.DoctorId == ) // TODO: Add filtering
-				.FindAsync(appointmentId);
+				.Where(a => a.DentistId.ToString() == id && a.Id == appointmentId)
+				.FirstOrDefaultAsync();
 			if (appointment == null) return NotFound();
 			return appointment;
 		}
@@ -62,6 +76,10 @@ namespace ToothSoupAPI.Controllers
 		[HttpPost("Appointment")]
 		public async Task<ActionResult<Appointment>> PostAppointment(Appointment appointment)
 		{
+			var id = GetDentistId();
+			if (id == null) return Unauthorized();
+
+			appointment.DentistId = int.Parse(id);
 			await _db.Appointments.AddAsync(appointment);
 			await _db.SaveChangesAsync();
 
@@ -71,11 +89,16 @@ namespace ToothSoupAPI.Controllers
 		[HttpPut("Appointment")]
 		public async Task<ActionResult<Appointment>> PutAppointment(Appointment newAppointment)
 		{
-			var appointment = await _db.Appointments.FindAsync(newAppointment.Id);
+			var id = GetDentistId();
+			if (id == null) return Unauthorized();
+
+			var appointment = await _db.Appointments
+				.Where(a => a.DentistId.ToString() == id && a.Id == newAppointment.Id)
+				.FirstOrDefaultAsync();
 			if (appointment == null) return NotFound();
 			appointment.DateTime = newAppointment.DateTime;
 			appointment.Duration = newAppointment.Duration;
-			appointment.DoctorId = appointment.DoctorId;
+			appointment.DentistId = appointment.DentistId;
 			appointment.PatientId = appointment.PatientId;
 			await _db.SaveChangesAsync();
 
@@ -85,12 +108,22 @@ namespace ToothSoupAPI.Controllers
 		[HttpDelete("Appointment/{id}")]
 		public async Task<ActionResult> DeleteAppointment(int appointmentId)
 		{
+			var id = GetDentistId();
+			if (id == null) return Unauthorized();
+
 			var appointment = await _db.Appointments
-				//.Where(a => a.DoctorId == ) // TODO: Add filtering
-				.FindAsync(appointmentId);
+				.Where(a => a.DentistId.ToString() == id && a.Id == appointmentId)
+				.FirstOrDefaultAsync();
 			if (appointment == null) return NotFound();
 			_db.Appointments.Remove(appointment);
 			return Ok();
+		}
+
+		private string GetDentistId()
+		{
+			var isDentist = HttpContext.User.HasClaim(c => c.Type == "Role" && c.Value == nameof(UserRole.Dentist));
+			if (!isDentist) return null;
+			return HttpContext.User.Claims.SingleOrDefault(c => c.Type == "Id")?.Value;
 		}
 	}
 }
