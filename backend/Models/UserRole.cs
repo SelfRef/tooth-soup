@@ -1,7 +1,7 @@
 namespace ToothSoupAPI.Models {
-	public enum UserRole {
-		Admin = 0,
-		Dentist = 1,
-		Patient = 2
+	public class UserRole {
+		public const string ADMIN = "Admin";
+		public const string DENTIST = "Dentist";
+		public const string PATIENT = "Patient";
 	}
 }

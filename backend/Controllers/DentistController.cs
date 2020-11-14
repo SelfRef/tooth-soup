@@ -29,12 +29,16 @@ namespace ToothSoupAPI.Controllers
 			var id = GetDentistId();
 			if (id == null) return Unauthorized();
 
-			return await _db.Patients.Where(p => p.DentistId.ToString() == id).Select(p => new PatientResult {
-				Id = p.Id,
-				FirstName = p.FirstName,
-				LastName = p.LastName,
-				Email = p.User.Email,
-			}).ToListAsync();
+			return await _db.Patients
+				.Where(p => p.DentistId.ToString() == id)
+				.Include(p => p.User)
+				.Select(p => new PatientResult {
+					Id = p.Id,
+					Pesel = p.Pesel,
+					FirstName = p.User.FirstName,
+					LastName = p.User.LastName,
+					Email = p.User.Email,
+				}).ToListAsync();
 		}
 
 		[HttpGet("Patient/{id}")]
@@ -121,7 +125,7 @@ namespace ToothSoupAPI.Controllers
 
 		private string GetDentistId()
 		{
-			var isDentist = HttpContext.User.HasClaim(c => c.Type == "Role" && c.Value == nameof(UserRole.Dentist));
+			var isDentist = HttpContext.User.HasClaim(c => c.Type == "Role" && c.Value == nameof(UserRole.DENTIST));
 			if (!isDentist) return null;
 			return HttpContext.User.Claims.SingleOrDefault(c => c.Type == "Id")?.Value;
 		}

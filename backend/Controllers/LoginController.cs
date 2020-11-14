@@ -63,14 +63,6 @@ namespace ToothSoupAPI.Controllers
 		{
 			User user = _db.Users.Where(u => u.Email == userData.Email && u.Password == userData.Password).FirstOrDefault();
 
-			if (user != null) return user;
-
-			//Validate the User Credentials    
-			//Demo Purpose, I have Passed HardCoded User Information    
-			if (userData.Email == "janusz@ex.pl")
-			{
-				user = new User { Email = "janusz@ex.pl" };
-			}
 			return user;
 		}
 	}

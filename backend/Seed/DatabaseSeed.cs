@@ -12,41 +12,45 @@ namespace ToothSoupAPI.Seed
 				new User {
 					Id = 1,
 					Email = "dentist1@test.pl",
-					Password = "qwerty",
-					Role = UserRole.Dentist
+					Password = "qwe",
+					Role = UserRole.DENTIST,
+					FirstName = "Jan",
+					LastName = "Kowalski",
 				},
 				new User {
 					Id = 2,
 					Email = "dentist2@test.pl",
-					Password = "qwerty",
-					Role = UserRole.Dentist
+					Password = "qwe",
+					Role = UserRole.DENTIST,
+					FirstName = "Marcin",
+					LastName = "Nowak",
 				},
 				new User {
 					Id = 3,
 					Email = "patient1@test.pl",
-					Password = "qwerty",
-					Role = UserRole.Patient
+					Password = "qwe",
+					Role = UserRole.PATIENT,
+					FirstName = "Janusz",
+					LastName = "Nosacz",
 				},
 				new User {
 					Id = 4,
 					Email = "patient2@test.pl",
-					Password = "qwerty",
-					Role = UserRole.Patient
+					Password = "qwe",
+					Role = UserRole.PATIENT,
+					FirstName = "Zbigniew",
+					LastName = "Stonoga",
 				}
 			);
 
 			modelBuilder.Entity<Dentist>().HasData(
 				new Dentist {
 					Id = 1,
-					FirstName = "Jan",
-					LastName = "Kowalski",
 					UserId = 1,
 				},
 				new Dentist
 				{
 					Id = 2,
-					FirstName = "Marcin",
-					LastName = "Nowak",
 					UserId = 2,
 				}
 			);
@@ -54,15 +58,11 @@ namespace ToothSoupAPI.Seed
 			modelBuilder.Entity<Patient>().HasData(
 				new Patient {
 					Id = 1,
-					FirstName = "Janusz",
-					LastName = "Nosacz",
 					UserId = 3,
 					DentistId = 1
 				},
 				new Patient {
 					Id = 2,
-					FirstName = "Zbigniew",
-					LastName = "Stonoga",
 					UserId = 4,
 					DentistId = 1
 				}

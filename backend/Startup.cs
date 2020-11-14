@@ -16,6 +16,8 @@ using Microsoft.AspNetCore.ApiAuthorization.IdentityServer;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using ToothSoupAPI.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace ToothSoupAPI
 {
@@ -33,6 +35,10 @@ namespace ToothSoupAPI
 		{
 			services.AddDbContext<Database>(options =>
 				options.UseInMemoryDatabase("Database"));
+
+			services.AddDefaultIdentity<User>()
+				.AddRoles<IdentityRole<string>>()
+				.AddEntityFrameworkStores<Database>();
 
 			services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 				.AddJwtBearer(options =>

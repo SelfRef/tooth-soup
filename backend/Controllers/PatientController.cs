@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace ToothSoupAPI.Controllers
 {
 	[ApiController]
-	[Authorize]
+	[Authorize(Roles = UserRole.PATIENT)]
 	[Route("api/[controller]")]
 	public class PatientController : ControllerBase
 	{
