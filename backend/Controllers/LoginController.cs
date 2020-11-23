@@ -46,8 +46,8 @@ namespace ToothSoupAPI.Controllers
 			var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
 			var claims = new[] {
-				new Claim("Role", userInfo.Role.ToString()),
-				new Claim("Id", userInfo.Id.ToString())
+				new Claim(ClaimTypes.Name, userInfo.Id.ToString()),
+				new Claim(ClaimTypes.Role, userInfo.Role)
 			};
 
 			var token = new JwtSecurityToken(_config["Jwt:Issuer"],

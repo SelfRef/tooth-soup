@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ToothSoupAPI.Models;
 
@@ -13,33 +14,33 @@ namespace ToothSoupAPI.Seed
 					Id = 1,
 					Email = "dentist1@test.pl",
 					Password = "qwe",
-					Role = UserRole.DENTIST,
 					FirstName = "Jan",
 					LastName = "Kowalski",
+					Role = UserRole.DENTIST,
 				},
 				new User {
 					Id = 2,
 					Email = "dentist2@test.pl",
 					Password = "qwe",
-					Role = UserRole.DENTIST,
 					FirstName = "Marcin",
 					LastName = "Nowak",
+					Role = UserRole.DENTIST,
 				},
 				new User {
 					Id = 3,
 					Email = "patient1@test.pl",
 					Password = "qwe",
-					Role = UserRole.PATIENT,
 					FirstName = "Janusz",
 					LastName = "Nosacz",
+					Role = UserRole.PATIENT,
 				},
 				new User {
 					Id = 4,
 					Email = "patient2@test.pl",
 					Password = "qwe",
-					Role = UserRole.PATIENT,
 					FirstName = "Zbigniew",
 					LastName = "Stonoga",
+					Role = UserRole.PATIENT,
 				}
 			);
 

@@ -8,6 +8,7 @@ using ToothSoupAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace ToothSoupAPI.Controllers
 {
@@ -30,7 +31,7 @@ namespace ToothSoupAPI.Controllers
 			if (id == null) return Unauthorized();
 
 			return await _db.Patients
-				.Where(p => p.DentistId.ToString() == id)
+				.Where(p => p.DentistId == id)
 				.Include(p => p.User)
 				.Select(p => new PatientResult {
 					Id = p.Id,
@@ -47,7 +48,7 @@ namespace ToothSoupAPI.Controllers
 			var id = GetDentistId();
 			if (id == null) return Unauthorized();
 
-			var patient = await _db.Patients.Where(p => p.DentistId.ToString() == id).Include(p => p.User).FirstOrDefaultAsync(p => p.Id == patientId);
+			var patient = await _db.Patients.Where(p => p.DentistId == id).Include(p => p.User).FirstOrDefaultAsync(p => p.Id == patientId);
 			if (patient == null) return NotFound();
 			return patient;
 		}
@@ -59,7 +60,7 @@ namespace ToothSoupAPI.Controllers
 			if (id == null) return Unauthorized();
 
 			var appointments = await _db.Appointments
-				.Where(a => a.DentistId.ToString() == id)
+				.Where(a => a.DentistId == id)
 				.ToListAsync();
 			return appointments;
 		}
@@ -71,7 +72,7 @@ namespace ToothSoupAPI.Controllers
 			if (id == null) return Unauthorized();
 
 			var appointment = await _db.Appointments
-				.Where(a => a.DentistId.ToString() == id && a.Id == appointmentId)
+				.Where(a => a.DentistId == id && a.Id == appointmentId)
 				.FirstOrDefaultAsync();
 			if (appointment == null) return NotFound();
 			return appointment;
@@ -83,7 +84,7 @@ namespace ToothSoupAPI.Controllers
 			var id = GetDentistId();
 			if (id == null) return Unauthorized();
 
-			appointment.DentistId = int.Parse(id);
+			appointment.DentistId = id.Value;
 			await _db.Appointments.AddAsync(appointment);
 			await _db.SaveChangesAsync();
 
@@ -97,7 +98,7 @@ namespace ToothSoupAPI.Controllers
 			if (id == null) return Unauthorized();
 
 			var appointment = await _db.Appointments
-				.Where(a => a.DentistId.ToString() == id && a.Id == newAppointment.Id)
+				.Where(a => a.DentistId == id && a.Id == newAppointment.Id)
 				.FirstOrDefaultAsync();
 			if (appointment == null) return NotFound();
 			appointment.DateTime = newAppointment.DateTime;
@@ -116,18 +117,18 @@ namespace ToothSoupAPI.Controllers
 			if (id == null) return Unauthorized();
 
 			var appointment = await _db.Appointments
-				.Where(a => a.DentistId.ToString() == id && a.Id == appointmentId)
+				.Where(a => a.DentistId == id && a.Id == appointmentId)
 				.FirstOrDefaultAsync();
 			if (appointment == null) return NotFound();
 			_db.Appointments.Remove(appointment);
 			return Ok();
 		}
 
-		private string GetDentistId()
+		private int? GetDentistId()
 		{
-			var isDentist = HttpContext.User.HasClaim(c => c.Type == "Role" && c.Value == nameof(UserRole.DENTIST));
+			var isDentist = HttpContext.User.HasClaim(c => c.Type == ClaimTypes.Role && c.Value == UserRole.DENTIST);
 			if (!isDentist) return null;
-			return HttpContext.User.Claims.SingleOrDefault(c => c.Type == "Id")?.Value;
+			return int.Parse(HttpContext.User.Identity.Name);
 		}
 	}
 }

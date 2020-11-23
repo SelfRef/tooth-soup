@@ -36,10 +36,6 @@ namespace ToothSoupAPI
 			services.AddDbContext<Database>(options =>
 				options.UseInMemoryDatabase("Database"));
 
-			services.AddDefaultIdentity<User>()
-				.AddRoles<IdentityRole<string>>()
-				.AddEntityFrameworkStores<Database>();
-
 			services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 				.AddJwtBearer(options =>
 				{
