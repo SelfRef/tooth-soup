@@ -13,7 +13,7 @@ using System.Security.Claims;
 namespace ToothSoupAPI.Controllers
 {
 	[ApiController]
-	[Authorize]
+	[Authorize(Roles = UserRole.DENTIST)]
 	[Route("api/[controller]")]
 	public class DentistController : ControllerBase
 	{
@@ -39,17 +39,32 @@ namespace ToothSoupAPI.Controllers
 					FirstName = p.User.FirstName,
 					LastName = p.User.LastName,
 					Email = p.User.Email,
+					DentistId = p.DentistId,
 				}).ToListAsync();
 		}
 
-		[HttpGet("Patient/{id}")]
-		public async Task<ActionResult<Patient>> GetPatient(int patientId)
+		[HttpGet("Patient/{patientId}")]
+		public async Task<ActionResult<PatientResult>> GetPatient(int patientId)
 		{
 			var id = GetDentistId();
 			if (id == null) return Unauthorized();
 
-			var patient = await _db.Patients.Where(p => p.DentistId == id).Include(p => p.User).FirstOrDefaultAsync(p => p.Id == patientId);
+			var patient = await _db.Patients
+				.Where(p => p.Id == patientId)
+				.Include(p => p.User)
+				.Select(p => new PatientResult
+				{
+					Id = p.Id,
+					Pesel = p.Pesel,
+					FirstName = p.User.FirstName,
+					LastName = p.User.LastName,
+					Email = p.User.Email,
+					DentistId = p.DentistId,
+				}).FirstOrDefaultAsync();
+
 			if (patient == null) return NotFound();
+			if (patient.DentistId != id) return Unauthorized("Patient is not assigned to you");
+
 			return patient;
 		}
 
@@ -65,7 +80,19 @@ namespace ToothSoupAPI.Controllers
 			return appointments;
 		}
 
-		[HttpGet("Appointment/{id}")]
+		[HttpGet("Appointments/Patient/{patientId}")]
+		public async Task<ActionResult<IEnumerable<Appointment>>> GetAppointmentsForPatient(int patientId)
+		{
+			var id = GetDentistId();
+			if (id == null) return Unauthorized();
+
+			var appointments = await _db.Appointments
+				.Where(a => a.DentistId == id && a.PatientId == patientId)
+				.ToListAsync();
+			return appointments;
+		}
+
+		[HttpGet("Appointment/{appointmentId}")]
 		public async Task<ActionResult<Appointment>> GetAppointment(int appointmentId)
 		{
 			var id = GetDentistId();
@@ -110,7 +137,7 @@ namespace ToothSoupAPI.Controllers
 			return CreatedAtAction(nameof(PutAppointment), new { appointment.Id }, appointment);
 		}
 
-		[HttpDelete("Appointment/{id}")]
+		[HttpDelete("Appointment/{appointmentId}")]
 		public async Task<ActionResult> DeleteAppointment(int appointmentId)
 		{
 			var id = GetDentistId();

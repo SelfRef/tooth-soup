@@ -15,7 +15,7 @@ using Microsoft.AspNetCore.Identity;
 namespace ToothSoupAPI.Controllers
 {
 	[ApiController]
-	[Authorize]
+	[Authorize(Roles = UserRole.PATIENT)]
 	[Route("api/[controller]")]
 	public class PatientController : ControllerBase
 	{
@@ -29,7 +29,6 @@ namespace ToothSoupAPI.Controllers
 		}
 
 		[HttpGet]
-		[Authorize(Roles = UserRole.PATIENT)]
 		public async Task<ActionResult<User>> Get()
 		{
 			var user = await _db.Users.FindAsync(User.Identity.Name);
