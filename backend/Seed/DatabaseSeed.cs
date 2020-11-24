@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -59,13 +60,50 @@ namespace ToothSoupAPI.Seed
 			modelBuilder.Entity<Patient>().HasData(
 				new Patient {
 					Id = 1,
+					Pesel = "01234567891",
 					UserId = 3,
 					DentistId = 1
 				},
 				new Patient {
 					Id = 2,
+					Pesel = "12345678901",
 					UserId = 4,
 					DentistId = 1
+				}
+			);
+
+			modelBuilder.Entity<Appointment>().HasData(
+				new Appointment {
+					Id = 1,
+					DateTime = DateTime.Now.AddDays(-2),
+					Duration = TimeSpan.Parse("02:00"),
+					Canceled = false,
+					DentistId = 1,
+					PatientId = 1,
+				},
+				new Appointment {
+					Id = 2,
+					DateTime = DateTime.Now.AddDays(-1),
+					Duration = TimeSpan.Parse("01:00"),
+					Canceled = true,
+					DentistId = 1,
+					PatientId = 1,
+				},
+				new Appointment {
+					Id = 3,
+					DateTime = DateTime.Now.AddDays(1),
+					Duration = TimeSpan.Parse("02:30"),
+					Canceled = true,
+					DentistId = 1,
+					PatientId = 1,
+				},
+				new Appointment {
+					Id = 4,
+					DateTime = DateTime.Now.AddDays(2),
+					Duration = TimeSpan.Parse("02:15"),
+					Canceled = false,
+					DentistId = 1,
+					PatientId = 1,
 				}
 			);
 		}
