@@ -91,6 +91,6 @@ export default {
    */
   build: {},
   env: {
-    APIURL: 'https://localhost:5001'
+    APIURL: 'https://localhost:5001/api'
   }
 }
