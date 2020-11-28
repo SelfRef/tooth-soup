@@ -13,8 +13,8 @@ using System.Security.Claims;
 namespace ToothSoupAPI.Controllers
 {
 	[ApiController]
-	[Authorize(Roles = UserRole.DENTIST)]
 	[Route("api/[controller]")]
+	[Authorize(Roles = UserRole.DENTIST)]
 	public class DentistController : ControllerBase
 	{
 		private readonly Database _db;
@@ -28,7 +28,7 @@ namespace ToothSoupAPI.Controllers
 		public async Task<ActionResult<IEnumerable<PatientResult>>> GetPatients()
 		{
 			var id = GetDentistId();
-			if (id == null) return Unauthorized();
+			if (!id.HasValue) return Unauthorized();
 
 			return await _db.Patients
 				.Where(p => p.DentistId == id)
@@ -39,18 +39,19 @@ namespace ToothSoupAPI.Controllers
 					FirstName = p.User.FirstName,
 					LastName = p.User.LastName,
 					Email = p.User.Email,
+					BirthDate = p.BirthDate,
 					DentistId = p.DentistId,
 				}).ToListAsync();
 		}
 
-		[HttpGet("Patient/{patientId}")]
-		public async Task<ActionResult<PatientResult>> GetPatient(int patientId)
+		[HttpGet("Patient/{id}")]
+		public async Task<ActionResult<PatientResult>> GetPatient(int id)
 		{
-			var id = GetDentistId();
-			if (id == null) return Unauthorized();
+			var dentistId = GetDentistId();
+			if (!dentistId.HasValue) return Unauthorized();
 
 			var patient = await _db.Patients
-				.Where(p => p.Id == patientId)
+				.Where(p => p.Id == id)
 				.Include(p => p.User)
 				.Select(p => new PatientResult
 				{
@@ -59,20 +60,48 @@ namespace ToothSoupAPI.Controllers
 					FirstName = p.User.FirstName,
 					LastName = p.User.LastName,
 					Email = p.User.Email,
+					BirthDate = p.BirthDate,
 					DentistId = p.DentistId,
 				}).FirstOrDefaultAsync();
 
 			if (patient == null) return NotFound();
-			if (patient.DentistId != id) return Unauthorized("Patient is not assigned to you");
+			if (patient.DentistId != dentistId) return Unauthorized("Patient is not assigned to you");
 
 			return patient;
+		}
+
+		[HttpPost("Patient")]
+		public async Task<ActionResult<PatientResult>> CreatePatient(PatientRequest patient)
+		{
+			var id = GetDentistId();
+			if (!id.HasValue) return Unauthorized();
+
+			var newUser = new User {
+				Email = patient.Email,
+				Password = patient.Password,
+				FirstName = patient.FirstName,
+				LastName = patient.LastName,
+				Role = UserRole.PATIENT,
+			};
+			
+			var newPatient = new Patient {
+				Pesel = patient.Pesel,
+				BirthDate = patient.BirthDate,
+				User = newUser,
+				DentistId = id.Value,
+			};
+
+			await _db.Patients.AddAsync(newPatient);
+			await _db.SaveChangesAsync();
+
+			return CreatedAtAction(nameof(GetPatient), new { newPatient.Id }, newPatient);
 		}
 
 		[HttpGet("Appointments")]
 		public async Task<ActionResult<IEnumerable<Appointment>>> GetAppointments()
 		{
 			var id = GetDentistId();
-			if (id == null) return Unauthorized();
+			if (!id.HasValue) return Unauthorized();
 
 			var appointments = await _db.Appointments
 				.Where(a => a.DentistId == id)
@@ -84,7 +113,7 @@ namespace ToothSoupAPI.Controllers
 		public async Task<ActionResult<IEnumerable<Appointment>>> GetAppointmentsForPatient(int patientId)
 		{
 			var id = GetDentistId();
-			if (id == null) return Unauthorized();
+			if (!id.HasValue) return Unauthorized();
 
 			var appointments = await _db.Appointments
 				.Where(a => a.DentistId == id && a.PatientId == patientId)
@@ -96,7 +125,7 @@ namespace ToothSoupAPI.Controllers
 		public async Task<ActionResult<Appointment>> GetAppointment(int appointmentId)
 		{
 			var id = GetDentistId();
-			if (id == null) return Unauthorized();
+			if (!id.HasValue) return Unauthorized();
 
 			var appointment = await _db.Appointments
 				.Where(a => a.DentistId == id && a.Id == appointmentId)
@@ -109,20 +138,20 @@ namespace ToothSoupAPI.Controllers
 		public async Task<ActionResult<Appointment>> PostAppointment(Appointment appointment)
 		{
 			var id = GetDentistId();
-			if (id == null) return Unauthorized();
+			if (!id.HasValue) return Unauthorized();
 
 			appointment.DentistId = id.Value;
 			await _db.Appointments.AddAsync(appointment);
 			await _db.SaveChangesAsync();
 
-			return CreatedAtAction(nameof(PostAppointment), new { appointment.Id }, appointment);
+			return CreatedAtAction(nameof(GetAppointment), new { appointment.Id }, appointment);
 		}
 
 		[HttpPut("Appointment")]
 		public async Task<ActionResult<Appointment>> PutAppointment(Appointment newAppointment)
 		{
 			var id = GetDentistId();
-			if (id == null) return Unauthorized();
+			if (!id.HasValue) return Unauthorized();
 
 			var appointment = await _db.Appointments
 				.Where(a => a.DentistId == id && a.Id == newAppointment.Id)
@@ -134,14 +163,14 @@ namespace ToothSoupAPI.Controllers
 			appointment.PatientId = appointment.PatientId;
 			await _db.SaveChangesAsync();
 
-			return CreatedAtAction(nameof(PutAppointment), new { appointment.Id }, appointment);
+			return CreatedAtAction(nameof(GetAppointment), new { appointment.Id }, appointment);
 		}
 
 		[HttpDelete("Appointment/{appointmentId}")]
 		public async Task<ActionResult> DeleteAppointment(int appointmentId)
 		{
 			var id = GetDentistId();
-			if (id == null) return Unauthorized();
+			if (!id.HasValue) return Unauthorized();
 
 			var appointment = await _db.Appointments
 				.Where(a => a.DentistId == id && a.Id == appointmentId)

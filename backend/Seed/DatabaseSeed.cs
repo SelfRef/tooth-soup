@@ -61,12 +61,14 @@ namespace ToothSoupAPI.Seed
 				new Patient {
 					Id = 1,
 					Pesel = "01234567891",
+					BirthDate = DateTime.Now.AddYears(-40),
 					UserId = 3,
 					DentistId = 1
 				},
 				new Patient {
 					Id = 2,
 					Pesel = "12345678901",
+					BirthDate = DateTime.Now.AddYears(-30),
 					UserId = 4,
 					DentistId = 1
 				}
