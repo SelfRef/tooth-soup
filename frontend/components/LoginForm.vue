@@ -1,37 +1,37 @@
 <template>
-  <v-row justify="center">
-    <v-dialog
-      v-model="active"
-      persistent
-      max-width="600px"
-    >
-      <v-card>
-        <v-card-title>
-          <span class="headline">User Profile</span>
-        </v-card-title>
-        <v-card-text>
-          <v-container>
-            <v-row>
-              <v-col cols="12">
-                <v-text-field
+	<v-row justify="center">
+		<v-dialog
+			v-model="active"
+			persistent
+			max-width="600px"
+		>
+			<v-card>
+				<v-card-title>
+					<span class="headline">User Login</span>
+				</v-card-title>
+				<v-card-text>
+					<v-container>
+						<v-row>
+							<v-col cols="12">
+								<v-text-field
 									v-model="loginData.email"
-                  label="Email*"
-                  required
-                ></v-text-field>
-              </v-col>
-              <v-col cols="12">
-                <v-text-field
+									label="Email*"
+									required
+								></v-text-field>
+							</v-col>
+							<v-col cols="12">
+								<v-text-field
 									v-model="loginData.password"
-                  label="Password*"
-                  type="password"
-                  required
-                ></v-text-field>
-              </v-col>
-            </v-row>
-          </v-container>
-          <small>*indicates required field</small>
-        </v-card-text>
-        <v-card-actions>
+									label="Password*"
+									type="password"
+									required
+								></v-text-field>
+							</v-col>
+						</v-row>
+					</v-container>
+					<small>*indicates required field</small>
+				</v-card-text>
+				<v-card-actions>
 					<v-btn
 						color="blue darken-1"
 						text
@@ -48,10 +48,10 @@
 					>
 						Login
 					</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-  </v-row>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
+	</v-row>
 </template>
 
 <script lang="ts">
@@ -78,7 +78,7 @@ export default class LoginForm extends Vue {
 			if (!tokenResponse.ok) throw new Error("Wrong login data");
 
 			let tokenData = await tokenResponse.json()
-			this.$store.commit('auth/setToken', tokenData.token);
+			this.$store.dispatch('auth/setToken', tokenData.token);
 			this.$emit('update:active', false);
 		} catch(e) {
 

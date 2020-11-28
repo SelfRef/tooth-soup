@@ -4,9 +4,20 @@
       <v-toolbar-title v-text="title" />
       <v-spacer />
       <template v-if="loggedIn">
-        <v-avatar
-          color="primary"
-        >JN</v-avatar>
+        <v-menu offset-y>
+          <template v-slot:activator="{ on, attrs }">
+            <v-avatar
+              color="primary"
+              v-bind="attrs"
+              v-on="on"
+            >JN</v-avatar>
+          </template>
+          <v-list>
+            <v-list-item @click="logout">
+              <v-list-item-title>Logout</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
       </template>
       <template v-else>
         <v-btn
@@ -44,6 +55,11 @@ export default {
   computed: {
     loggedIn() {
       return Boolean(this.$store.getters['auth/token']);
+    }
+  },
+  methods: {
+    logout() {
+      this.$store.dispatch('auth/setToken', null);
     }
   }
 }
