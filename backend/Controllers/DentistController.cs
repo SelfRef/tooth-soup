@@ -32,10 +32,12 @@ namespace ToothSoupAPI.Controllers
 			if (!id.HasValue) return Unauthorized();
 
 			bool unlinked = Request.Query.ContainsKey("unlinked");
+			string filter = Request.Query["filter"].FirstOrDefault()?.ToLower();
 
 			return await _db.Patients
 				.Where(p => p.DentistId == (unlinked ? null : id))
 				.Include(p => p.User)
+				.Where(p => $"{p.Pesel} {p.User.FirstName} {p.User.LastName} {p.User.Email}".ToLower().Contains(filter ?? string.Empty))
 				.Select(p => new PatientResult {
 					Id = p.Id,
 					Pesel = p.Pesel,
