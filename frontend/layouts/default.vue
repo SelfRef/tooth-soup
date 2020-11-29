@@ -61,6 +61,15 @@ export default {
     logout() {
       this.$store.dispatch('auth/setToken', null);
     }
+  },
+  mounted() {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    this.$vuetify.theme.dark = mq.matches;
+    mq.addEventListener('change', (e) => {
+      this.$vuetify.theme.dark = e.matches;
+    });
+
+    this.$store.dispatch('checkToken');
   }
 }
 </script>
