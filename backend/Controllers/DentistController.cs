@@ -97,6 +97,19 @@ namespace ToothSoupAPI.Controllers
 			return CreatedAtAction(nameof(GetPatient), new { newPatient.Id }, newPatient);
 		}
 
+		[HttpDelete("Patient/{id}")]
+		public async Task<ActionResult<int>> DeletePatient(int id) {
+			var dentistId = GetDentistId();
+			if (!dentistId.HasValue) return Unauthorized();
+
+			var patient = await _db.Patients.FindAsync(id);
+			if (patient == null) return NotFound();
+
+			_db.Patients.Remove(patient);
+			await _db.SaveChangesAsync();
+			return id;
+		}
+
 		[HttpGet("Appointments")]
 		public async Task<ActionResult<IEnumerable<Appointment>>> GetAppointments()
 		{
