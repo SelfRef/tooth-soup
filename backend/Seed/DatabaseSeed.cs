@@ -42,6 +42,14 @@ namespace ToothSoupAPI.Seed
 					FirstName = "Zbigniew",
 					LastName = "Stonoga",
 					Role = UserRole.PATIENT,
+				},
+				new User {
+					Id = 5,
+					Email = "patient3@test.pl",
+					Password = "qwe",
+					FirstName = "Karol",
+					LastName = "Wojtyła",
+					Role = UserRole.PATIENT,
 				}
 			);
 
@@ -71,6 +79,13 @@ namespace ToothSoupAPI.Seed
 					BirthDate = DateTime.Now.AddYears(-30),
 					UserId = 4,
 					DentistId = 1
+				},
+				new Patient {
+					Id = 3,
+					Pesel = "23456789012",
+					BirthDate = DateTime.Now.AddYears(-60),
+					UserId = 5,
+					DentistId = null
 				}
 			);
 

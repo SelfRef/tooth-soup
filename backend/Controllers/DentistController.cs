@@ -30,8 +30,10 @@ namespace ToothSoupAPI.Controllers
 			var id = GetDentistId();
 			if (!id.HasValue) return Unauthorized();
 
+			bool unlinked = Request.Query.ContainsKey("unlinked");
+
 			return await _db.Patients
-				.Where(p => p.DentistId == id)
+				.Where(p => p.DentistId == (unlinked ? null : id))
 				.Include(p => p.User)
 				.Select(p => new PatientResult {
 					Id = p.Id,
@@ -65,9 +67,67 @@ namespace ToothSoupAPI.Controllers
 				}).FirstOrDefaultAsync();
 
 			if (patient == null) return NotFound();
-			if (patient.DentistId != dentistId) return Unauthorized("Patient is not assigned to you");
+			if (patient.DentistId != dentistId) return Unauthorized("Patient is not linked to you");
 
 			return patient;
+		}
+
+		[HttpGet("Patient/{id}/Link")]
+		public async Task<ActionResult<PatientResult>> LinkPatient(int id)
+		{
+			var dentistId = GetDentistId();
+			if (!dentistId.HasValue) return Unauthorized();
+
+			var patient = await _db.Patients
+				.Where(p => p.Id == id)
+				.Include(p => p.User)
+				.FirstOrDefaultAsync();
+
+			if (patient == null) return NotFound();
+			if (patient.DentistId != null) return Unauthorized("Patient is already linked");
+
+			patient.DentistId = dentistId;
+			await _db.SaveChangesAsync();
+
+			return new PatientResult
+			{
+				Id = patient.Id,
+				Pesel = patient.Pesel,
+				FirstName = patient.User.FirstName,
+				LastName = patient.User.LastName,
+				Email = patient.User.Email,
+				BirthDate = patient.BirthDate,
+				DentistId = patient.DentistId,
+			};
+		}
+
+		[HttpGet("Patient/{id}/Unlink")]
+		public async Task<ActionResult<PatientResult>> UninkPatient(int id)
+		{
+			var dentistId = GetDentistId();
+			if (!dentistId.HasValue) return Unauthorized();
+
+			var patient = await _db.Patients
+				.Where(p => p.Id == id)
+				.Include(p => p.User)
+				.FirstOrDefaultAsync();
+
+			if (patient == null) return NotFound();
+			if (patient.DentistId != dentistId) return Unauthorized("Patient is not linked to you");
+
+			patient.DentistId = null;
+			await _db.SaveChangesAsync();
+
+			return new PatientResult
+			{
+				Id = patient.Id,
+				Pesel = patient.Pesel,
+				FirstName = patient.User.FirstName,
+				LastName = patient.User.LastName,
+				Email = patient.User.Email,
+				BirthDate = patient.BirthDate,
+				DentistId = patient.DentistId,
+			};
 		}
 
 		[HttpPost("Patient")]

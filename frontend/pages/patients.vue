@@ -26,13 +26,44 @@
 						<td>{{patient.email}}</td>
 						<td>
 							<v-btn icon color="blue"><v-icon>mdi-account-edit</v-icon></v-btn>
-							<v-btn icon color="red"><v-icon>mdi-account-remove</v-icon></v-btn>
+							<v-menu :close-on-content-click="false">
+								<template #activator="{on, attrs}">
+									<v-btn
+										v-on="on"
+										v-bind="attrs"
+										icon
+										color="orange"
+									><v-icon>mdi-account-minus</v-icon></v-btn>
+								</template>
+								<v-card>
+									<v-card-text>Are you sure you want to unlink this user?</v-card-text>
+									<v-card-actions>
+										<v-btn color="red" text @click="unlinkPatient(patient.id)">Unlink</v-btn>
+									</v-card-actions>
+								</v-card>
+							</v-menu>
+							<v-menu :close-on-content-click="false">
+								<template #activator="{on, attrs}">
+									<v-btn
+										v-on="on"
+										v-bind="attrs"
+										icon
+										color="red"
+									><v-icon>mdi-account-remove</v-icon></v-btn>
+								</template>
+								<v-card>
+									<v-card-text>Are you sure you want to remove this user?</v-card-text>
+									<v-card-actions>
+										<v-btn color="red" text @click="removePatient(patient.id)">Remove</v-btn>
+									</v-card-actions>
+								</v-card>
+							</v-menu>
 						</td>
 					</tr>
 				</tbody>
 			</v-simple-table>
 		</v-flex>
-		<patient-edit-form :active.sync="userDialog"/>
+		<patient-edit-form :active.sync="userDialog" @refresh="refreshData"/>
 	</v-layout>
 </template>
 
@@ -50,6 +81,10 @@
 		private userDialog = false;
 
 		async mounted() {
+			await this.refreshData();
+		}
+
+		async refreshData() {
 			let initData: RequestInit = {
 				method: 'GET',
 				headers: {
@@ -57,6 +92,28 @@
 				}
 			}
 			this.patients = await fetch(`${process.env.APIURL}/Dentist/Patients`, initData).then(response => response.json());
+		}
+
+		async unlinkPatient(id: number) {
+			let initData: RequestInit = {
+				method: 'GET',
+				headers: {
+					'Authorization': `Bearer ${this.$store.getters['auth/token']}`,
+				}
+			}
+			await fetch(`${process.env.APIURL}/Dentist/Patient/${id}/Unlink`, initData);
+			await this.refreshData();
+		}
+
+		async removePatient(id: number) {
+			let initData: RequestInit = {
+				method: 'DELETE',
+				headers: {
+					'Authorization': `Bearer ${this.$store.getters['auth/token']}`,
+				}
+			}
+			await fetch(`${process.env.APIURL}/Dentist/Patient/${id}`, initData);
+			await this.refreshData();
 		}
 	}
 </script>

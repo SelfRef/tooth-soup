@@ -8,6 +8,6 @@ namespace ToothSoupAPI.Models {
 		public string LastName { get; set; }
 		public string Email { get; set; }
 		public DateTime BirthDate { get; set; }
-		public int DentistId { get; set; }
+		public int? DentistId { get; set; }
 	}
 }

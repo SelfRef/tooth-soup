@@ -7,6 +7,6 @@ namespace ToothSoupAPI.Models {
 		public DateTime BirthDate { get; set; }
 		public User User { get; set; }
 		public int UserId { get; set; }
-		public int DentistId { get; set; }
+		public int? DentistId { get; set; }
 	}
 }
