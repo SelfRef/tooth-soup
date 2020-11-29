@@ -23,9 +23,10 @@
 										sm="6"
 									>
 										<v-text-field
-											label="PESEL number*"
-											required
-											v-model="user.pesel"
+											label="PESEL number"
+											:required="!Boolean(edit)"
+											v-model="patient.pesel"
+											prepend-icon="mdi-numeric"
 										></v-text-field>
 									</v-col>
 									<v-col
@@ -37,17 +38,17 @@
 										>
 											<template v-slot:activator="{ on, attrs }">
 												<v-text-field
-													v-model="user.birthDate"
-													label="Birth Date*"
-													hint="YYYY-MM-DD format"
+													v-model="patient.birthDate"
+													label="Birth Date"
 													persistent-hint
 													prepend-icon="mdi-calendar"
 													v-bind="attrs"
 													v-on="on"
+													:required="!Boolean(edit)"
 												></v-text-field>
 											</template>
 											<v-date-picker
-												v-model="user.birthDate"
+												v-model="patient.birthDate"
 												no-title
 												@input="datePickerActive = false"
 											></v-date-picker>
@@ -58,9 +59,10 @@
 										sm="6"
 									>
 										<v-text-field
-											label="Legal first name*"
-											required
-											v-model="user.firstName"
+											label="Legal first name"
+											:required="!Boolean(edit)"
+											v-model="patient.firstName"
+											prepend-icon="mdi-card-account-details"
 										></v-text-field>
 									</v-col>
 									<v-col
@@ -68,29 +70,31 @@
 										sm="6"
 									>
 										<v-text-field
-											label="Legal last name*"
-											required
-											v-model="user.lastName"
+											label="Legal last name"
+											:required="!Boolean(edit)"
+											v-model="patient.lastName"
+											prepend-icon="mdi-card-account-details"
 										></v-text-field>
 									</v-col>
 									<v-col cols="12" sm="6">
 										<v-text-field
-											label="Email*"
-											required
-											v-model="user.email"
+											label="Email"
+											:required="!Boolean(edit)"
+											v-model="patient.email"
+											prepend-icon="mdi-email"
 										></v-text-field>
 									</v-col>
 									<v-col cols="12" sm="6">
 										<v-text-field
-											label="Password*"
+											label="Password"
 											type="password"
-											required
-											v-model="user.password"
+											:required="!Boolean(edit)"
+											v-model="patient.password"
+											prepend-icon="mdi-lock"
 										></v-text-field>
 									</v-col>
 								</v-row>
 							</v-container>
-							<small>*indicates required field</small>
 						</v-card-text>
 						<v-card-actions>
 							<v-spacer></v-spacer>
@@ -127,6 +131,7 @@
 											:item-text="u => `(${u.pesel}) ${u.firstName} ${u.lastName}`"
 											item-value="id"
 											v-model="unlinkedUserSelected"
+											prepend-icon="mdi-account-search"
 										></v-select>
 									</v-col>
 								</v-row>
@@ -164,37 +169,31 @@ import Patient from '~/interfaces/Patient';
 @Component
 export default class PatientEditForm extends Vue {
 	@Prop() active = false;
-	@Prop() edit = false;
-	@Prop() userData: Patient | null = null;
+	@Prop() patientData: Patient | null = null;
 	private datePickerActive = false;
 	private unlinkedUsers: Patient[] = [];
 	private currentTab: number | null = null;
 	private unlinkedUserSelected: number | null = null;
-
-	mounted() {
-		this.user = this.userData ? {...this.userData} : this.user;
-	}
-
-	private user: Patient = {
+	private patient: Patient = {
 		pesel: '',
 		firstName: '',
 		lastName: '',
 		email: '',
 		password: '',
-		birthDate: null,
+		birthDate: '',
 	}
-
 
 	async save() {
 		const fetchOptions: RequestInit = {
-			method: 'POST',
-			body: JSON.stringify(this.user),
+			method: this.edit ? 'PUT' : 'POST',
+			body: JSON.stringify(this.patient),
 			headers: {
 					'Authorization': `Bearer ${this.$store.getters['auth/token']}`,
 					'Content-Type': 'application/json'
 				}
 		}
 		await fetch(`${process.env.APIURL}/Dentist/Patient`, fetchOptions);
+		this.$emit('update:active', false)
 	}
 
 	async linkUser() {
@@ -207,6 +206,10 @@ export default class PatientEditForm extends Vue {
 		await fetch(`${process.env.APIURL}/Dentist/Patient/${this.unlinkedUserSelected}/Link`, fetchOptions);
 		this.$emit('update:active', false)
 		this.$emit('refresh')
+	}
+
+	get edit() {
+		return Boolean(this.patientData);
 	}
 
 	@Watch('currentTab')
@@ -225,6 +228,14 @@ export default class PatientEditForm extends Vue {
 	@Watch('active')
 	onDialogShow() {
 		setTimeout(() => this.currentTab = 0, 500);
+		this.patient = this.patientData ? {...this.patientData} : {
+			pesel: '',
+			firstName: '',
+			lastName: '',
+			email: '',
+			password: '',
+			birthDate: '',
+		};
 	}
 }
 </script>

@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using IdentityServer4.Extensions;
 
 namespace ToothSoupAPI.Controllers
 {
@@ -152,6 +153,33 @@ namespace ToothSoupAPI.Controllers
 			};
 
 			await _db.Patients.AddAsync(newPatient);
+			await _db.SaveChangesAsync();
+
+			return CreatedAtAction(nameof(GetPatient), new { newPatient.Id }, newPatient);
+		}
+
+		[HttpPut("Patient")]
+		public async Task<ActionResult<PatientResult>> UpdatePatient(PatientRequest patient)
+		{
+			var dentistId = GetDentistId();
+			if (!dentistId.HasValue) return Unauthorized();
+
+			var newPatient = await _db.Patients
+				.Where(p => p.Id == patient.Id)
+				.Include(p => p.User)
+				.FirstOrDefaultAsync();
+
+			if (newPatient == null) return NotFound();
+			if (newPatient.DentistId != dentistId) return Unauthorized("Patient is not linked to you");
+
+			
+			if (!patient.Email.IsNullOrEmpty()) newPatient.User.Email = patient.Email;
+			if (!patient.Password.IsNullOrEmpty()) newPatient.User.Password = patient.Password;
+			if (!patient.FirstName.IsNullOrEmpty()) newPatient.User.FirstName = patient.FirstName;
+			if (!patient.LastName.IsNullOrEmpty()) newPatient.User.LastName = patient.LastName;
+			if (!patient.Pesel.IsNullOrEmpty()) newPatient.Pesel = patient.Pesel;
+			if (patient.BirthDate != null) newPatient.BirthDate = patient.BirthDate;
+
 			await _db.SaveChangesAsync();
 
 			return CreatedAtAction(nameof(GetPatient), new { newPatient.Id }, newPatient);

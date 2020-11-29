@@ -1,11 +1,32 @@
 <template>
 	<v-layout>
-		<v-flex>
-			<h2>Patient List</h2>
-			<v-btn @click="userDialog = true">
-				Add user
-				<v-icon right>mdi-account-plus</v-icon>
-			</v-btn>
+		<v-container>
+			<v-row>
+				<v-col>
+					<h2>Patient List</h2>
+				</v-col>
+				<v-spacer></v-spacer>
+				<v-col>
+					<v-text-field
+						v-model="searchText"
+						label="Search"
+						hint="(PESEL, Name, Email)"
+						clearable
+						dense
+					></v-text-field>
+				</v-col>
+				<v-col cols="auto">
+					<v-btn @click="refreshData">
+						Refresh
+						<v-icon right>mdi-refresh</v-icon>
+					</v-btn>
+					<v-btn @click="userDialog = true">
+						Add user
+						<v-icon right>mdi-account-plus</v-icon>
+					</v-btn>
+				</v-col>
+			</v-row>
+
 			<v-simple-table>
 				<thead>
 					<tr>
@@ -25,7 +46,7 @@
 						<td>{{patient.birthDate.split('T')[0]}}</td>
 						<td>{{patient.email}}</td>
 						<td>
-							<v-btn icon color="blue"><v-icon>mdi-account-edit</v-icon></v-btn>
+							<v-btn icon color="blue" @click="editPatient(patient)"><v-icon>mdi-account-edit</v-icon></v-btn>
 							<v-menu :close-on-content-click="false">
 								<template #activator="{on, attrs}">
 									<v-btn
@@ -62,13 +83,13 @@
 					</tr>
 				</tbody>
 			</v-simple-table>
-		</v-flex>
-		<patient-edit-form :active.sync="userDialog" @refresh="refreshData"/>
+		</v-container>
+		<patient-edit-form :active.sync="userDialog" :patientData="patient" @refresh="refreshData"/>
 	</v-layout>
 </template>
 
 <script lang='ts'>
-	import { Vue, Component } from 'vue-property-decorator';
+	import { Vue, Component, Watch } from 'vue-property-decorator';
 	import Patient from 'interfaces/Patient';
 	import PatientEditForm from '~/components/PatientEditForm.vue';
 	@Component({
@@ -79,6 +100,8 @@
 	export default class Patients extends Vue {
 		private patients: Patient[] = [];
 		private userDialog = false;
+		private patient: Patient | null = null;
+		private searchText: string = '';
 
 		async mounted() {
 			await this.refreshData();
@@ -92,6 +115,11 @@
 				}
 			}
 			this.patients = await fetch(`${process.env.APIURL}/Dentist/Patients`, initData).then(response => response.json());
+		}
+
+		editPatient(patient: Patient) {
+			this.patient = patient;
+			this.userDialog = true;
 		}
 
 		async unlinkPatient(id: number) {
@@ -114,6 +142,12 @@
 			}
 			await fetch(`${process.env.APIURL}/Dentist/Patient/${id}`, initData);
 			await this.refreshData();
+		}
+
+		@Watch('userDialog')
+		resetPatient(userDialog: boolean) {
+			if (!userDialog) this.patient = null;
+			else if (this.patient?.birthDate) this.patient.birthDate = this.patient.birthDate.split('T')[0];
 		}
 	}
 </script>
