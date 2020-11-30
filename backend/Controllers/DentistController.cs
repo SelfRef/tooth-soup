@@ -174,7 +174,6 @@ namespace ToothSoupAPI.Controllers
 			if (newPatient == null) return NotFound();
 			if (newPatient.DentistId != dentistId) return Unauthorized("Patient is not linked to you");
 
-			
 			if (!patient.Email.IsNullOrEmpty()) newPatient.User.Email = patient.Email;
 			if (!patient.Password.IsNullOrEmpty()) newPatient.User.Password = patient.Password;
 			if (!patient.FirstName.IsNullOrEmpty()) newPatient.User.FirstName = patient.FirstName;
@@ -203,35 +202,35 @@ namespace ToothSoupAPI.Controllers
 		[HttpGet("Appointments")]
 		public async Task<ActionResult<IEnumerable<Appointment>>> GetAppointments()
 		{
-			var id = GetDentistId();
-			if (!id.HasValue) return Unauthorized();
+			var dentistId = GetDentistId();
+			if (!dentistId.HasValue) return Unauthorized();
 
 			var appointments = await _db.Appointments
-				.Where(a => a.DentistId == id)
+				.Where(a => a.DentistId == dentistId)
 				.ToListAsync();
 			return appointments;
 		}
 
-		[HttpGet("Appointments/Patient/{patientId}")]
-		public async Task<ActionResult<IEnumerable<Appointment>>> GetAppointmentsForPatient(int patientId)
+		[HttpGet("Appointments/Patient/{id}")]
+		public async Task<ActionResult<IEnumerable<Appointment>>> GetAppointmentsForPatient(int id)
 		{
-			var id = GetDentistId();
-			if (!id.HasValue) return Unauthorized();
+			var dentistId = GetDentistId();
+			if (!dentistId.HasValue) return Unauthorized();
 
 			var appointments = await _db.Appointments
-				.Where(a => a.DentistId == id && a.PatientId == patientId)
+				.Where(a => a.DentistId == dentistId && a.PatientId == id)
 				.ToListAsync();
 			return appointments;
 		}
 
-		[HttpGet("Appointment/{appointmentId}")]
-		public async Task<ActionResult<Appointment>> GetAppointment(int appointmentId)
+		[HttpGet("Appointment/{id}")]
+		public async Task<ActionResult<Appointment>> GetAppointment(int id)
 		{
-			var id = GetDentistId();
-			if (!id.HasValue) return Unauthorized();
+			var dentistId = GetDentistId();
+			if (!dentistId.HasValue) return Unauthorized();
 
 			var appointment = await _db.Appointments
-				.Where(a => a.DentistId == id && a.Id == appointmentId)
+				.Where(a => a.DentistId == dentistId && a.Id == id)
 				.FirstOrDefaultAsync();
 			if (appointment == null) return NotFound();
 			return appointment;
@@ -240,10 +239,10 @@ namespace ToothSoupAPI.Controllers
 		[HttpPost("Appointment")]
 		public async Task<ActionResult<Appointment>> PostAppointment(Appointment appointment)
 		{
-			var id = GetDentistId();
-			if (!id.HasValue) return Unauthorized();
+			var dentistId = GetDentistId();
+			if (!dentistId.HasValue) return Unauthorized();
 
-			appointment.DentistId = id.Value;
+			appointment.DentistId = dentistId.Value;
 			await _db.Appointments.AddAsync(appointment);
 			await _db.SaveChangesAsync();
 
@@ -251,35 +250,38 @@ namespace ToothSoupAPI.Controllers
 		}
 
 		[HttpPut("Appointment")]
-		public async Task<ActionResult<Appointment>> PutAppointment(Appointment newAppointment)
+		public async Task<ActionResult<Appointment>> PutAppointment(AppointmentRequest newAppointment)
 		{
-			var id = GetDentistId();
-			if (!id.HasValue) return Unauthorized();
+			var dentistId = GetDentistId();
+			if (!dentistId.HasValue) return Unauthorized();
 
 			var appointment = await _db.Appointments
-				.Where(a => a.DentistId == id && a.Id == newAppointment.Id)
+				.Where(a => a.DentistId == dentistId && a.Id == newAppointment.Id)
 				.FirstOrDefaultAsync();
 			if (appointment == null) return NotFound();
-			appointment.DateTime = newAppointment.DateTime;
-			appointment.Duration = newAppointment.Duration;
-			appointment.DentistId = appointment.DentistId;
-			appointment.PatientId = appointment.PatientId;
+			if (newAppointment.DateTime.HasValue) appointment.DateTime = newAppointment.DateTime.Value;
+			if (newAppointment.Duration.HasValue) appointment.Duration = newAppointment.Duration.Value;
+			if (newAppointment.Canceled.HasValue) appointment.Canceled = newAppointment.Canceled.Value;
+			
 			await _db.SaveChangesAsync();
 
 			return CreatedAtAction(nameof(GetAppointment), new { appointment.Id }, appointment);
 		}
 
-		[HttpDelete("Appointment/{appointmentId}")]
-		public async Task<ActionResult> DeleteAppointment(int appointmentId)
+		[HttpDelete("Appointment/{id}")]
+		public async Task<ActionResult> DeleteAppointment(int id)
 		{
-			var id = GetDentistId();
-			if (!id.HasValue) return Unauthorized();
+			var dentistId = GetDentistId();
+			if (!dentistId.HasValue) return Unauthorized();
 
 			var appointment = await _db.Appointments
-				.Where(a => a.DentistId == id && a.Id == appointmentId)
+				.Where(a => a.DentistId == dentistId && a.Id == id)
 				.FirstOrDefaultAsync();
 			if (appointment == null) return NotFound();
+
 			_db.Appointments.Remove(appointment);
+			await _db.SaveChangesAsync();
+			
 			return Ok();
 		}
 
