@@ -1,5 +1,5 @@
 <template>
-	<v-layout>
+	<v-layout column>
 		<v-container>
 			<v-row>
 				<v-col>
@@ -83,8 +83,9 @@
 					</tr>
 				</tbody>
 			</v-simple-table>
+			<patient-edit-form :active.sync="userDialog" :patientData="patient" @refresh="refreshData"/>
 		</v-container>
-		<patient-edit-form :active.sync="userDialog" :patientData="patient" @refresh="refreshData"/>
+		<appointment-list :patientId="1" />
 	</v-layout>
 </template>
 
@@ -92,9 +93,11 @@
 	import { Vue, Component, Watch } from 'vue-property-decorator';
 	import Patient from 'interfaces/Patient';
 	import PatientEditForm from '~/components/PatientEditForm.vue';
+	import AppointmentList from '~/components/AppointmentList.vue';
 	@Component({
 		components: {
 			PatientEditForm,
+			AppointmentList,
 		}
 	})
 	export default class Patients extends Vue {
