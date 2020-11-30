@@ -3,7 +3,7 @@
 		<v-container>
 			<v-row>
 				<v-col>
-					<h2>Patient List</h2>
+					<h2>Patient List {{ searchText ? '(filtered)' : '' }}</h2>
 				</v-col>
 				<v-spacer></v-spacer>
 				<v-col>
@@ -16,11 +16,11 @@
 					></v-text-field>
 				</v-col>
 				<v-col cols="auto">
-					<v-btn @click="refreshData">
+					<v-btn @click="refreshData" color="blue">
 						Refresh
 						<v-icon right>mdi-refresh</v-icon>
 					</v-btn>
-					<v-btn @click="userDialog = true">
+					<v-btn @click="userDialog = true" color="green">
 						Add user
 						<v-icon right>mdi-account-plus</v-icon>
 					</v-btn>
@@ -102,6 +102,7 @@
 		private userDialog = false;
 		private patient: Patient | null = null;
 		private searchText: string = '';
+		private searchTextTimeout: NodeJS.Timeout | null = null;
 
 		async mounted() {
 			await this.refreshData();
@@ -114,7 +115,8 @@
 					'Authorization': `Bearer ${this.$store.getters['auth/token']}`,
 				}
 			}
-			this.patients = await fetch(`${process.env.APIURL}/Dentist/Patients`, initData).then(response => response.json());
+			const filterQuery = this.searchText ? `?filter=${this.searchText}` : '';
+			this.patients = await fetch(`${process.env.APIURL}/Dentist/Patients${filterQuery}`, initData).then(response => response.json());
 		}
 
 		editPatient(patient: Patient) {
@@ -148,6 +150,12 @@
 		resetPatient(userDialog: boolean) {
 			if (!userDialog) this.patient = null;
 			else if (this.patient?.birthDate) this.patient.birthDate = this.patient.birthDate.split('T')[0];
+		}
+
+		@Watch('searchText')
+		refreshSearch(userDialog: boolean) {
+			if (this.searchTextTimeout) clearTimeout(this.searchTextTimeout);
+			this.searchTextTimeout = setTimeout(() => this.refreshData(), 1000);
 		}
 	}
 </script>

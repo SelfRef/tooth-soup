@@ -2,7 +2,7 @@ type State = {
 	token: string | null
 	userId: number | null
 	userRole: string | null
-	tokenExpiration: Date | null
+	tokenExpiration: string | null
 }
 
 export const state = (): State => ({
@@ -23,22 +23,22 @@ export const getters = {
 		return state.userRole;
 	},
 	tokenExpiration(state: State) {
-		return state.tokenExpiration;
+		return state.tokenExpiration ? new Date(state.tokenExpiration) : null;
 	},
 };
 
 export const mutations = {
-	setToken(state: State, token: string) {
+	setToken(state: State, token: string | null) {
 		state.token = token;
 	},
-	setUserId(state: State, userId: string) {
+	setUserId(state: State, userId: string | null) {
 		state.userId = userId ? Number(userId) : null;
 	},
-	setUserRole(state: State, userRole: string) {
+	setUserRole(state: State, userRole: string | null) {
 		state.userRole = userRole;
 	},
-	setTokenExpiration(state: State, tokenExpiration: Date) {
-		state.tokenExpiration = tokenExpiration;
+	setTokenExpiration(state: State, tokenExpiration: Date | null) {
+		state.tokenExpiration = tokenExpiration ? tokenExpiration.toISOString() : null;
 	},
 }
 
@@ -53,7 +53,6 @@ export const actions = {
 
 			id = data['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'];
 			role = data['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
-			console.log(data['exp']);
 			exp = new Date(data['exp'] * 1000);
 		}
 

@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-app-bar :clipped-left="clipped" fixed app>
+    <v-app-bar fixed app>
       <v-toolbar-title v-text="title" />
       <v-spacer />
       <template v-if="loggedIn">
@@ -31,7 +31,7 @@
         <nuxt />
       </v-container>
     </v-main>
-    <v-footer :absolute="!fixed" app>
+    <v-footer app>
       <span>&copy; {{copyName}} {{ new Date().getFullYear() }}</span>
     </v-footer>
     <login-form :active.sync="loginDialog"/>
@@ -69,7 +69,7 @@ export default {
       this.$vuetify.theme.dark = e.matches;
     });
 
-    this.$store.dispatch('checkToken');
+    this.$store.dispatch('auth/checkToken');
   }
 }
 </script>
