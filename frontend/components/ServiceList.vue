@@ -24,15 +24,25 @@
 			>
 				<template #item.price="{value}">{{value | price}}</template>
 				<template #item.actions="{item}">
-					<v-btn icon color="blue" @click="edit(item)"><v-icon>mdi-puzzle-edit</v-icon></v-btn>
+					<v-tooltip bottom>
+						Edit service
+						<template #activator="{on, attrs}">
+							<v-btn v-on="on" v-bind="attrs" icon color="blue" @click="edit(item)"><v-icon>mdi-puzzle-edit</v-icon></v-btn>
+						</template>
+					</v-tooltip>
 					<v-menu :close-on-content-click="false">
 						<template #activator="{on, attrs}">
-							<v-btn
-								v-on="on"
-								v-bind="attrs"
-								icon
-								color="red"
-							><v-icon>mdi-puzzle-remove</v-icon></v-btn>
+							<v-tooltip bottom v-on="on" v-bind="attrs">
+								Remove service
+								<template #activator="{on, attrs}">
+									<v-btn
+										v-on="on"
+										v-bind="attrs"
+										icon
+										color="red"
+									><v-icon>mdi-puzzle-remove</v-icon></v-btn>
+								</template>
+							</v-tooltip>
 						</template>
 						<v-card>
 							<v-card-text>Are you sure you want to remove this service?</v-card-text>
