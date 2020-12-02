@@ -25,6 +25,9 @@ export const getters = {
 	tokenExpiration(state: State) {
 		return state.tokenExpiration ? new Date(state.tokenExpiration) : null;
 	},
+	isLoggedIn(state: State) {
+		return Boolean(state.token);
+	}
 };
 
 export const mutations = {

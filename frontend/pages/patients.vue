@@ -1,5 +1,5 @@
 <template>
-	<v-layout column>
+	<v-layout column v-if="isLoggedIn">
 		<v-container>
 			<v-row>
 				<v-col>
@@ -108,6 +108,9 @@
 		private searchTextTimeout: NodeJS.Timeout | null = null;
 
 		async mounted() {
+			if (!this.isLoggedIn) {
+				return this.$router.replace('/');
+			}
 			await this.refreshData();
 		}
 
@@ -147,6 +150,10 @@
 			}
 			await fetch(`${process.env.APIURL}/Dentist/Patient/${id}`, initData);
 			await this.refreshData();
+		}
+
+		get isLoggedIn() {
+			return this.$store.getters['auth/isLoggedIn'];
 		}
 
 		@Watch('userDialog')
