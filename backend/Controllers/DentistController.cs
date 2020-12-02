@@ -318,23 +318,38 @@ namespace ToothSoupAPI.Controllers
 		}
 
 		[HttpGet("Services")]
-		public async Task<ActionResult<IEnumerable<Service>>> GetServices()
+		public async Task<ActionResult<IEnumerable<ServiceResponse>>> GetServices()
 		{
 			var dentistId = GetDentistId();
 			if (!dentistId.HasValue) return Unauthorized();
 
 			var services = await _db.Services
+				.Where(s => !s.Deleted)
+				.Select(s => new ServiceResponse {
+					Id = s.Id,
+					Name = s.Name,
+					Price = s.Price,
+					AppointmentsCount = _db.Appointments.Where(a => a.ServiceId == s.Id).Count(),
+				})
 				.ToListAsync();
 			return services;
 		}
 
 		[HttpGet("Services/{id}")]
-		public async Task<ActionResult<Service>> GetService(int id)
+		public async Task<ActionResult<ServiceResponse>> GetService(int id)
 		{
 			var dentistId = GetDentistId();
 			if (!dentistId.HasValue) return Unauthorized();
 
 			var service = await _db.Services
+				.Where(s => !s.Deleted)
+				.Select(s => new ServiceResponse
+				{
+					Id = s.Id,
+					Name = s.Name,
+					Price = s.Price,
+					AppointmentsCount = _db.Appointments.Where(a => a.ServiceId == s.Id).Count(),
+				})
 				.FirstOrDefaultAsync(s => s.Id == id);
 			
 			if (service == null) return NotFound();
@@ -377,10 +392,11 @@ namespace ToothSoupAPI.Controllers
 			if (!dentistId.HasValue) return Unauthorized();
 
 			var service = await _db.Services
+				.Where(s => !s.Deleted)
 				.FirstOrDefaultAsync(s => s.Id == id);
 			if (service == null) return NotFound();
 
-			_db.Services.Remove(service);
+			service.Deleted = true;
 			await _db.SaveChangesAsync();
 
 			return Ok();
