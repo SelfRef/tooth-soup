@@ -97,6 +97,7 @@ namespace ToothSoupAPI.Seed
 					Canceled = false,
 					DentistId = 1,
 					PatientId = 1,
+					ServiceId = 1,
 				},
 				new Appointment {
 					Id = 2,
@@ -105,6 +106,7 @@ namespace ToothSoupAPI.Seed
 					Canceled = true,
 					DentistId = 1,
 					PatientId = 1,
+					ServiceId = 2,
 				},
 				new Appointment {
 					Id = 3,
@@ -113,6 +115,7 @@ namespace ToothSoupAPI.Seed
 					Canceled = true,
 					DentistId = 1,
 					PatientId = 1,
+					ServiceId = 3,
 				},
 				new Appointment {
 					Id = 4,
@@ -121,6 +124,30 @@ namespace ToothSoupAPI.Seed
 					Canceled = false,
 					DentistId = 1,
 					PatientId = 1,
+					ServiceId = 4,
+				}
+			);
+
+			modelBuilder.Entity<Service>().HasData(
+				new Service {
+					Id = 1,
+					Name = "Overview",
+					Price = 100
+				},
+				new Service {
+					Id = 2,
+					Name = "Tooth Extraction",
+					Price = 200
+				},
+				new Service {
+					Id = 3,
+					Name = "Root Canal Treatment",
+					Price = 300
+				},
+				new Service {
+					Id = 4,
+					Name = "Euthanasia",
+					Price = 500
 				}
 			);
 		}

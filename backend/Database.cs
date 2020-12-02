@@ -20,5 +20,6 @@ namespace ToothSoupAPI {
 		public DbSet<Dentist> Dentists { get; set; }
 		public DbSet<Patient> Patients { get; set; }
 		public DbSet<Appointment> Appointments { get; set; }
+		public DbSet<Service> Services { get; set; }
 	}
 }

@@ -8,5 +8,6 @@ namespace ToothSoupAPI.Models {
 		public TimeSpan? Duration { get; set; }
 		public bool? Canceled { get; set; }
 		public int? PatientId { get; set; }
+		public int? ServiceId { get; set; }
 	}
 }
