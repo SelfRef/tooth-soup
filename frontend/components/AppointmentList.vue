@@ -92,15 +92,19 @@
 			<template #no-data v-if="patientId">No appointments available for this patient.</template>
 			<template #no-data v-else>Select patient to show appointments.</template>
 		</v-data-table>
-		<patient-edit-form :active.sync="dialog" :itemData="appointment" @refresh="refreshData"/>
+		<appointment-form :active.sync="dialog" :item="appointment" @refresh="refreshData" :selectedPatientId="patientId"/>
 	</v-container>
 </template>
 
 <script lang="ts">
 import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
 import Appointment from '~/interfaces/Appointment';
+import AppointmentForm from '~/components/AppointmentForm.vue';
 
 @Component({
+	components: {
+		AppointmentForm,
+	},
 	filters: {
 		duration(value: string) {
 			const parts = value.split(':');
