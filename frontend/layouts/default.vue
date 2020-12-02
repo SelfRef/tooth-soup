@@ -39,6 +39,7 @@
 </template>
 
 <script>
+import 'reflect-metadata';
 import { Vue, Component, Prop } from 'vue-property-decorator';
 import LoginForm from "@/components/LoginForm";
 export default {

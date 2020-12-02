@@ -27,64 +27,56 @@
 			</v-col>
 		</v-row>
 
-		<v-simple-table>
-			<thead>
-				<tr>
-					<th>Date</th>
-					<th>Duration</th>
-					<th>Service</th>
-					<th>Actions</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr v-for="appointment in appointments" :key="appointment.id">
-					<td>{{appointment.dateTime.replace('T', ' ').split('.')[0]}}</td>
-					<td>{{appointment.duration}}</td>
-					<td>[service]</td>
-					<td>
-						<v-btn icon color="blue" @click="edit(appointment)"><v-icon>mdi-calendar-plus</v-icon></v-btn>
-						<v-menu :close-on-content-click="true">
-							<template #activator="{on, attrs}">
-								<v-btn
-									v-on="on"
-									v-bind="attrs"
-									icon
-									color="orange"
-								><v-icon>mdi-calendar-minus</v-icon></v-btn>
-							</template>
-							<v-card>
-								<v-card-text>Are you sure you want to {{ appointment.canceled ? 'uncancel' : 'cancel' }} this appointment?</v-card-text>
-								<v-card-actions>
-									<v-btn
-										color="red"
-										text
-										@click="cancel(appointment.id, !appointment.canceled)"
-									>
-										{{ appointment.canceled ? 'Uncancel' : 'Cancel' }}
-									</v-btn>
-								</v-card-actions>
-							</v-card>
-						</v-menu>
-						<v-menu :close-on-content-click="false">
-							<template #activator="{on, attrs}">
-								<v-btn
-									v-on="on"
-									v-bind="attrs"
-									icon
-									color="red"
-								><v-icon>mdi-calendar-remove</v-icon></v-btn>
-							</template>
-							<v-card>
-								<v-card-text>Are you sure you want to remove this appointment?</v-card-text>
-								<v-card-actions>
-									<v-btn color="red" text @click="remove(appointment.id)">Remove</v-btn>
-								</v-card-actions>
-							</v-card>
-						</v-menu>
-					</td>
-				</tr>
-			</tbody>
-		</v-simple-table>
+		<v-data-table
+			:headers="headers"
+			:items="appointments"
+		>
+			<template #item.dateTime="{value}">{{value | dateTime}}</template>
+			<template #item.duration="{value}">{{value | duration}}</template>
+			<template #item.actions="{item}">
+				<v-btn icon color="blue" @click="edit(item)"><v-icon>mdi-calendar-plus</v-icon></v-btn>
+				<v-menu :close-on-content-click="true">
+					<template #activator="{on, attrs}">
+						<v-btn
+							v-on="on"
+							v-bind="attrs"
+							icon
+							color="orange"
+						><v-icon>mdi-calendar-minus</v-icon></v-btn>
+					</template>
+					<v-card>
+						<v-card-text>Are you sure you want to {{ item.canceled ? 'uncancel' : 'cancel' }} this appointment?</v-card-text>
+						<v-card-actions>
+							<v-btn
+								color="red"
+								text
+								@click="cancel(item.id, !item.canceled)"
+							>
+								{{ item.canceled ? 'Uncancel' : 'Cancel' }}
+							</v-btn>
+						</v-card-actions>
+					</v-card>
+				</v-menu>
+				<v-menu :close-on-content-click="false">
+					<template #activator="{on, attrs}">
+						<v-btn
+							v-on="on"
+							v-bind="attrs"
+							icon
+							color="red"
+						><v-icon>mdi-calendar-remove</v-icon></v-btn>
+					</template>
+					<v-card>
+						<v-card-text>Are you sure you want to remove this appointment?</v-card-text>
+						<v-card-actions>
+							<v-btn color="red" text @click="remove(item.id)">Remove</v-btn>
+						</v-card-actions>
+					</v-card>
+				</v-menu>
+			</template>
+			<template #no-data v-if="patientId">No appointments available for this patient.</template>
+			<template #no-data v-else>Select patient to show appointments.</template>
+		</v-data-table>
 		<patient-edit-form :active.sync="dialog" :itemData="appointment" @refresh="refreshData"/>
 	</v-container>
 </template>
@@ -93,27 +85,58 @@
 import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
 import Appointment from '~/interfaces/Appointment';
 
-@Component
+@Component({
+	filters: {
+		duration(value: string) {
+			const parts = value.split(':');
+			return `${Number(parts[0])}h ${parts[1]}m`;
+		},
+		dateTime(value: string) {
+			return value.replace('T', ' ').split('.')[0];
+		}
+	}
+})
 export default class AppointmentList extends Vue {
-	@Prop() patientId!: number;
+	@Prop({default: null}) patientId!: number | null;
 	private appointments: Appointment[] = [];
 	private appointment: Appointment | null = null;
 	private dialog = false;
-	//private searchText: string = '';
-	//private searchTextTimeout: NodeJS.Timeout | null = null;
+	private headers = [
+			{
+				text: 'Date',
+				value: 'dateTime',
+			},
+			{
+				text: 'Duration',
+				value: 'duration',
+			},
+			{
+				text: 'Service',
+				value: 'service',
+			},
+			{
+				text: 'Actions',
+				value: 'actions',
+				width: 150,
+			},
+		];
 
 	async mounted() {
 		await this.refreshData();
 	}
 
 	async refreshData() {
+		if (!this.patientId) {
+			this.appointments = [];
+			return;
+		}
+
 		let initData: RequestInit = {
 			method: 'GET',
 			headers: {
 				'Authorization': `Bearer ${this.$store.getters['auth/token']}`,
 			}
 		}
-		//const filterQuery = this.searchText ? `?filter=${this.searchText}` : '';
 		this.appointments = await fetch(`${process.env.APIURL}/Dentist/Appointments/Patient/${this.patientId}`, initData).then(response => response.json());
 	}
 
@@ -153,6 +176,11 @@ export default class AppointmentList extends Vue {
 	resetPatient(dialog: boolean) {
 		if (!dialog) this.appointment = null;
 		//else if (this.appointment?.dateTime) this.appointment.dateTime = this.appointment.dateTime.split('T')[0];
+	}
+
+	@Watch('patientId')
+	patientIdChanged() {
+		this.refreshData();
 	}
 
 	// @Watch('searchText')

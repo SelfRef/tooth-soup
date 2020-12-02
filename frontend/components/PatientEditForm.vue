@@ -175,8 +175,8 @@ import Patient from '~/interfaces/Patient';
 
 @Component
 export default class PatientEditForm extends Vue {
-	@Prop() active = false;
-	@Prop() patientData: Patient | null = null;
+	@Prop({default: false}) active!: boolean;
+	@Prop({default: null}) patientData!: Patient | null;
 	@Ref('form') form;
 	private datePickerActive = false;
 	private unlinkedUsers: Patient[] = [];
