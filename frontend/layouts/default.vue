@@ -2,6 +2,12 @@
   <v-app>
     <v-app-bar fixed app>
       <v-toolbar-title v-text="title" />
+      <v-tabs :value="tabNumber">
+        <v-tab to="/">Home</v-tab>
+        <v-tab to="/patients">Patients</v-tab>
+        <v-tab to="/appointments">Appointments</v-tab>
+        <v-tab to="/services">Services</v-tab>
+      </v-tabs>
       <v-spacer />
       <template v-if="loggedIn">
         <v-menu offset-y>
@@ -56,6 +62,18 @@ export default {
   computed: {
     loggedIn() {
       return Boolean(this.$store.getters['auth/token']);
+    },
+    tabNumber() {
+      switch(this.$route.path) {
+        case '/':
+          return 0;
+        case '/patients':
+          return 1;
+        case '/appointments':
+          return 2;
+        case '/services':
+          return 3;
+      }
     }
   },
   methods: {
