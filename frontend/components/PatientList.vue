@@ -1,93 +1,101 @@
 <template>
-	<v-layout column v-if="isLoggedIn">
-		<v-container>
-			<v-row>
-				<v-col>
-					<h2>Patient List {{ searchText ? '(filtered)' : '' }}</h2>
-				</v-col>
-				<v-spacer></v-spacer>
-				<v-col>
-					<v-text-field
-						v-model="searchText"
-						label="Search"
-						hint="(PESEL, Name, Email)"
-						clearable
-						dense
-					></v-text-field>
-				</v-col>
-				<v-col cols="auto">
-					<v-btn @click="refreshData" color="blue">
-						Refresh
-						<v-icon right>mdi-refresh</v-icon>
-					</v-btn>
-					<v-btn @click="userDialog = true" color="green">
-						Add user
-						<v-icon right>mdi-account-plus</v-icon>
-					</v-btn>
-				</v-col>
-			</v-row>
-
-			<v-data-table
-				:headers="headers"
-				:items="patients"
-				show-select
-				single-select
-				v-model="selectedPatients"
-			>
-				<template #item.birthDate="{value}">{{value | dateTime}}</template>
-				<template #item.actions="{item}">
-					<v-tooltip bottom>
-						Edit patient
-						<template #activator="{on, attrs}">
-							<v-btn v-on="on" v-bind="attrs" icon color="blue" @click="editPatient(item)"><v-icon>mdi-account-edit</v-icon></v-btn>
-						</template>
-					</v-tooltip>
-					<v-menu :close-on-content-click="false">
-						<template #activator="{on: onMenu}">
-							<v-tooltip bottom>
-								Unlink patient
-								<template #activator="{on: onTip}">
-									<v-btn
-										v-on="{...onTip, ...onMenu}"
-										icon
-										color="orange"
-									><v-icon>mdi-account-minus</v-icon></v-btn>
-								</template>
-							</v-tooltip>
-						</template>
-						<v-card>
-							<v-card-text>Are you sure you want to unlink this user?</v-card-text>
-							<v-card-actions>
-								<v-btn color="red" text @click="unlinkPatient(item.id)">Unlink</v-btn>
-							</v-card-actions>
-						</v-card>
-					</v-menu>
-					<v-menu :close-on-content-click="false">
-						<template #activator="{on: onMenu}">
-							<v-tooltip bottom>
-								Remove patient
-								<template #activator="{on: onTip}">
-									<v-btn
-										v-on="{...onTip, ...onMenu}"
-										icon
-										color="red"
-									><v-icon>mdi-account-remove</v-icon></v-btn>
-								</template>
-							</v-tooltip>
-						</template>
-						<v-card>
-							<v-card-text>Are you sure you want to remove this user?</v-card-text>
-							<v-card-actions>
-								<v-btn color="red" text @click="removePatient(item.id)">Remove</v-btn>
-							</v-card-actions>
-						</v-card>
-					</v-menu>
-				</template>
-			</v-data-table>
-			<patient-edit-form :active.sync="userDialog" :patientData="patient" @refresh="refreshData"/>
-		</v-container>
-		<appointment-list :patientId="selectedPatientId" />
-	</v-layout>
+	<v-container v-if="isLoggedIn">
+		<v-row>
+			<v-col cols="12" lg="8" xl="6">
+				<v-row>
+					<v-col cols="auto">
+						<h2>Patient List {{ searchText ? '(filtered)' : '' }}</h2>
+					</v-col>
+					<v-col>
+						<v-text-field
+							v-model="searchText"
+							label="Search"
+							hint="(PESEL, Name, Email)"
+							clearable
+							dense
+						></v-text-field>
+					</v-col>
+					<v-col cols="12" sm="auto">
+						<v-btn @click="refreshData" color="blue">
+							Refresh
+							<v-icon right>mdi-refresh</v-icon>
+						</v-btn>
+						<v-btn @click="userDialog = true" color="green">
+							Add user
+							<v-icon right>mdi-account-plus</v-icon>
+						</v-btn>
+					</v-col>
+				</v-row>
+				<v-data-table
+					:headers="headers"
+					:items="patients"
+					show-select
+					single-select
+					v-model="selectedPatients"
+				>
+					<template #item.birthDate="{value}">{{value | dateTime}}</template>
+					<template #item.actions="{item}">
+						<v-tooltip bottom>
+							Edit patient
+							<template #activator="{on, attrs}">
+								<v-btn v-on="on" v-bind="attrs" icon color="blue" @click="editPatient(item)"><v-icon>mdi-account-edit</v-icon></v-btn>
+							</template>
+						</v-tooltip>
+						<v-menu :close-on-content-click="false">
+							<template #activator="{on: onMenu}">
+								<v-tooltip bottom>
+									Unlink patient
+									<template #activator="{on: onTip}">
+										<v-btn
+											v-on="{...onTip, ...onMenu}"
+											icon
+											color="orange"
+										><v-icon>mdi-account-minus</v-icon></v-btn>
+									</template>
+								</v-tooltip>
+							</template>
+							<v-card>
+								<v-card-text>Are you sure you want to unlink this user?</v-card-text>
+								<v-card-actions>
+									<v-btn color="red" text @click="unlinkPatient(item.id)">Unlink</v-btn>
+								</v-card-actions>
+							</v-card>
+						</v-menu>
+						<v-menu :close-on-content-click="false">
+							<template #activator="{on: onMenu}">
+								<v-tooltip bottom>
+									Remove patient
+									<template #activator="{on: onTip}">
+										<v-btn
+											v-on="{...onTip, ...onMenu}"
+											icon
+											color="red"
+										><v-icon>mdi-account-remove</v-icon></v-btn>
+									</template>
+								</v-tooltip>
+							</template>
+							<v-card>
+								<v-card-text>Are you sure you want to remove this user?</v-card-text>
+								<v-card-actions>
+									<v-btn color="red" text @click="removePatient(item.id)">Remove</v-btn>
+								</v-card-actions>
+							</v-card>
+						</v-menu>
+					</template>
+				</v-data-table>
+				<patient-edit-form :active.sync="userDialog" :patientData="patient" @refresh="refreshData"/>
+				<appointment-list :patientId="selectedPatientId" />
+			</v-col>
+			<v-col>
+				<v-sheet height="800">
+					<v-calendar
+						:events="events"
+						:type="calendarType"
+					></v-calendar>
+				</v-sheet>
+			</v-col>
+		</v-row>
+	</v-container>
 </template>
 
 <script lang='ts'>
@@ -200,6 +208,12 @@
 			} else {
 				return null;
 			}
+		}
+
+		get calendarType() {
+			if (this.$vuetify.breakpoint.xlOnly) return '4day';
+			if (this.$vuetify.breakpoint.mdOnly) return '4day';
+			else return 'day';
 		}
 
 		@Watch('userDialog')

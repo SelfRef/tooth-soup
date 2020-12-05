@@ -1,7 +1,7 @@
 <template>
-	<v-container>
+	<v-container class="px-0">
 		<v-row>
-			<v-col>
+			<v-col cols="auto">
 				<!-- <h2>Appointment List {{ searchText ? '(filtered)' : '' }}</h2> -->
 				<h2>Appointment List</h2>
 			</v-col>
@@ -190,9 +190,13 @@ export default class AppointmentList extends Vue {
 		await this.refreshData();
 	}
 
-	
 	canceledRow(item: Appointment) {
-		return item.canceled ? 'red lighten-5' : '';
+		let colorClass = '';
+		if (item.canceled) {
+			colorClass += 'red '
+			colorClass += this.$vuetify.theme.dark ? 'darken-4' : 'lighten-5'
+		}
+		return colorClass;
 	}
 
 	@Watch('dialog')
