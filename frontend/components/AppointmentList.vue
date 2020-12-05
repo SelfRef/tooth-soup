@@ -16,11 +16,11 @@
 				></v-text-field>
 			</v-col> -->
 			<v-col cols="auto">
-				<v-btn @click="refreshData" color="blue">
+				<v-btn @click="refreshData" color="blue" :disabled="!patientId">
 					Refresh
 					<v-icon right>mdi-refresh</v-icon>
 				</v-btn>
-				<v-btn @click="dialog = true" color="green">
+				<v-btn @click="dialog = true" color="green" :disabled="!patientId">
 					Add appointment
 					<v-icon right>mdi-calendar-plus</v-icon>
 				</v-btn>
@@ -30,6 +30,7 @@
 		<v-data-table
 			:headers="headers"
 			:items="appointments"
+			:item-class="canceledRow"
 		>
 			<template #item.dateTime="{value}">{{value | dateTime}}</template>
 			<template #item.duration="{value}">{{value | duration}}</template>
@@ -41,13 +42,12 @@
 					</template>
 				</v-tooltip>
 				<v-menu :close-on-content-click="true">
-					<template #activator="{on, attrs}">
-						<v-tooltip bottom v-on="on" v-bind="attrs">
+					<template #activator="{on: onMenu}">
+						<v-tooltip bottom>
 							Cancel appointment
-							<template #activator="{on, attrs}">
+							<template #activator="{on: onTip}">
 								<v-btn
-									v-on="on"
-									v-bind="attrs"
+									v-on="{...onTip, ...onMenu}"
 									icon
 									color="orange"
 								><v-icon>mdi-calendar-minus</v-icon></v-btn>
@@ -68,13 +68,12 @@
 					</v-card>
 				</v-menu>
 				<v-menu :close-on-content-click="false">
-					<template #activator="{on, attrs}">
-						<v-tooltip bottom v-on="on" v-bind="attrs">
+					<template #activator="{on: onMenu}">
+						<v-tooltip bottom>
 							Remove appointment
-							<template #activator="{on, attrs}">
+							<template #activator="{on: onTip}">
 								<v-btn
-									v-on="on"
-									v-bind="attrs"
+									v-on="{...onTip, ...onMenu}"
 									icon
 									color="red"
 								><v-icon>mdi-calendar-remove</v-icon></v-btn>
@@ -189,6 +188,11 @@ export default class AppointmentList extends Vue {
 		}
 		await fetch(`${process.env.APIURL}/Dentist/Appointment/${id}`, initData);
 		await this.refreshData();
+	}
+
+	
+	canceledRow(item: Appointment) {
+		return item.canceled ? 'red lighten-5' : '';
 	}
 
 	@Watch('dialog')

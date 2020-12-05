@@ -43,13 +43,12 @@
 						</template>
 					</v-tooltip>
 					<v-menu :close-on-content-click="false">
-						<template #activator="{on, attrs}">
-							<v-tooltip bottom v-on="on" v-bind="attrs">
+						<template #activator="{on: onMenu}">
+							<v-tooltip bottom>
 								Unlink patient
-								<template #activator="{on, attrs}">
+								<template #activator="{on: onTip}">
 									<v-btn
-										v-on="on"
-										v-bind="attrs"
+										v-on="{...onTip, ...onMenu}"
 										icon
 										color="orange"
 									><v-icon>mdi-account-minus</v-icon></v-btn>
@@ -64,13 +63,12 @@
 						</v-card>
 					</v-menu>
 					<v-menu :close-on-content-click="false">
-						<template #activator="{on, attrs}">
-							<v-tooltip bottom v-on="on" v-bind="attrs">
+						<template #activator="{on: onMenu}">
+							<v-tooltip bottom>
 								Remove patient
-								<template #activator="{on, attrs}">
+								<template #activator="{on: onTip}">
 									<v-btn
-										v-on="on"
-										v-bind="attrs"
+										v-on="{...onTip, ...onMenu}"
 										icon
 										color="red"
 									><v-icon>mdi-account-remove</v-icon></v-btn>
