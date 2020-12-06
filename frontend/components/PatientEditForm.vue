@@ -62,7 +62,7 @@
 											sm="6"
 										>
 											<v-text-field
-												label="Legal first name"
+												label="First name"
 												:required="!Boolean(edit)"
 												v-model="patient.firstName"
 												prepend-icon="mdi-card-account-details"
@@ -74,7 +74,7 @@
 											sm="6"
 										>
 											<v-text-field
-												label="Legal last name"
+												label="Last name"
 												:required="!Boolean(edit)"
 												v-model="patient.lastName"
 												prepend-icon="mdi-card-account-details"
@@ -98,6 +98,7 @@
 												v-model="patient.password"
 												prepend-icon="mdi-lock"
 												:rules="[rules.required]"
+												:placeholder="edit ? '(unchanged)' : null"
 											></v-text-field>
 										</v-col>
 									</v-row>
@@ -148,14 +149,14 @@
 						<v-card-actions>
 							<v-spacer></v-spacer>
 							<v-btn
-								color="blue darken-1"
+								color="primary"
 								text
 								@click="close"
 							>
 								Close
 							</v-btn>
 							<v-btn
-								color="blue darken-1"
+								color="primary"
 								text
 								@click="linkUser"
 							>

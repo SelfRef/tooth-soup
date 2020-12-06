@@ -36,7 +36,6 @@ namespace ToothSoupAPI.Controllers
 
 			return await _db.Patients
 				.Where(p => p.DentistId == (unlinked ? null : id))
-				.Include(p => p.User)
 				.Where(p => $"{p.Pesel} {p.User.FirstName} {p.User.LastName} {p.User.Email}".ToLower().Contains(filter ?? string.Empty))
 				.Select(p => new PatientResult {
 					Id = p.Id,
@@ -57,7 +56,6 @@ namespace ToothSoupAPI.Controllers
 
 			var patient = await _db.Patients
 				.Where(p => p.Id == id)
-				.Include(p => p.User)
 				.Select(p => new PatientResult
 				{
 					Id = p.Id,
@@ -83,7 +81,6 @@ namespace ToothSoupAPI.Controllers
 
 			var patient = await _db.Patients
 				.Where(p => p.Id == id)
-				.Include(p => p.User)
 				.FirstOrDefaultAsync();
 
 			if (patient == null) return NotFound();
@@ -112,7 +109,6 @@ namespace ToothSoupAPI.Controllers
 
 			var patient = await _db.Patients
 				.Where(p => p.Id == id)
-				.Include(p => p.User)
 				.FirstOrDefaultAsync();
 
 			if (patient == null) return NotFound();
@@ -168,7 +164,6 @@ namespace ToothSoupAPI.Controllers
 
 			var newPatient = await _db.Patients
 				.Where(p => p.Id == patient.Id)
-				.Include(p => p.User)
 				.FirstOrDefaultAsync();
 
 			if (newPatient == null) return NotFound();
@@ -207,13 +202,14 @@ namespace ToothSoupAPI.Controllers
 
 			var appointments = await _db.Appointments
 				.Where(a => a.DentistId == dentistId)
-				.Include(a => a.Service)
 				.Select(a => new AppointmentResponse {
 					Id = a.Id,
-					DateTime = a.DateTime,
+					StartDate = a.StartDate,
+					EndDate = a.EndDate,
 					Duration = a.Duration,
 					Canceled = a.Canceled,
 					PatientId = a.PatientId,
+					PatientName = $"{a.Patient.User.FirstName} {a.Patient.User.LastName}",
 					ServiceId = a.ServiceId,
 					ServiceName = a.Service.Name,
 				})
@@ -229,14 +225,15 @@ namespace ToothSoupAPI.Controllers
 
 			var appointments = await _db.Appointments
 				.Where(a => a.DentistId == dentistId && a.PatientId == id)
-				.Include(a => a.Service)
 				.Select(a => new AppointmentResponse
 				{
 					Id = a.Id,
-					DateTime = a.DateTime,
+					StartDate = a.StartDate,
+					EndDate = a.EndDate,
 					Duration = a.Duration,
 					Canceled = a.Canceled,
 					PatientId = a.PatientId,
+					PatientName = $"{a.Patient.User.FirstName} {a.Patient.User.LastName}",
 					ServiceId = a.ServiceId,
 					ServiceName = a.Service.Name,
 				})
@@ -252,14 +249,15 @@ namespace ToothSoupAPI.Controllers
 
 			var appointment = await _db.Appointments
 				.Where(a => a.DentistId == dentistId && a.Id == id)
-				.Include(a => a.Service)
 				.Select(a => new AppointmentResponse
 				{
 					Id = a.Id,
-					DateTime = a.DateTime,
+					StartDate = a.StartDate,
+					EndDate = a.EndDate,
 					Duration = a.Duration,
 					Canceled = a.Canceled,
 					PatientId = a.PatientId,
+					PatientName = $"{a.Patient.User.FirstName} {a.Patient.User.LastName}",
 					ServiceId = a.ServiceId,
 					ServiceName = a.Service.Name,
 				})
@@ -291,8 +289,8 @@ namespace ToothSoupAPI.Controllers
 				.Where(a => a.DentistId == dentistId && a.Id == newAppointment.Id)
 				.FirstOrDefaultAsync();
 			if (appointment == null) return NotFound();
-			if (newAppointment.DateTime.HasValue) appointment.DateTime = newAppointment.DateTime.Value;
-			if (newAppointment.Duration.HasValue) appointment.Duration = newAppointment.Duration.Value;
+			if (newAppointment.StartDate.HasValue) appointment.StartDate = newAppointment.StartDate.Value;
+			if (newAppointment.EndDate.HasValue) appointment.EndDate = newAppointment.EndDate.Value;
 			if (newAppointment.Canceled.HasValue) appointment.Canceled = newAppointment.Canceled.Value;
 			
 			await _db.SaveChangesAsync();

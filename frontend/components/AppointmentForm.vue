@@ -71,7 +71,7 @@
 										<v-date-picker
 											v-model="date"
 											no-title
-											@change="$refs.datePicker.save(time)"
+											@change="$refs.datePicker.save(date)"
 										></v-date-picker>
 									</v-menu>
 								</v-col>
@@ -96,7 +96,7 @@
 										<v-time-picker
 											v-if="timeStartPickerActive"
 											v-model="timeStart"
-											@click:minute="$refs.timeStartPicker.save(time)"
+											@click:minute="$refs.timeStartPicker.save(timeStart)"
 											:max="timeEnd"
 											format="24hr"
 										></v-time-picker>
@@ -123,7 +123,7 @@
 										<v-time-picker
 											v-if="timeEndPickerActive"
 											v-model="timeEnd"
-											@click:minute="$refs.timeEndPicker.save(time)"
+											@click:minute="$refs.timeEndPicker.save(timeEnd)"
 											:min="timeStart"
 											format="24hr"
 										></v-time-picker>
@@ -133,9 +133,10 @@
 									<v-text-field
 										label="Duration"
 										:required="!Boolean(edit)"
-										v-model="appointment.duration"
+										v-model="duration"
 										prepend-icon="mdi-card-account-details"
 										:rules="[rules.required]"
+										readonly
 									></v-text-field>
 								</v-col>
 							</v-row>
@@ -144,14 +145,14 @@
 					<v-card-actions>
 						<v-spacer></v-spacer>
 						<v-btn
-							color="blue darken-1"
+							color="primary"
 							text
 							@click="close"
 						>
 							Close
 						</v-btn>
 						<v-btn
-							color="blue darken-1"
+							color="primary"
 							text
 							@click="save"
 						>
@@ -186,11 +187,15 @@ export default class AppointmentForm extends Vue {
 	private date: string = '';
 	private timeStart: string = '';
 	private timeEnd: string = '';
+	private duration: string = '';
 	private appointment: Appointment = {
 		dentistId: null,
 		patientId: null,
+		patientName: null,
 		serviceId: null,
-		dateTime: null,
+		serviceName: null,
+		startDate: null,
+		endDate: null,
 		duration: null,
 		canceled: false,
 	}
@@ -256,12 +261,24 @@ export default class AppointmentForm extends Vue {
 		this.appointment = this.item && active ? {...this.item} : {
 			dentistId: null,
 			patientId: null,
+			patientName: null,
 			serviceId: null,
-			dateTime: null,
+			serviceName: null,
+			startDate: null,
+			endDate: null,
 			duration: null,
 			canceled: false,
 		}
 		this.setUserIds();
+	}
+
+	@Watch('item')
+	setDateTime(item: Appointment) {
+		if (!item) return;
+		this.date = item.startDate?.substr(0, 10) ?? '';
+		this.timeStart = item.startDate?.substr(11, 5) ?? '';
+		this.timeEnd = item.endDate?.substr(11, 5) ?? '';
+		console.log(item, this.date, this.timeStart, this.timeEnd)
 	}
 
 	@Watch('date')
@@ -269,7 +286,7 @@ export default class AppointmentForm extends Vue {
 	@Watch('timeEnd')
 	calcDate() {
 		if (this.date && this.timeStart) {
-			this.appointment.dateTime = new Date(`${this.date} ${this.timeStart}`);
+			this.appointment.startDate = new Date(`${this.date} ${this.timeStart}`).toISOString();
 		}
 		if (this.timeStart && this.timeEnd) {
 			const [timeStartHours, timeStartMinutes] = this.timeStart.split(':')
@@ -282,7 +299,7 @@ export default class AppointmentForm extends Vue {
 			const diff = end.getTime() - start.getTime();
 			const diffHours = Math.floor(diff / 1000 / 60 / 60);
 			const diffMinutes = Math.floor(diff / 1000 / 60 % 60);
-			this.appointment.duration = `${diffHours < 10 ? '0' : ''}${diffHours}:${diffMinutes < 10 ? '0' : ''}${diffMinutes}`;
+			this.duration = `${diffHours < 10 ? '0' : ''}${diffHours}:${diffMinutes < 10 ? '0' : ''}${diffMinutes}`;
 		}
 	}
 

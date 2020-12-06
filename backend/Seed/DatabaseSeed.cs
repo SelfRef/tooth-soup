@@ -89,11 +89,12 @@ namespace ToothSoupAPI.Seed
 				}
 			);
 
+			var now = DateTime.Now;
 			modelBuilder.Entity<Appointment>().HasData(
 				new Appointment {
 					Id = 1,
-					DateTime = DateTime.Now.AddDays(-2),
-					Duration = TimeSpan.Parse("02:00"),
+					StartDate = now.AddDays(-2),
+					EndDate = now.AddDays(-2).AddHours(1.5),
 					Canceled = false,
 					DentistId = 1,
 					PatientId = 1,
@@ -101,8 +102,8 @@ namespace ToothSoupAPI.Seed
 				},
 				new Appointment {
 					Id = 2,
-					DateTime = DateTime.Now.AddDays(-1),
-					Duration = TimeSpan.Parse("01:00"),
+					StartDate = now.AddDays(-1),
+					EndDate = now.AddDays(-1).AddHours(1),
 					Canceled = true,
 					DentistId = 1,
 					PatientId = 1,
@@ -110,18 +111,36 @@ namespace ToothSoupAPI.Seed
 				},
 				new Appointment {
 					Id = 3,
-					DateTime = DateTime.Now.AddDays(1),
-					Duration = TimeSpan.Parse("02:30"),
-					Canceled = true,
+					StartDate = now,
+					EndDate = now.AddHours(1),
+					Canceled = false,
+					DentistId = 1,
+					PatientId = 1,
+					ServiceId = 1,
+				},
+				new Appointment {
+					Id = 4,
+					StartDate = now.AddHours(1.5),
+					EndDate = now.AddHours(2),
+					Canceled = false,
+					DentistId = 1,
+					PatientId = 1,
+					ServiceId = 2,
+				},
+				new Appointment {
+					Id = 5,
+					StartDate = now.AddDays(1),
+					EndDate = now.AddDays(1).AddHours(2.5),
+					Canceled = false,
 					DentistId = 1,
 					PatientId = 1,
 					ServiceId = 3,
 				},
 				new Appointment {
-					Id = 4,
-					DateTime = DateTime.Now.AddDays(2),
-					Duration = TimeSpan.Parse("02:15"),
-					Canceled = false,
+					Id = 6,
+					StartDate = now.AddDays(2),
+					EndDate = now.AddDays(2).AddHours(2.25),
+					Canceled = true,
 					DentistId = 1,
 					PatientId = 1,
 					ServiceId = 4,

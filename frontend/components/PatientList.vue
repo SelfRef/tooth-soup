@@ -4,23 +4,22 @@
 			<v-col cols="12" lg="8" xl="6">
 				<v-row>
 					<v-col cols="auto">
-						<h2>Patient List {{ searchText ? '(filtered)' : '' }}</h2>
+						<h2>Patient List</h2>
 					</v-col>
 					<v-col>
 						<v-text-field
 							v-model="searchText"
 							label="Search"
-							hint="(PESEL, Name, Email)"
 							clearable
 							dense
 						></v-text-field>
 					</v-col>
 					<v-col cols="12" sm="auto">
-						<v-btn @click="refreshData" color="blue">
+						<v-btn @click="refreshData" color="info">
 							Refresh
 							<v-icon right>mdi-refresh</v-icon>
 						</v-btn>
-						<v-btn @click="userDialog = true" color="green">
+						<v-btn @click="userDialog = true" color="success">
 							Add user
 							<v-icon right>mdi-account-plus</v-icon>
 						</v-btn>
@@ -32,13 +31,14 @@
 					show-select
 					single-select
 					v-model="selectedPatients"
+					:search="searchText"
 				>
 					<template #item.birthDate="{value}">{{value | dateTime}}</template>
 					<template #item.actions="{item}">
 						<v-tooltip bottom>
 							Edit patient
 							<template #activator="{on, attrs}">
-								<v-btn v-on="on" v-bind="attrs" icon color="blue" @click="editPatient(item)"><v-icon>mdi-account-edit</v-icon></v-btn>
+								<v-btn v-on="on" v-bind="attrs" icon color="info" @click="editPatient(item)"><v-icon>mdi-account-edit</v-icon></v-btn>
 							</template>
 						</v-tooltip>
 						<v-menu :close-on-content-click="false">
@@ -49,7 +49,7 @@
 										<v-btn
 											v-on="{...onTip, ...onMenu}"
 											icon
-											color="orange"
+											color="warning"
 										><v-icon>mdi-account-minus</v-icon></v-btn>
 									</template>
 								</v-tooltip>
@@ -57,7 +57,7 @@
 							<v-card>
 								<v-card-text>Are you sure you want to unlink this user?</v-card-text>
 								<v-card-actions>
-									<v-btn color="red" text @click="unlinkPatient(item.id)">Unlink</v-btn>
+									<v-btn color="error" text @click="unlinkPatient(item.id)">Unlink</v-btn>
 								</v-card-actions>
 							</v-card>
 						</v-menu>
@@ -69,7 +69,7 @@
 										<v-btn
 											v-on="{...onTip, ...onMenu}"
 											icon
-											color="red"
+											color="error"
 										><v-icon>mdi-account-remove</v-icon></v-btn>
 									</template>
 								</v-tooltip>
@@ -77,7 +77,7 @@
 							<v-card>
 								<v-card-text>Are you sure you want to remove this user?</v-card-text>
 								<v-card-actions>
-									<v-btn color="red" text @click="removePatient(item.id)">Remove</v-btn>
+									<v-btn color="error" text @click="removePatient(item.id)">Remove</v-btn>
 								</v-card-actions>
 							</v-card>
 						</v-menu>
@@ -87,12 +87,7 @@
 				<appointment-list :patientId="selectedPatientId" />
 			</v-col>
 			<v-col>
-				<v-sheet height="800">
-					<v-calendar
-						:events="events"
-						:type="calendarType"
-					></v-calendar>
-				</v-sheet>
+				<appointment-calendar />
 			</v-col>
 		</v-row>
 	</v-container>
@@ -103,10 +98,12 @@
 	import Patient from 'interfaces/Patient';
 	import PatientEditForm from '~/components/PatientEditForm.vue';
 	import AppointmentList from '~/components/AppointmentList.vue';
+	import AppointmentCalendar from '~/components/AppointmentCalendar.vue';
 	@Component({
 		components: {
 			PatientEditForm,
 			AppointmentList,
+			AppointmentCalendar,
 		},
 		filters: {
 			duration(value: string) {
@@ -114,7 +111,7 @@
 				return `${Number(parts[0])}h ${parts[1]}m`;
 			},
 			dateTime(value: string) {
-				return value.replace('T', ' ').split('.')[0];
+				return value.substr(0, 10);
 			}
 		}
 	})
@@ -124,7 +121,6 @@
 		private userDialog = false;
 		private patient: Patient | null = null;
 		private searchText: string = '';
-		private searchTextTimeout: NodeJS.Timeout | null = null;
 		private headers = [
 			{
 				text: 'PESEL',
@@ -167,8 +163,7 @@
 					'Authorization': `Bearer ${this.$store.getters['auth/token']}`,
 				}
 			}
-			const filterQuery = this.searchText ? `?filter=${this.searchText}` : '';
-			this.patients = await fetch(`${process.env.APIURL}/Dentist/Patients${filterQuery}`, initData).then(response => response.json());
+			this.patients = await fetch(`${process.env.APIURL}/Dentist/Patients`, initData).then(response => response.json());
 		}
 
 		editPatient(patient: Patient) {
@@ -210,22 +205,10 @@
 			}
 		}
 
-		get calendarType() {
-			if (this.$vuetify.breakpoint.xlOnly) return '4day';
-			if (this.$vuetify.breakpoint.mdOnly) return '4day';
-			else return 'day';
-		}
-
 		@Watch('userDialog')
 		resetPatient(userDialog: boolean) {
 			if (!userDialog) this.patient = null;
 			else if (this.patient?.birthDate) this.patient.birthDate = this.patient.birthDate.split('T')[0];
-		}
-
-		@Watch('searchText')
-		refreshSearch(userDialog: boolean) {
-			if (this.searchTextTimeout) clearTimeout(this.searchTextTimeout);
-			this.searchTextTimeout = setTimeout(() => this.refreshData(), 1000);
 		}
 	}
 </script>
