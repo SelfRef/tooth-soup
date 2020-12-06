@@ -3,6 +3,7 @@ type State = {
 	userId: number | null
 	userRole: string | null
 	tokenExpiration: string | null
+	theme: number
 }
 
 export const state = (): State => ({
@@ -10,6 +11,7 @@ export const state = (): State => ({
 	userId: null,
 	userRole: null,
 	tokenExpiration: null,
+	theme: 0,
 })
 
 export const getters = {
@@ -27,6 +29,9 @@ export const getters = {
 	},
 	isLoggedIn(state: State) {
 		return Boolean(state.token);
+	},
+	theme(state: State) {
+		return state.theme;
 	}
 };
 
@@ -42,6 +47,9 @@ export const mutations = {
 	},
 	setTokenExpiration(state: State, tokenExpiration: Date | null) {
 		state.tokenExpiration = tokenExpiration ? tokenExpiration.toISOString() : null;
+	},
+	setTheme(state: State, theme: number) {
+		state.theme = theme;
 	},
 }
 
@@ -68,5 +76,9 @@ export const actions = {
 		if (getters['tokenExpiration'] < new Date()) {
 			dispatch('setToken', null);
 		}
+	},
+
+	setTheme({commit}, theme: number) {
+		commit('setTheme', theme);
 	}
 }
