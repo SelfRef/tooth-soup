@@ -20,7 +20,7 @@
 
 			<v-data-table
 				:headers="headers"
-				:items="services"
+				:items="$store.getters['dentist/services']"
 			>
 				<template #item.price="{value}">{{value | price}}</template>
 				<template #item.actions="{item}">
@@ -76,7 +76,6 @@
 		}
 	})
 	export default class ServiceList extends Vue {
-		private services: Service[] = [];
 		private itemToEdit: Service | null = null;
 		private dialog = false;
 		private headers = [
@@ -107,13 +106,7 @@
 		}
 
 		async refreshData() {
-			let initData: RequestInit = {
-				method: 'GET',
-				headers: {
-					'Authorization': `Bearer ${this.$store.getters['auth/token']}`,
-				}
-			}
-			this.services = await fetch(`${process.env.APIURL}/Dentist/Services`, initData).then(response => response.json());
+			this.$store.dispatch('dentist/updateServices');
 		}
 
 		edit(item: Service) {

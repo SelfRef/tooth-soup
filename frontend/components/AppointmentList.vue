@@ -160,6 +160,7 @@ export default class AppointmentList extends Vue {
 			}
 		}
 		this.appointments = await fetch(`${process.env.APIURL}/Dentist/Appointments/Patient/${this.patientId}`, initData).then(response => response.json());
+		this.$store.dispatch('dentist/updateAppointments');
 	}
 
 	edit(appointment: Appointment) {

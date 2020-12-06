@@ -25,11 +25,10 @@ import Appointment from '~/interfaces/Appointment';
 @Component
 export default class AppointmentCalendar extends Vue {
 	@Ref() calendar;
-	private appointments: Appointment[] = [];
 	private ready: boolean = false;
 
 	get items() {
-		return this.appointments.map(a => ({
+		return this.$store.getters['dentist/appointments'].map(a => ({
 			name: a.serviceName,
 			start: this.formatDate(a.startDate),
 			end: this.formatDate(a.endDate),
@@ -64,13 +63,7 @@ export default class AppointmentCalendar extends Vue {
 	}
 
 	async refreshData() {
-		let initData: RequestInit = {
-			method: 'GET',
-			headers: {
-				'Authorization': `Bearer ${this.$store.getters['auth/token']}`,
-			}
-		}
-		this.appointments = await fetch(`${process.env.APIURL}/Dentist/Appointments`, initData).then(response => response.json());
+		this.$store.dispatch('dentist/updateAppointments');
 	}
 
 	formatDate(dateIso: string) {

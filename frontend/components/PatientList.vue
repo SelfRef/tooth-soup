@@ -27,7 +27,7 @@
 				</v-row>
 				<v-data-table
 					:headers="headers"
-					:items="patients"
+					:items="$store.getters['dentist/patients']"
 					show-select
 					single-select
 					v-model="selectedPatients"
@@ -116,7 +116,6 @@
 		}
 	})
 	export default class PatientList extends Vue {
-		private patients: Patient[] = [];
 		private selectedPatients: Patient[] = [];
 		private userDialog = false;
 		private patient: Patient | null = null;
@@ -157,13 +156,7 @@
 		}
 
 		async refreshData() {
-			let initData: RequestInit = {
-				method: 'GET',
-				headers: {
-					'Authorization': `Bearer ${this.$store.getters['auth/token']}`,
-				}
-			}
-			this.patients = await fetch(`${process.env.APIURL}/Dentist/Patients`, initData).then(response => response.json());
+			this.$store.dispatch('dentist/updatePatients');
 		}
 
 		editPatient(patient: Patient) {
