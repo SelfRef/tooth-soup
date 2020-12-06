@@ -46,6 +46,7 @@
 										v-model="appointment.serviceId"
 										prepend-icon="mdi-puzzle"
 										label="Service"
+										:rules="[rules.required]"
 									></v-select>
 								</v-col>
 							</v-row>
@@ -135,7 +136,6 @@
 										:required="!Boolean(edit)"
 										v-model="duration"
 										prepend-icon="mdi-card-account-details"
-										:rules="[rules.required]"
 										readonly
 									></v-text-field>
 								</v-col>
@@ -274,11 +274,16 @@ export default class AppointmentForm extends Vue {
 
 	@Watch('item')
 	setDateTime(item: Appointment) {
-		if (!item) return;
-		this.date = item.startDate?.substr(0, 10) ?? '';
-		this.timeStart = item.startDate?.substr(11, 5) ?? '';
-		this.timeEnd = item.endDate?.substr(11, 5) ?? '';
-		console.log(item, this.date, this.timeStart, this.timeEnd)
+		if (item) {
+			this.date = item.startDate?.substr(0, 10) ?? '';
+			this.timeStart = item.startDate?.substr(11, 5) ?? '';
+			this.timeEnd = item.endDate?.substr(11, 5) ?? '';
+		} else {
+			this.date = '';
+			this.timeStart = '';
+			this.timeEnd = '';
+			this.duration = '';
+		}
 	}
 
 	@Watch('date')
@@ -287,6 +292,9 @@ export default class AppointmentForm extends Vue {
 	calcDate() {
 		if (this.date && this.timeStart) {
 			this.appointment.startDate = new Date(`${this.date} ${this.timeStart}`).toISOString();
+		}
+		if (this.date && this.timeEnd) {
+			this.appointment.endDate = new Date(`${this.date} ${this.timeEnd}`).toISOString();
 		}
 		if (this.timeStart && this.timeEnd) {
 			const [timeStartHours, timeStartMinutes] = this.timeStart.split(':')

@@ -6,7 +6,13 @@
 			</v-col>
 			<v-spacer></v-spacer>
 			<v-col cols="auto">
-				<v-switch hide-details height="0" v-model="activeOnly" label="Active only" />
+				<v-switch
+					hide-details
+					height="0"
+					v-model="activeOnly"
+					label="Active only"
+					:disabled="!patientId"
+				/>
 			</v-col>
 			<v-col cols="auto">
 				<v-btn @click="refreshData" color="info" :disabled="!patientId">
@@ -24,6 +30,8 @@
 			:headers="headers"
 			:items="filteredAppointments"
 			:item-class="canceledRow"
+			sort-by="startDate"
+			sort-desc
 		>
 			<template #item.startDate="{value}">{{value | dateTime}}</template>
 			<template #item.duration="{value}">{{value | duration}}</template>
@@ -82,7 +90,7 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop, Watch } from 'vue-property-decorator';
+import { Vue, Component, Prop, Watch, Emit } from 'vue-property-decorator';
 import Appointment from '~/interfaces/Appointment';
 import AppointmentForm from '~/components/AppointmentForm.vue';
 
@@ -138,6 +146,7 @@ export default class AppointmentList extends Vue {
 		await this.refreshData();
 	}
 
+	@Emit('refreshData')
 	async refreshData() {
 		if (!this.patientId) {
 			this.appointments = [];
