@@ -94,6 +94,33 @@ namespace ToothSoupAPI.Controllers
 			return dentists;
 		}
 
+		[HttpGet("Appointments")]
+		public async Task<ActionResult<IEnumerable<AppointmentPatientResponse>>> GetAppointments()
+		{
+			var id = GetPatientId();
+			if (!id.HasValue) return Unauthorized();
+
+			var patient = await _db.Patients.FirstOrDefaultAsync(p => p.UserId == id);
+			if (patient == null) return NotFound("Patient");
+
+			var appointments = await _db.Appointments
+				.Where(a => a.PatientId == patient.Id)
+				.Select(a => new AppointmentPatientResponse {
+					Id = a.Id,
+					StartDate = a.StartDate,
+					EndDate = a.EndDate,
+					Duration = a.Duration,
+					Canceled = a.Canceled,
+					DentistId = a.DentistId,
+					DentistName = GetUserName(a.Dentist.User),
+					ServiceId = a.ServiceId,
+					ServiceName = a.Service.Name
+				})
+				.ToListAsync();
+
+			return appointments;
+		}
+
 		// [HttpPost]
 		// public async Task<ActionResult<Appointment>> RegisterAppointment(Appointment appointment)
 		// {
