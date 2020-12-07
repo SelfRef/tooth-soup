@@ -144,6 +144,11 @@
 											></v-text-field>
 										</v-col>
 									</v-row>
+									<v-row v-if="!edit && isCollision">
+										<v-col>
+											<v-alert type="warning">Appointment may collide</v-alert>
+										</v-col>
+									</v-row>
 								</v-col>
 								<v-col>
 									<v-sheet height="400">
@@ -234,7 +239,7 @@ export default class AppointmentForm extends Vue {
 
 		if (this.date && this.timeStart && this.timeEnd) {
 			appointments.push({
-				name: 'New appointment',
+				name: this.edit ? 'After change' : 'New appointment',
 				start: `${this.date} ${this.timeStart}`,
 				end: `${this.date} ${this.timeEnd}`,
 				color: 'success',
@@ -257,6 +262,7 @@ export default class AppointmentForm extends Vue {
 			this.$store.dispatch('patient/updateAccount');
 		}
 		this.refreshServices();
+		this.updateAppointments();
 	}
 
 	@Emit('update:active')
@@ -315,6 +321,19 @@ export default class AppointmentForm extends Vue {
 	get patientId() {
 		if (this.role === 'Patient') return this.id;
 		else return this.selectedPatientId || null;
+	}
+
+	get isCollision() {
+		if (!this.date || !this.timeStart || !this.timeEnd) return false;
+		const start = new Date(`${this.date}T${this.timeStart}`);
+		const end = new Date(`${this.date}T${this.timeEnd}`);
+		console.log('new', start, end);
+		return this.dentistAppointments.some(a => {
+			const aStart = new Date(a.startDate);
+			const aEnd = new Date(a.endDate);
+			console.log('old', aStart, aEnd);
+			return (start > aStart && start < aEnd) || (end > aStart && end < aEnd) || (aStart > start && aEnd < end);
+		});
 	}
 
 	@Watch('active')
@@ -387,9 +406,9 @@ export default class AppointmentForm extends Vue {
 					}
 				}
 				this.dentistAppointments = await fetch(`${process.env.APIURL}/Patient/Appointments/Dentist/${this.dentistId}/${this.date}`, initData).then(response => response.json());
-			} else if (this.role === 'Dentist') {
-				this.dentistAppointments = this.$store.getters['dentist/appointments'];
 			}
+		} else if (this.role === 'Dentist') {
+			this.dentistAppointments = this.$store.getters['dentist/appointments'];
 		}
 	}
 
