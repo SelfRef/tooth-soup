@@ -130,6 +130,7 @@ namespace ToothSoupAPI.Controllers
 
 			var patient = await _db.Patients
 				.Where(p => p.Id == id)
+				.Include(p => p.User)
 				.FirstOrDefaultAsync();
 
 			if (patient == null) return NotFound();
@@ -161,6 +162,7 @@ namespace ToothSoupAPI.Controllers
 
 			var patient = await _db.Patients
 				.Where(p => p.Id == id)
+				.Include(p => p.User)
 				.FirstOrDefaultAsync();
 
 			var dentist = await _db.Dentists.FirstOrDefaultAsync(d => d.UserId == userId);
