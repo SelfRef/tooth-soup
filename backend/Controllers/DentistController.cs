@@ -37,8 +37,8 @@ namespace ToothSoupAPI.Controllers
 					FirstName = p.User.FirstName,
 					LastName = p.User.LastName,
 					Email = p.User.Email,
-					CanLink = !p.PreventPatientLinking,
-					CanCreateAppointment = !p.PreventUnlinkedPatient
+					CanLink = p.CanLink,
+					CanCreateAppointment = p.CanCreateAppointment
 				})
 				.SingleOrDefaultAsync();
 			if (dentist == null) return NotFound();
@@ -59,8 +59,8 @@ namespace ToothSoupAPI.Controllers
 
 			var dentist = await _db.Dentists.FirstOrDefaultAsync(d => d.UserId == userId);
 			if (dentist == null) return NotFound("Dentist");
-			if (newUser.CanLink.HasValue) dentist.PreventPatientLinking = !newUser.CanLink.Value;
-			if (newUser.CanCreateAppointment.HasValue) dentist.PreventUnlinkedPatient = !newUser.CanCreateAppointment.Value;
+			if (newUser.CanLink.HasValue) dentist.CanLink = newUser.CanLink.Value;
+			if (newUser.CanCreateAppointment.HasValue) dentist.CanCreateAppointment = newUser.CanCreateAppointment.Value;
 
 			await _db.SaveChangesAsync();
 			return CreatedAtAction(nameof(GetMyInfo), GetMyInfo().Result.Value);

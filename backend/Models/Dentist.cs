@@ -7,10 +7,10 @@ namespace ToothSoupAPI.Models {
 		public User User { get; set; }
 		public int UserId { get; set; }
 
-		/// <summary>Prevent patient from linking this dentist in account page</summary>
-		public bool PreventPatientLinking { get; set; }
+		/// <summary>Allow patient to link this dentist in account page</summary>
+		public bool CanLink { get; set; }
 
-		/// <summary>Prevent unlinked patient from creating appointment</summary>
-		public bool PreventUnlinkedPatient { get; set; }
+		/// <summary>Allow unlinked patient for creating appointment</summary>
+		public bool CanCreateAppointment { get; set; }
 	}
 }

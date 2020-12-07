@@ -28,10 +28,7 @@
 						>JN</v-avatar>
 					</template>
 					<v-list>
-						<v-list-item to="/account">
-							<v-list-item-title>Account</v-list-item-title>
-						</v-list-item>
-						<v-list-item @click="logout">
+						<v-list-item @click="logout" color="error">
 							<v-list-item-title>Logout</v-list-item-title>
 						</v-list-item>
 					</v-list>

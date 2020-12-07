@@ -67,7 +67,7 @@ namespace ToothSoupAPI.Controllers
 				if (patient == null) return NotFound("Patient");
 				if (dentist == null) return NotFound("Dentist");
 				if (patient.DentistId != dentist.Id) {
-					if (dentist.PreventPatientLinking) return Forbid("PreventPatientLinking");
+					if (!dentist.CanLink) return Forbid("CanLink");
 					patient.DentistId = dentist.Id;
 				}
 			}
@@ -90,8 +90,8 @@ namespace ToothSoupAPI.Controllers
 					Id = d.Id,
 					FirstName = d.User.FirstName,
 					LastName = d.User.LastName,
-					CanLink = !d.PreventPatientLinking,
-					CanCreateAppointment = !d.PreventUnlinkedPatient || d.Patients.Any(p => p.Id == patient.Id)
+					CanLink = d.CanLink,
+					CanCreateAppointment = d.CanCreateAppointment || d.Patients.Any(p => p.Id == patient.Id)
 				})
 				.ToListAsync();
 
@@ -207,7 +207,7 @@ namespace ToothSoupAPI.Controllers
 
 			var dentist = await _db.Dentists.FindAsync(appointment.DentistId);
 			if (dentist == null) return NotFound("Dentist");
-			if (dentist.PreventUnlinkedPatient && !dentist.Patients.Any(p => p.Id == patient.Id)) return Forbid("PreventUnlinkedPatient");
+			if (!dentist.CanCreateAppointment && !dentist.Patients.Any(p => p.Id == patient.Id)) return Forbid("CanCreateAppointment");
 
 			appointment.PatientId = patient.Id;
 			await _db.Appointments.AddAsync(appointment);
