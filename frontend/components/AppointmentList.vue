@@ -11,15 +11,15 @@
 					height="0"
 					v-model="activeOnly"
 					label="Active only"
-					:disabled="!patientId"
+					:disabled="!patientId && role !== 'Patient'"
 				/>
 			</v-col>
 			<v-col cols="auto">
-				<v-btn @click="refreshData" color="info" :disabled="!patientId">
+				<v-btn @click="refreshData" color="info" :disabled="!patientId && role !== 'Patient'">
 					Refresh
 					<v-icon right>mdi-refresh</v-icon>
 				</v-btn>
-				<v-btn @click="dialog = true" color="success" :disabled="!patientId">
+				<v-btn @click="dialog = true" color="success" :disabled="!patientId && role !== 'Patient'">
 					Add appointment
 					<v-icon right>mdi-calendar-plus</v-icon>
 				</v-btn>
@@ -40,7 +40,7 @@
 					<template #activator="{on}">
 						<v-simple-checkbox readonly v-on="on" :value="value" />
 					</template>
-					<v-card>
+					<v-card v-if="role === 'Dentist' || !value">
 						<v-card-text>Are you sure you want to {{ item.canceled ? 'uncancel' : 'cancel' }} this appointment?</v-card-text>
 						<v-card-actions>
 							<v-btn
@@ -58,10 +58,10 @@
 				<v-tooltip bottom>
 					Edit appointment
 					<template #activator="{on, attrs}">
-						<v-btn v-on="on" v-bind="attrs" icon color="info" @click="edit(item)"><v-icon>mdi-calendar-edit</v-icon></v-btn>
+						<v-btn :disabled="item.canceled" v-on="on" v-bind="attrs" icon color="info" @click="edit(item)"><v-icon>mdi-calendar-edit</v-icon></v-btn>
 					</template>
 				</v-tooltip>
-				<v-menu :close-on-content-click="false">
+				<v-menu :close-on-content-click="false" v-if="role === 'Dentist'">
 					<template #activator="{on: onMenu}">
 						<v-tooltip bottom>
 							Remove appointment
@@ -134,33 +134,51 @@ export default class AppointmentList extends Vue {
 		{
 			text: 'Actions',
 			value: 'actions',
-			width: 110,
+			width: this.role === 'Dentist' ? 110 : null,
 		},
 	];
 
 	get filteredAppointments() {
-		return this.appointments.filter(a => !this.activeOnly || !a.canceled);
+		if (this.role === 'Patient') {
+			return this.$store.getters['patient/appointments'].filter(a => !this.activeOnly || !a.canceled);
+		} else {
+			return this.appointments.filter(a => !this.activeOnly || !a.canceled);
+		}
+	}
+
+	get role() {
+		return this.$store.getters['auth/userRole'];
 	}
 
 	async mounted() {
 		await this.refreshData();
+		if (this.role === 'Patient') {
+			this.headers.splice(2, 0, {
+				text: 'Dentist',
+				value: 'dentistName',
+			},)
+		}
 	}
 
 	@Emit('refreshData')
 	async refreshData() {
-		if (!this.patientId) {
-			this.appointments = [];
-			return;
+		if (this.role === 'Patient') {
+			this.$store.dispatch('patient/updateAppointments');
 		}
-
-		let initData: RequestInit = {
-			method: 'GET',
-			headers: {
-				'Authorization': `Bearer ${this.$store.getters['auth/token']}`,
+		if (this.role === 'Dentist') {
+			this.$store.dispatch('dentist/updateAppointments');
+			if (!this.patientId) {
+				this.appointments = [];
+				return;
 			}
+			let initData: RequestInit = {
+				method: 'GET',
+				headers: {
+					'Authorization': `Bearer ${this.$store.getters['auth/token']}`,
+				}
+			}
+			this.appointments = await fetch(`${process.env.APIURL}/Dentist/Appointments/Patient/${this.patientId}`, initData).then(response => response.json());
 		}
-		this.appointments = await fetch(`${process.env.APIURL}/Dentist/Appointments/Patient/${this.patientId}`, initData).then(response => response.json());
-		this.$store.dispatch('dentist/updateAppointments');
 	}
 
 	edit(appointment: Appointment) {
@@ -180,7 +198,7 @@ export default class AppointmentList extends Vue {
 				canceled: cancel,
 			})
 		}
-		await fetch(`${process.env.APIURL}/Dentist/Appointment`, initData);
+		await fetch(`${process.env.APIURL}/${this.role}/Appointment`, initData);
 		await this.refreshData();
 	}
 

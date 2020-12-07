@@ -5,6 +5,7 @@ export default interface Appointment {
 	duration: string | null;
 	canceled: boolean | null;
 	dentistId: number | null;
+	dentistName: string | null;
 	patientId: number | null;
 	patientName: string | null;
 	serviceId: number | null;

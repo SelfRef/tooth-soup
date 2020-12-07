@@ -22,7 +22,7 @@
 							@click:append-outer="pushData"
 						/>
 						<v-select
-							:items="$store.getters['patient/dentists']"
+							:items="$store.getters['patient/dentists'].filter(d => d.canLink)"
 							:item-text="d => d.name"
 							:item-value="d => d.id"
 							label="Linked dentist"

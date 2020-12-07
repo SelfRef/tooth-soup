@@ -27,9 +27,20 @@ export default class AppointmentCalendar extends Vue {
 	@Ref() calendar;
 	private ready: boolean = false;
 
+	get role() {
+		return this.$store.getters['auth/userRole'];
+	}
+
 	get items() {
-		return this.$store.getters['dentist/appointments'].map(a => ({
-			name: a.serviceName,
+		let appointments;
+		if (this.role === 'Patient') {
+			appointments = this.$store.getters['patient/appointments'];
+		} else if (this.role === 'Dentist') {
+			appointments = this.$store.getters['dentist/appointments'];
+		}
+		if (!appointments) return [];
+		return appointments.map(a => ({
+			name: this.eventName(a),
 			start: this.formatDate(a.startDate),
 			end: this.formatDate(a.endDate),
 			color: a.canceled ? 'error' : 'primary',
@@ -63,11 +74,26 @@ export default class AppointmentCalendar extends Vue {
 	}
 
 	async refreshData() {
-		this.$store.dispatch('dentist/updateAppointments');
+		if (this.role === 'Patient') {
+			this.$store.dispatch('patient/updateAppointments');
+		} else if (this.role === 'Patient') {
+			this.$store.dispatch('dentist/updateAppointments');
+		}
 	}
 
 	formatDate(dateIso: string) {
 		return dateIso.substr(0, 16).replace('T', ' ');
+	}
+
+	eventName(appointment: Appointment) {
+		if (appointment.serviceName) {
+			let name;
+			if (this.role === 'Patient') name = appointment.dentistName;
+			else if (this.role === 'Dentist') name = appointment.patientName;
+			return `${appointment.serviceName} (${name})`;
+		} else {
+			return 'Busy';
+		}
 	}
 }
 </script>

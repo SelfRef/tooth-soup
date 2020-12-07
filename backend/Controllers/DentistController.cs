@@ -28,14 +28,19 @@ namespace ToothSoupAPI.Controllers
 		[HttpGet("Patients")]
 		public async Task<ActionResult<IEnumerable<PatientResult>>> GetPatients()
 		{
-			var id = GetDentistId();
-			if (!id.HasValue) return Unauthorized();
+			var userId = GetUserId();
+			if (!userId.HasValue) return Unauthorized();
 
 			bool unlinked = Request.Query.ContainsKey("unlinked");
 			string filter = Request.Query["filter"].FirstOrDefault()?.ToLower();
 
+			var dentist = await _db.Dentists.FirstOrDefaultAsync(d => d.UserId == userId);
+			if (dentist == null) return NotFound("Dentist");
+			int? dentistId = dentist.Id;
+			if (unlinked) dentistId = null;
+
 			return await _db.Patients
-				.Where(p => p.DentistId == (unlinked ? null : id))
+				.Where(p => p.DentistId == dentistId)
 				.Where(p => $"{p.Pesel} {p.User.FirstName} {p.User.LastName} {p.User.Email}".ToLower().Contains(filter ?? string.Empty))
 				.Select(p => new PatientResult {
 					Id = p.Id,
@@ -51,8 +56,11 @@ namespace ToothSoupAPI.Controllers
 		[HttpGet("Patient/{id}")]
 		public async Task<ActionResult<PatientResult>> GetPatient(int id)
 		{
-			var dentistId = GetDentistId();
-			if (!dentistId.HasValue) return Unauthorized();
+			var userId = GetUserId();
+			if (!userId.HasValue) return Unauthorized();
+
+			var dentist = await _db.Dentists.FirstOrDefaultAsync(d => d.UserId == userId);
+			if (dentist == null) return NotFound("Dentist");
 
 			var patient = await _db.Patients
 				.Where(p => p.Id == id)
@@ -68,7 +76,7 @@ namespace ToothSoupAPI.Controllers
 				}).FirstOrDefaultAsync();
 
 			if (patient == null) return NotFound();
-			if (patient.DentistId != dentistId) return Unauthorized("Patient is not linked to you");
+			if (patient.DentistId != dentist.Id) return Unauthorized("Patient is not linked to you");
 
 			return patient;
 		}
@@ -76,8 +84,8 @@ namespace ToothSoupAPI.Controllers
 		[HttpGet("Patient/{id}/Link")]
 		public async Task<ActionResult<PatientResult>> LinkPatient(int id)
 		{
-			var dentistId = GetDentistId();
-			if (!dentistId.HasValue) return Unauthorized();
+			var userId = GetUserId();
+			if (!userId.HasValue) return Unauthorized();
 
 			var patient = await _db.Patients
 				.Where(p => p.Id == id)
@@ -86,7 +94,10 @@ namespace ToothSoupAPI.Controllers
 			if (patient == null) return NotFound();
 			if (patient.DentistId != null) return Unauthorized("Patient is already linked");
 
-			patient.DentistId = dentistId;
+			var dentist = await _db.Dentists.FirstOrDefaultAsync(d => d.UserId == userId);
+			if (dentist == null) return NotFound("Dentist");
+
+			patient.DentistId = dentist.Id;
 			await _db.SaveChangesAsync();
 
 			return new PatientResult
@@ -104,15 +115,18 @@ namespace ToothSoupAPI.Controllers
 		[HttpGet("Patient/{id}/Unlink")]
 		public async Task<ActionResult<PatientResult>> UninkPatient(int id)
 		{
-			var dentistId = GetDentistId();
-			if (!dentistId.HasValue) return Unauthorized();
+			var userId = GetUserId();
+			if (!userId.HasValue) return Unauthorized();
 
 			var patient = await _db.Patients
 				.Where(p => p.Id == id)
 				.FirstOrDefaultAsync();
 
+			var dentist = await _db.Dentists.FirstOrDefaultAsync(d => d.UserId == userId);
+			if (dentist == null) return NotFound("Dentist");
+
 			if (patient == null) return NotFound();
-			if (patient.DentistId != dentistId) return Unauthorized("Patient is not linked to you");
+			if (patient.DentistId != dentist.Id) return Unauthorized("Patient is not linked to you");
 
 			patient.DentistId = null;
 			await _db.SaveChangesAsync();
@@ -132,8 +146,8 @@ namespace ToothSoupAPI.Controllers
 		[HttpPost("Patient")]
 		public async Task<ActionResult<PatientResult>> CreatePatient(PatientRequest patient)
 		{
-			var id = GetDentistId();
-			if (!id.HasValue) return Unauthorized();
+			var userId = GetUserId();
+			if (!userId.HasValue) return Unauthorized();
 
 			var newUser = new User {
 				Email = patient.Email,
@@ -142,32 +156,38 @@ namespace ToothSoupAPI.Controllers
 				LastName = patient.LastName,
 				Role = UserRole.PATIENT,
 			};
+
+			var dentist = await _db.Dentists.FirstOrDefaultAsync(d => d.UserId == userId);
+			if (dentist == null) return NotFound("Dentist");
 			
 			var newPatient = new Patient {
 				Pesel = patient.Pesel,
 				BirthDate = patient.BirthDate,
 				User = newUser,
-				DentistId = id.Value,
+				DentistId = dentist.Id,
 			};
 
 			await _db.Patients.AddAsync(newPatient);
 			await _db.SaveChangesAsync();
 
-			return CreatedAtAction(nameof(GetPatient), new { newPatient.Id }, newPatient);
+			return CreatedAtAction(nameof(GetPatient), new { newPatient.Id }, null);
 		}
 
 		[HttpPut("Patient")]
 		public async Task<ActionResult<PatientResult>> UpdatePatient(PatientRequest patient)
 		{
-			var dentistId = GetDentistId();
-			if (!dentistId.HasValue) return Unauthorized();
+			var userId = GetUserId();
+			if (!userId.HasValue) return Unauthorized();
 
 			var newPatient = await _db.Patients
 				.Where(p => p.Id == patient.Id)
 				.FirstOrDefaultAsync();
 
+			var dentist = await _db.Dentists.FirstOrDefaultAsync(d => d.UserId == userId);
+			if (dentist == null) return NotFound("Dentist");
+
 			if (newPatient == null) return NotFound();
-			if (newPatient.DentistId != dentistId) return Unauthorized("Patient is not linked to you");
+			if (newPatient.DentistId != dentist.Id) return Unauthorized("Patient is not linked to you");
 
 			if (!patient.Email.IsNullOrEmpty()) newPatient.User.Email = patient.Email;
 			if (!patient.Password.IsNullOrEmpty()) newPatient.User.Password = patient.Password;
@@ -178,13 +198,13 @@ namespace ToothSoupAPI.Controllers
 
 			await _db.SaveChangesAsync();
 
-			return CreatedAtAction(nameof(GetPatient), new { newPatient.Id }, newPatient);
+			return CreatedAtAction(nameof(GetPatient), new { newPatient.Id }, null);
 		}
 
 		[HttpDelete("Patient/{id}")]
 		public async Task<ActionResult<int>> DeletePatient(int id) {
-			var dentistId = GetDentistId();
-			if (!dentistId.HasValue) return Unauthorized();
+			var userId = GetUserId();
+			if (!userId.HasValue) return Unauthorized();
 
 			var patient = await _db.Patients.FindAsync(id);
 			if (patient == null) return NotFound();
@@ -197,11 +217,14 @@ namespace ToothSoupAPI.Controllers
 		[HttpGet("Appointments")]
 		public async Task<ActionResult<IEnumerable<AppointmentResponse>>> GetAppointments()
 		{
-			var dentistId = GetDentistId();
-			if (!dentistId.HasValue) return Unauthorized();
+			var userId = GetUserId();
+			if (!userId.HasValue) return Unauthorized();
+
+			var dentist = await _db.Dentists.FirstOrDefaultAsync(d => d.UserId == userId);
+			if (dentist == null) return NotFound("Dentist");
 
 			var appointments = await _db.Appointments
-				.Where(a => a.DentistId == dentistId)
+				.Where(a => a.DentistId == dentist.Id)
 				.Select(a => new AppointmentResponse {
 					Id = a.Id,
 					StartDate = a.StartDate,
@@ -220,11 +243,14 @@ namespace ToothSoupAPI.Controllers
 		[HttpGet("Appointments/Patient/{id}")]
 		public async Task<ActionResult<IEnumerable<AppointmentResponse>>> GetAppointmentsForPatient(int id)
 		{
-			var dentistId = GetDentistId();
-			if (!dentistId.HasValue) return Unauthorized();
+			var userId = GetUserId();
+			if (!userId.HasValue) return Unauthorized();
+
+			var dentist = await _db.Dentists.FirstOrDefaultAsync(d => d.UserId == userId);
+			if (dentist == null) return NotFound("Dentist");
 
 			var appointments = await _db.Appointments
-				.Where(a => a.DentistId == dentistId && a.PatientId == id)
+				.Where(a => a.DentistId == dentist.Id && a.PatientId == id)
 				.Select(a => new AppointmentResponse
 				{
 					Id = a.Id,
@@ -244,11 +270,14 @@ namespace ToothSoupAPI.Controllers
 		[HttpGet("Appointment/{id}")]
 		public async Task<ActionResult<AppointmentResponse>> GetAppointment(int id)
 		{
-			var dentistId = GetDentistId();
-			if (!dentistId.HasValue) return Unauthorized();
+			var userId = GetUserId();
+			if (!userId.HasValue) return Unauthorized();
+
+			var dentist = await _db.Dentists.FirstOrDefaultAsync(d => d.UserId == userId);
+			if (dentist == null) return NotFound("Dentist");
 
 			var appointment = await _db.Appointments
-				.Where(a => a.DentistId == dentistId && a.Id == id)
+				.Where(a => a.DentistId == dentist.Id && a.Id == id)
 				.Select(a => new AppointmentResponse
 				{
 					Id = a.Id,
@@ -269,24 +298,30 @@ namespace ToothSoupAPI.Controllers
 		[HttpPost("Appointment")]
 		public async Task<ActionResult<Appointment>> PostAppointment(Appointment appointment)
 		{
-			var dentistId = GetDentistId();
-			if (!dentistId.HasValue) return Unauthorized();
+			var userId = GetUserId();
+			if (!userId.HasValue) return Unauthorized();
 
-			appointment.DentistId = dentistId.Value;
+			var dentist = await _db.Dentists.FirstOrDefaultAsync(d => d.UserId == userId);
+			if (dentist == null) return NotFound("Dentist");
+
+			appointment.DentistId = dentist.Id;
 			await _db.Appointments.AddAsync(appointment);
 			await _db.SaveChangesAsync();
 
-			return CreatedAtAction(nameof(GetAppointment), new { appointment.Id }, appointment);
+			return CreatedAtAction(nameof(GetAppointment), new { appointment.Id }, null);
 		}
 
 		[HttpPut("Appointment")]
 		public async Task<ActionResult<Appointment>> PutAppointment(AppointmentRequest newAppointment)
 		{
-			var dentistId = GetDentistId();
-			if (!dentistId.HasValue) return Unauthorized();
+			var userId = GetUserId();
+			if (!userId.HasValue) return Unauthorized();
+
+			var dentist = await _db.Dentists.FirstOrDefaultAsync(d => d.UserId == userId);
+			if (dentist == null) return NotFound("Dentist");
 
 			var appointment = await _db.Appointments
-				.Where(a => a.DentistId == dentistId && a.Id == newAppointment.Id)
+				.Where(a => a.DentistId == dentist.Id && a.Id == newAppointment.Id)
 				.FirstOrDefaultAsync();
 			if (appointment == null) return NotFound();
 			if (newAppointment.StartDate.HasValue) appointment.StartDate = newAppointment.StartDate.Value;
@@ -295,17 +330,20 @@ namespace ToothSoupAPI.Controllers
 			
 			await _db.SaveChangesAsync();
 
-			return CreatedAtAction(nameof(GetAppointment), new { appointment.Id }, appointment);
+			return CreatedAtAction(nameof(GetAppointment), new { appointment.Id }, null);
 		}
 
 		[HttpDelete("Appointment/{id}")]
 		public async Task<ActionResult> DeleteAppointment(int id)
 		{
-			var dentistId = GetDentistId();
-			if (!dentistId.HasValue) return Unauthorized();
+			var userId = GetUserId();
+			if (!userId.HasValue) return Unauthorized();
+
+			var dentist = await _db.Dentists.FirstOrDefaultAsync(d => d.UserId == userId);
+			if (dentist == null) return NotFound("Dentist");
 
 			var appointment = await _db.Appointments
-				.Where(a => a.DentistId == dentistId && a.Id == id)
+				.Where(a => a.DentistId == dentist.Id && a.Id == id)
 				.FirstOrDefaultAsync();
 			if (appointment == null) return NotFound();
 
@@ -318,8 +356,8 @@ namespace ToothSoupAPI.Controllers
 		[HttpGet("Services")]
 		public async Task<ActionResult<IEnumerable<ServiceResponse>>> GetServices()
 		{
-			var dentistId = GetDentistId();
-			if (!dentistId.HasValue) return Unauthorized();
+			var userId = GetUserId();
+			if (!userId.HasValue) return Unauthorized();
 
 			var services = await _db.Services
 				.Where(s => !s.Deleted)
@@ -336,8 +374,8 @@ namespace ToothSoupAPI.Controllers
 		[HttpGet("Services/{id}")]
 		public async Task<ActionResult<ServiceResponse>> GetService(int id)
 		{
-			var dentistId = GetDentistId();
-			if (!dentistId.HasValue) return Unauthorized();
+			var userId = GetUserId();
+			if (!userId.HasValue) return Unauthorized();
 
 			var service = await _db.Services
 				.Where(s => !s.Deleted)
@@ -357,20 +395,20 @@ namespace ToothSoupAPI.Controllers
 		[HttpPost("Services")]
 		public async Task<ActionResult<Service>> CreateService(Service service)
 		{
-			var dentistId = GetDentistId();
-			if (!dentistId.HasValue) return Unauthorized();
+			var userId = GetUserId();
+			if (!userId.HasValue) return Unauthorized();
 
 			await _db.Services.AddAsync(service);
 			await _db.SaveChangesAsync();
 
-			return CreatedAtAction(nameof(GetService), new { service.Id }, service);
+			return CreatedAtAction(nameof(GetService), new { service.Id }, null);
 		}
 
 		[HttpPut("Services")]
 		public async Task<ActionResult<Service>> UpdateService(Service newService)
 		{
-			var dentistId = GetDentistId();
-			if (!dentistId.HasValue) return Unauthorized();
+			var userId = GetUserId();
+			if (!userId.HasValue) return Unauthorized();
 
 			var service = await _db.Services
 				.FirstOrDefaultAsync(s => s.Id == newService.Id);
@@ -380,14 +418,14 @@ namespace ToothSoupAPI.Controllers
 			service.Price = newService.Price;
 			await _db.SaveChangesAsync();
 
-			return CreatedAtAction(nameof(GetService), new { service.Id }, service);
+			return CreatedAtAction(nameof(GetService), new { service.Id }, null);
 		}
 
 		[HttpDelete("Services/{id}")]
 		public async Task<ActionResult> DeleteService(int id)
 		{
-			var dentistId = GetDentistId();
-			if (!dentistId.HasValue) return Unauthorized();
+			var userId = GetUserId();
+			if (!userId.HasValue) return Unauthorized();
 
 			var service = await _db.Services
 				.Where(s => !s.Deleted)
@@ -400,7 +438,7 @@ namespace ToothSoupAPI.Controllers
 			return Ok();
 		}
 
-		private int? GetDentistId()
+		private int? GetUserId()
 		{
 			var isDentist = HttpContext.User.HasClaim(c => c.Type == ClaimTypes.Role && c.Value == UserRole.DENTIST);
 			if (!isDentist) return null;

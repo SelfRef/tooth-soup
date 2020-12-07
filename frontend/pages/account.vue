@@ -16,7 +16,7 @@ import AccountInfo from '~/components/AccountInfo.vue';
 		AccountInfo,
 	}
 })
-export default class account extends Vue {
+export default class Account extends Vue {
 
 }
 </script>

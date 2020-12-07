@@ -4,7 +4,7 @@
 			v-if="active"
 			v-model="active"
 			persistent
-			max-width="600px"
+			max-width="1000px"
 		>
 			<v-form ref="form">
 				<v-card>
@@ -13,131 +13,149 @@
 					</v-card-title>
 					<v-card-text>
 						<v-container>
-							<v-row v-if="!dentistId">
-								<v-col cols="12">
-									<v-select
-										:items="dentists"
-										:item-text="u => `${u.firstName} ${u.lastName}`"
-										item-value="id"
-										v-model="appointment.dentistId"
-										prepend-icon="mdi-account"
-										label="Dentist"
-									></v-select>
-								</v-col>
-							</v-row>
 							<v-row>
-								<v-col cols="12">
-									<v-select
-										:items="patients"
-										:item-text="u => `(${u.pesel}) ${u.firstName} ${u.lastName}`"
-										item-value="id"
-										v-model="appointment.patientId"
-										prepend-icon="mdi-account"
-										label="Patient"
-									></v-select>
-								</v-col>
-							</v-row>
-							<v-row>
-								<v-col cols="12">
-									<v-select
-										:items="services"
-										:item-text="u => `${u.name} - ${u.price}zł`"
-										item-value="id"
-										v-model="appointment.serviceId"
-										prepend-icon="mdi-puzzle"
-										label="Service"
-										:rules="[rules.required]"
-									></v-select>
-								</v-col>
-							</v-row>
-							<v-row>
-								<v-col cols="12">
-									<v-menu
-										v-model="datePickerActive"
-										ref="datePicker"
-										:close-on-content-click="false"
-									>
-										<template v-slot:activator="{ on, attrs }">
-											<v-text-field
-												v-model="date"
-												label="Date"
-												persistent-hint
-												prepend-icon="mdi-calendar"
-												v-bind="attrs"
-												v-on="on"
-												:required="!Boolean(edit)"
+								<v-col>
+									<v-row v-if="role === 'Patient'">
+										<v-col cols="12">
+											<v-select
+												:items="dentists.filter(d => d.canCreateAppointment)"
+												:item-text="u => `${u.firstName} ${u.lastName}`"
+												item-value="id"
+												v-model="appointment.dentistId"
+												prepend-icon="mdi-account"
+												label="Dentist"
+												:readonly="role === 'Patient' && edit"
+											></v-select>
+										</v-col>
+									</v-row>
+									<v-row v-if="role === 'Dentist'">
+										<v-col cols="12">
+											<v-select
+												:items="patients"
+												:item-text="u => `(${u.pesel}) ${u.firstName} ${u.lastName}`"
+												item-value="id"
+												v-model="appointment.patientId"
+												prepend-icon="mdi-account"
+												label="Patient"
+											></v-select>
+										</v-col>
+									</v-row>
+									<v-row>
+										<v-col cols="12">
+											<v-select
+												:items="services"
+												:item-text="u => `${u.name} - ${u.price}zł`"
+												item-value="id"
+												v-model="appointment.serviceId"
+												prepend-icon="mdi-puzzle"
+												label="Service"
 												:rules="[rules.required]"
-											></v-text-field>
-										</template>
-										<v-date-picker
-											v-model="date"
-											no-title
-											@change="$refs.datePicker.save(date)"
-										></v-date-picker>
-									</v-menu>
-								</v-col>
-								<v-col cols="12" sm="4">
-									<v-menu
-										v-model="timeStartPickerActive"
-										ref="timeStartPicker"
-										:close-on-content-click="false"
-									>
-										<template v-slot:activator="{ on, attrs }">
+											></v-select>
+										</v-col>
+									</v-row>
+									<v-row>
+										<v-col cols="12">
+											<v-menu
+												v-model="datePickerActive"
+												ref="datePicker"
+												:close-on-content-click="false"
+											>
+												<template v-slot:activator="{ on, attrs }">
+													<v-text-field
+														v-model="date"
+														label="Date"
+														persistent-hint
+														prepend-icon="mdi-calendar"
+														v-bind="attrs"
+														v-on="on"
+														:required="!Boolean(edit)"
+														:rules="[rules.required]"
+													></v-text-field>
+												</template>
+												<v-date-picker
+													v-model="date"
+													:min="new Date().toISOString().substr(0, 10)"
+													no-title
+													@change="$refs.datePicker.save(date)"
+												></v-date-picker>
+											</v-menu>
+										</v-col>
+										<v-col cols="12" sm="4">
+											<v-menu
+												v-model="timeStartPickerActive"
+												ref="timeStartPicker"
+												:close-on-content-click="false"
+											>
+												<template v-slot:activator="{ on, attrs }">
+													<v-text-field
+														v-model="timeStart"
+														label="Time Start"
+														persistent-hint
+														prepend-icon="mdi-calendar"
+														v-bind="attrs"
+														v-on="on"
+														:required="!Boolean(edit)"
+														:rules="[rules.required]"
+													></v-text-field>
+												</template>
+												<v-time-picker
+													v-if="timeStartPickerActive"
+													v-model="timeStart"
+													@click:minute="$refs.timeStartPicker.save(timeStart)"
+													:max="timeEnd"
+													format="24hr"
+												></v-time-picker>
+											</v-menu>
+										</v-col>
+										<v-col cols="12" sm="4">
+											<v-menu
+												v-model="timeEndPickerActive"
+												ref="timeEndPicker"
+												:close-on-content-click="false"
+											>
+												<template v-slot:activator="{ on, attrs }">
+													<v-text-field
+														v-model="timeEnd"
+														label="Time End"
+														persistent-hint
+														prepend-icon="mdi-calendar"
+														v-bind="attrs"
+														v-on="on"
+														:required="!Boolean(edit)"
+														:rules="[rules.required]"
+													></v-text-field>
+												</template>
+												<v-time-picker
+													v-if="timeEndPickerActive"
+													v-model="timeEnd"
+													@click:minute="$refs.timeEndPicker.save(timeEnd)"
+													:min="timeStart"
+													format="24hr"
+												></v-time-picker>
+											</v-menu>
+										</v-col>
+										<v-col cols="12" sm="4">
 											<v-text-field
-												v-model="timeStart"
-												label="Time Start"
-												persistent-hint
-												prepend-icon="mdi-calendar"
-												v-bind="attrs"
-												v-on="on"
+												label="Duration"
 												:required="!Boolean(edit)"
-												:rules="[rules.required]"
+												v-model="duration"
+												prepend-icon="mdi-card-account-details"
+												readonly
 											></v-text-field>
-										</template>
-										<v-time-picker
-											v-if="timeStartPickerActive"
-											v-model="timeStart"
-											@click:minute="$refs.timeStartPicker.save(timeStart)"
-											:max="timeEnd"
-											format="24hr"
-										></v-time-picker>
-									</v-menu>
+										</v-col>
+									</v-row>
 								</v-col>
-								<v-col cols="12" sm="4">
-									<v-menu
-										v-model="timeEndPickerActive"
-										ref="timeEndPicker"
-										:close-on-content-click="false"
-									>
-										<template v-slot:activator="{ on, attrs }">
-											<v-text-field
-												v-model="timeEnd"
-												label="Time End"
-												persistent-hint
-												prepend-icon="mdi-calendar"
-												v-bind="attrs"
-												v-on="on"
-												:required="!Boolean(edit)"
-												:rules="[rules.required]"
-											></v-text-field>
-										</template>
-										<v-time-picker
-											v-if="timeEndPickerActive"
-											v-model="timeEnd"
-											@click:minute="$refs.timeEndPicker.save(timeEnd)"
-											:min="timeStart"
-											format="24hr"
-										></v-time-picker>
-									</v-menu>
-								</v-col>
-								<v-col cols="12" sm="4">
-									<v-text-field
-										label="Duration"
-										:required="!Boolean(edit)"
-										v-model="duration"
-										prepend-icon="mdi-card-account-details"
-										readonly
-									></v-text-field>
+								<v-col>
+									<v-sheet height="400">
+										<v-calendar
+											type="day"
+											hide-header
+											:value="date"
+											:events="items"
+											:event-color="e => e.color"
+											:event-name="getName"
+										/>
+									</v-sheet>
 								</v-col>
 							</v-row>
 						</v-container>
@@ -181,6 +199,7 @@ export default class AppointmentForm extends Vue {
 	private dentists: Dentist[] = []
 	private patients: Patient[] = []
 	private services: Service[] = []
+	private dentistAppointments: Appointment[] = []
 	private datePickerActive = false;
 	private timeStartPickerActive = false;
 	private timeEndPickerActive = false;
@@ -190,6 +209,7 @@ export default class AppointmentForm extends Vue {
 	private duration: string = '';
 	private appointment: Appointment = {
 		dentistId: null,
+		dentistName: null,
 		patientId: null,
 		patientName: null,
 		serviceId: null,
@@ -203,8 +223,39 @@ export default class AppointmentForm extends Vue {
 		required: (v: string) => this.edit || Boolean(v) || 'Required',
 	};
 
+	get items() {
+		const appointments = this.dentistAppointments.map(a => ({
+			name: this.eventName(a),
+			start: this.formatDate(a.startDate),
+			end: this.formatDate(a.endDate),
+			color: !a.serviceName ? 'secondary' : (a.canceled ? 'error' : 'primary'),
+			canceled: a.canceled,
+		}));
+
+		if (this.date && this.timeStart && this.timeEnd) {
+			appointments.push({
+				name: 'New appointment',
+				start: `${this.date} ${this.timeStart}`,
+				end: `${this.date} ${this.timeEnd}`,
+				color: 'success',
+				canceled: false,
+			})
+		}
+
+		return appointments;
+	}
+
+	getName(item) {
+		if (item.input.canceled) return `❌ ${item.input.name}`;
+		return item.input.name
+	}
+
 	mounted() {
-		this.refreshPatients();
+		if (this.role === 'Dentist') this.refreshPatients();
+		if (this.role === 'Patient') {
+			this.refreshDentists();
+			this.$store.dispatch('patient/updateAccount');
+		}
 		this.refreshServices();
 	}
 
@@ -225,13 +276,19 @@ export default class AppointmentForm extends Vue {
 					'Content-Type': 'application/json'
 				}
 		}
-		await fetch(`${process.env.APIURL}/Dentist/Appointment`, fetchOptions);
+		await fetch(`${process.env.APIURL}/${this.role}/Appointment`, fetchOptions);
+		this.form.reset();
 		this.close();
 	}
 
 	setUserIds() {
-		this.appointment.dentistId = this.dentistId;
-		this.appointment.patientId = this.patientId;
+		if (this.role === 'Patient') {
+			this.appointment.dentistId = this.account?.dentistId;
+			this.appointment.patientId = this.id;
+		} else if (this.role === 'Dentist') {
+			this.appointment.dentistId = this.dentistId;
+			this.appointment.patientId = this.patientId;
+		}
 	}
 
 	get edit() {
@@ -242,13 +299,17 @@ export default class AppointmentForm extends Vue {
 		return this.$store.getters['auth/userRole'];
 	}
 
+	get account() {
+		return this.$store.getters['patient/account'];
+	}
+
 	get id() {
 		return this.$store.getters['auth/userId'];
 	}
 
 	get dentistId() {
 		if (this.role === 'Dentist') return this.id;
-		else return null;
+		else return this.appointment.dentistId;
 	}
 
 	get patientId() {
@@ -260,6 +321,7 @@ export default class AppointmentForm extends Vue {
 	onDialogShow(active: boolean) {
 		this.appointment = this.item && active ? {...this.item} : {
 			dentistId: null,
+			dentistName: null,
 			patientId: null,
 			patientName: null,
 			serviceId: null,
@@ -269,7 +331,9 @@ export default class AppointmentForm extends Vue {
 			duration: null,
 			canceled: false,
 		}
+		if (active && !this.item) this.date = new Date().toISOString().substr(0, 10);
 		this.setUserIds();
+		this.updateAppointments()
 	}
 
 	@Watch('item')
@@ -279,7 +343,7 @@ export default class AppointmentForm extends Vue {
 			this.timeStart = item.startDate?.substr(11, 5) ?? '';
 			this.timeEnd = item.endDate?.substr(11, 5) ?? '';
 		} else {
-			this.date = '';
+			this.date = new Date().toISOString().substr(0, 10);
 			this.timeStart = '';
 			this.timeEnd = '';
 			this.duration = '';
@@ -291,10 +355,10 @@ export default class AppointmentForm extends Vue {
 	@Watch('timeEnd')
 	calcDate() {
 		if (this.date && this.timeStart) {
-			this.appointment.startDate = new Date(`${this.date} ${this.timeStart}`).toISOString();
+			this.appointment.startDate = new Date(`${this.date}T${this.timeStart}Z`).toISOString();
 		}
 		if (this.date && this.timeEnd) {
-			this.appointment.endDate = new Date(`${this.date} ${this.timeEnd}`).toISOString();
+			this.appointment.endDate = new Date(`${this.date}T${this.timeEnd}Z`).toISOString();
 		}
 		if (this.timeStart && this.timeEnd) {
 			const [timeStartHours, timeStartMinutes] = this.timeStart.split(':')
@@ -311,6 +375,24 @@ export default class AppointmentForm extends Vue {
 		}
 	}
 
+	@Watch('date')
+	@Watch('dentistId')
+	async updateAppointments() {
+		if (this.date && this.dentistId) {
+			if (this.role === 'Patient') {
+				let initData: RequestInit = {
+					method: 'GET',
+					headers: {
+						'Authorization': `Bearer ${this.$store.getters['auth/token']}`,
+					}
+				}
+				this.dentistAppointments = await fetch(`${process.env.APIURL}/Patient/Appointments/Dentist/${this.dentistId}/${this.date}`, initData).then(response => response.json());
+			} else if (this.role === 'Dentist') {
+				this.dentistAppointments = this.$store.getters['dentist/appointments'];
+			}
+		}
+	}
+
 	async refreshServices() {
 		let initData: RequestInit = {
 			method: 'GET',
@@ -318,7 +400,7 @@ export default class AppointmentForm extends Vue {
 				'Authorization': `Bearer ${this.$store.getters['auth/token']}`,
 			}
 		}
-		this.services = await fetch(`${process.env.APIURL}/Dentist/Services`, initData).then(response => response.json());
+		this.services = await fetch(`${process.env.APIURL}/${this.role}/Services`, initData).then(response => response.json());
 	}
 
 	async refreshPatients() {
@@ -329,6 +411,31 @@ export default class AppointmentForm extends Vue {
 			}
 		}
 		this.patients = await fetch(`${process.env.APIURL}/Dentist/Patients`, initData).then(response => response.json());
+	}
+
+	async refreshDentists() {
+		let initData: RequestInit = {
+			method: 'GET',
+			headers: {
+				'Authorization': `Bearer ${this.$store.getters['auth/token']}`,
+			}
+		}
+		this.dentists = await fetch(`${process.env.APIURL}/Patient/Dentists`, initData).then(response => response.json());
+	}
+
+	formatDate(dateIso: string) {
+		return dateIso.substr(0, 16).replace('T', ' ');
+	}
+
+	eventName(appointment: Appointment) {
+		if (appointment.serviceName) {
+			let name;
+			if (this.role === 'Patient') name = appointment.dentistName;
+			else if (this.role === 'Dentist') name = appointment.patientName;
+			return `${appointment.serviceName} (${name})`;
+		} else {
+			return 'Busy';
+		}
 	}
 }
 </script>
