@@ -25,6 +25,47 @@ namespace ToothSoupAPI.Controllers
 			_db = database;
 		}
 
+		[HttpGet("Me")]
+		public async Task<ActionResult<DentistResult>> GetMyInfo()
+		{
+			var userId = GetUserId();
+			if (!userId.HasValue) return Unauthorized();
+
+			var dentist = await _db.Dentists
+				.Where(p => p.UserId == userId)
+				.Select(p => new DentistResult {
+					FirstName = p.User.FirstName,
+					LastName = p.User.LastName,
+					Email = p.User.Email,
+					CanLink = !p.PreventPatientLinking,
+					CanCreateAppointment = !p.PreventUnlinkedPatient
+				})
+				.SingleOrDefaultAsync();
+			if (dentist == null) return NotFound();
+
+			return dentist;
+		}
+
+		[HttpPut("Me")]
+		public async Task<ActionResult<DentistResult>> Put(DentistUpdate newUser)
+		{
+			var userId = GetUserId();
+			if (!userId.HasValue) return Unauthorized();
+			
+			var user = await _db.Users.FindAsync(userId);
+			if (user == null) return NotFound("User");
+			if (!newUser.Email.IsNullOrEmpty()) user.Email = newUser.Email;
+			if (!newUser.Password.IsNullOrEmpty()) user.Password = newUser.Password;
+
+			var dentist = await _db.Dentists.FirstOrDefaultAsync(d => d.UserId == userId);
+			if (dentist == null) return NotFound("Dentist");
+			if (newUser.CanLink.HasValue) dentist.PreventPatientLinking = !newUser.CanLink.Value;
+			if (newUser.CanCreateAppointment.HasValue) dentist.PreventUnlinkedPatient = !newUser.CanCreateAppointment.Value;
+
+			await _db.SaveChangesAsync();
+			return CreatedAtAction(nameof(GetMyInfo), GetMyInfo().Result.Value);
+		}
+
 		[HttpGet("Patients")]
 		public async Task<ActionResult<IEnumerable<PatientResult>>> GetPatients()
 		{

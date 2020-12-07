@@ -73,7 +73,7 @@ namespace ToothSoupAPI.Controllers
 			}
 
 			await _db.SaveChangesAsync();
-			return CreatedAtAction(nameof(GetMyInfo), null);
+			return CreatedAtAction(nameof(GetMyInfo), GetMyInfo().Result.Value);
 		}
 
 		[HttpGet("Dentists")]
