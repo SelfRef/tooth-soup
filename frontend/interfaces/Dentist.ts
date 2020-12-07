@@ -4,4 +4,5 @@ export default interface Dentist {
 	id: number;
 	firstName: string;
 	lastName: string;
+	name: string;
 }

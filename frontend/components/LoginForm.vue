@@ -10,26 +10,28 @@
 					<span class="headline">User Login</span>
 				</v-card-title>
 				<v-card-text>
-					<v-container>
-						<v-row>
-							<v-col cols="12">
-								<v-text-field
-									v-model="loginData.email"
-									label="Email*"
-									required
-								></v-text-field>
-							</v-col>
-							<v-col cols="12">
-								<v-text-field
-									v-model="loginData.password"
-									label="Password*"
-									type="password"
-									required
-								></v-text-field>
-							</v-col>
-						</v-row>
-					</v-container>
-					<small>*indicates required field</small>
+					<v-form @keypress.native.enter="login">
+						<v-container>
+							<v-row>
+								<v-col cols="12">
+									<v-text-field
+										v-model="loginData.email"
+										label="Email*"
+										required
+									></v-text-field>
+								</v-col>
+								<v-col cols="12">
+									<v-text-field
+										v-model="loginData.password"
+										label="Password*"
+										type="password"
+										required
+									></v-text-field>
+								</v-col>
+							</v-row>
+						</v-container>
+						<small>*indicates required field</small>
+					</v-form>
 				</v-card-text>
 				<v-card-actions>
 					<v-btn
@@ -39,9 +41,7 @@
 					>
 						Close
 					</v-btn>
-
 					<v-spacer/>
-
 					<v-btn
 						color="primary"
 						@click="login"

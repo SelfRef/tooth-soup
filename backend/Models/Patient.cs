@@ -8,5 +8,6 @@ namespace ToothSoupAPI.Models {
 		public User User { get; set; }
 		public int UserId { get; set; }
 		public int? DentistId { get; set; }
+		public Dentist Dentist { get; set; }
 	}
 }

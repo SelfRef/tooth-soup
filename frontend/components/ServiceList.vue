@@ -99,9 +99,6 @@
 		];
 
 		async mounted() {
-			if (!this.isLoggedIn) {
-				return this.$router.replace('/');
-			}
 			await this.refreshData();
 		}
 
