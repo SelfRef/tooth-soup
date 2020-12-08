@@ -8,9 +8,10 @@
 			<v-tabs :value="tabNumber">
 				<v-tab to="/">Home</v-tab>
 				<v-tab v-if="role === 'Dentist'" to="/patients">Patients</v-tab>
-				<v-tab v-if="role === 'Dentist'" to="/services">Services</v-tab>
 				<v-tab v-if="role === 'Patient'" to="/appointments">Appointments</v-tab>
-				<v-tab v-if="loggedIn" to="/account">Account</v-tab>
+				<v-tab v-if="role === 'Admin'" to="/users">Users</v-tab>
+				<v-tab v-if="role === 'Dentist' || role === 'Admin'" to="/services">Services</v-tab>
+				<v-tab v-if="role !== 'Admin'" to="/account">Account</v-tab>
 			</v-tabs>
 			<v-spacer />
 			<v-btn-toggle v-model="theme" class="mr-8">
@@ -36,6 +37,12 @@
 			</template>
 			<template v-else>
 				<v-btn
+					class="mr-2"
+					text
+					@click="registerDialog = !registerDialog"
+				>Register</v-btn>
+				<v-btn
+				right
 					color="primary"
 					@click="loginDialog = !loginDialog"
 				>Login</v-btn>
@@ -48,31 +55,35 @@
 			<span>&copy; {{copyName}} {{ new Date().getFullYear() }}</span>
 		</v-footer>
 		<login-form :active.sync="loginDialog"/>
+		<patient-form :active.sync="registerDialog"/>
 	</v-app>
 </template>
 
 <script>
 import 'reflect-metadata';
 import { Vue, Component, Prop } from 'vue-property-decorator';
-import LoginForm from "@/components/LoginForm";
+import LoginForm from "~/components/LoginForm";
+import PatientForm from "~/components/PatientForm";
 export default {
 	components: {
 		LoginForm,
+		PatientForm,
 	},
 	data() {
 		return {
 			title: 'Vuetify.js',
 			copyName: 'Tooth Soup Corp.',
 			loginDialog: false,
+			registerDialog: false,
 			theme: 0,
 		}
 	},
 	computed: {
 		loggedIn() {
-			return Boolean(this.$store.getters['auth/token']);
+			return Boolean(this.$store.getters['Auth/token']);
 		},
 		role() {
-			return this.$store.getters['auth/userRole'];
+			return this.$store.getters['Auth/userRole'];
 		},
 		tabNumber() {
 			switch(this.$route.path) {
@@ -80,12 +91,14 @@ export default {
 					return 0;
 				case '/patients':
 					return 1;
-				case '/services':
-					return 2;
 				case '/appointments':
+					return 2;
+				case '/users':
 					return 3;
-				case '/account':
+				case '/services':
 					return 4;
+				case '/account':
+					return 5;
 				default:
 					return null;
 			}
@@ -93,7 +106,7 @@ export default {
 	},
 	methods: {
 		logout() {
-			this.$store.dispatch('auth/setToken', null);
+			this.$store.dispatch('Auth/setToken', null);
 		},
 		changeTheme(theme) {
 			switch (theme) {
@@ -120,14 +133,14 @@ export default {
 		}
 	},
 	mounted() {
-		this.theme = this.$store.getters['auth/theme'];
+		this.theme = this.$store.getters['Auth/theme'];
 		this.changeTheme(this.theme);
-		this.$store.dispatch('auth/checkToken');
+		this.$store.dispatch('Auth/checkToken');
 		this.checkLoggedIn(this.loggedIn);
 	},
 	watch: {
 		theme(theme) {
-			this.$store.dispatch('auth/setTheme', theme);
+			this.$store.dispatch('Auth/setTheme', theme);
 			this.changeTheme(theme);
 		},
 		loggedIn(loggedIn) {

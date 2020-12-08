@@ -97,7 +97,7 @@ export default class ServiceForm extends Vue {
 			method: this.edit ? 'PUT' : 'POST',
 			body: JSON.stringify(this.service),
 			headers: {
-					'Authorization': `Bearer ${this.$store.getters['auth/token']}`,
+					'Authorization': `Bearer ${this.$store.getters['Auth/token']}`,
 					'Content-Type': 'application/json'
 				}
 		}

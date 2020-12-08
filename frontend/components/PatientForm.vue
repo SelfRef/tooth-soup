@@ -41,7 +41,7 @@
 												<template v-slot:activator="{ on, attrs }">
 													<v-text-field
 														v-model="patient.birthDate"
-														label="Birth Date"
+														label="Birth date"
 														persistent-hint
 														prepend-icon="mdi-calendar"
 														v-bind="attrs"
@@ -175,7 +175,7 @@ import { Vue, Component, Prop, Ref, Watch } from 'vue-property-decorator';
 import Patient from '~/interfaces/Patient';
 
 @Component
-export default class PatientEditForm extends Vue {
+export default class PatientForm extends Vue {
 	@Prop({default: false}) active!: boolean;
 	@Prop({default: null}) patientData!: Patient | null;
 	@Ref('form') form;
@@ -215,7 +215,7 @@ export default class PatientEditForm extends Vue {
 			method: this.edit ? 'PUT' : 'POST',
 			body: JSON.stringify(this.patient),
 			headers: {
-					'Authorization': `Bearer ${this.$store.getters['auth/token']}`,
+					'Authorization': `Bearer ${this.$store.getters['Auth/token']}`,
 					'Content-Type': 'application/json'
 				}
 		}
@@ -228,7 +228,7 @@ export default class PatientEditForm extends Vue {
 		const fetchOptions: RequestInit = {
 			method: 'GET',
 			headers: {
-					'Authorization': `Bearer ${this.$store.getters['auth/token']}`,
+					'Authorization': `Bearer ${this.$store.getters['Auth/token']}`,
 				}
 		}
 		await fetch(`${process.env.APIURL}/Dentist/Patient/${this.unlinkedUserSelected}/Link`, fetchOptions);
@@ -247,7 +247,7 @@ export default class PatientEditForm extends Vue {
 		const fetchOptions: RequestInit = {
 			method: 'GET',
 			headers: {
-					'Authorization': `Bearer ${this.$store.getters['auth/token']}`,
+					'Authorization': `Bearer ${this.$store.getters['Auth/token']}`,
 				},
 		}
 		this.unlinkedUsers = await fetch(`${process.env.APIURL}/Dentist/Patients?unlinked`, fetchOptions).then(r => r.json());

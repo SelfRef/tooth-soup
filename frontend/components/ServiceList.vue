@@ -20,7 +20,7 @@
 
 			<v-data-table
 				:headers="headers"
-				:items="$store.getters['dentist/services']"
+				:items="$store.getters[`${this.role}/services`]"
 			>
 				<template #item.price="{value}">{{value | price}}</template>
 				<template #item.actions="{item}">
@@ -31,13 +31,12 @@
 						</template>
 					</v-tooltip>
 					<v-menu :close-on-content-click="false">
-						<template #activator="{on, attrs}">
-							<v-tooltip bottom v-on="on" v-bind="attrs">
+						<template #activator="{on: onMenu}">
+							<v-tooltip bottom>
 								Remove service
-								<template #activator="{on, attrs}">
+								<template #activator="{on: onTip}">
 									<v-btn
-										v-on="on"
-										v-bind="attrs"
+										v-on="{...onTip, ...onMenu}"
 										icon
 										color="red"
 									><v-icon>mdi-puzzle-remove</v-icon></v-btn>
@@ -98,12 +97,16 @@
 			},
 		];
 
+		get role() {
+			return this.$store.getters['Auth/userRole'];
+		}
+
 		async mounted() {
 			await this.refreshData();
 		}
 
 		async refreshData() {
-			this.$store.dispatch('dentist/updateServices');
+			this.$store.dispatch(`${this.role}/pullServices`);
 		}
 
 		edit(item: Service) {
@@ -115,15 +118,15 @@
 			let initData: RequestInit = {
 				method: 'DELETE',
 				headers: {
-					'Authorization': `Bearer ${this.$store.getters['auth/token']}`,
+					'Authorization': `Bearer ${this.$store.getters['Auth/token']}`,
 				}
 			}
-			await fetch(`${process.env.APIURL}/Dentist/Services/${id}`, initData);
+			await fetch(`${process.env.APIURL}/${this.role}/Services/${id}`, initData);
 			await this.refreshData();
 		}
 
 		get isLoggedIn() {
-			return this.$store.getters['auth/isLoggedIn'];
+			return this.$store.getters['Auth/isLoggedIn'];
 		}
 
 		@Watch('dialog')

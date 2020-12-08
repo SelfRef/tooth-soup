@@ -142,7 +142,7 @@ namespace ToothSoupAPI.Controllers
 			return appointments;
 		}
 
-		[HttpGet("Appointment/{id}")]
+		[HttpGet("Appointments/{id}")]
 		public async Task<ActionResult<AppointmentPatientResponse>> GetAppointment(int id)
 		{
 			var userId = GetPatientId();
@@ -169,7 +169,7 @@ namespace ToothSoupAPI.Controllers
 			};
 		}
 
-		[HttpGet("Appointments/Dentist/{dentistId}/{date}")]
+		[HttpGet("Appointments/Dentists/{dentistId}/{date}")]
 		public async Task<ActionResult<IEnumerable<AppointmentPatientResponse>>> GetDentistAppointments(int dentistId, DateTime date)
 		{
 			var userId = GetPatientId();
@@ -196,7 +196,7 @@ namespace ToothSoupAPI.Controllers
 			return appointments;
 		}
 
-		[HttpPost("Appointment")]
+		[HttpPost("Appointments")]
 		public async Task<ActionResult<AppointmentPatientResponse>> PostAppointment(Appointment appointment)
 		{
 			var userId = GetPatientId();
@@ -216,7 +216,7 @@ namespace ToothSoupAPI.Controllers
 			return CreatedAtAction(nameof(GetAppointment), new { appointment.Id }, null);
 		}
 
-		[HttpPut("Appointment")]
+		[HttpPut("Appointments")]
 		public async Task<ActionResult<AppointmentPatientResponse>> PutAppointment(AppointmentRequest newAppointment)
 		{
 			var userId = GetPatientId();

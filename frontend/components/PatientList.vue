@@ -27,7 +27,7 @@
 				</v-row>
 				<v-data-table
 					:headers="headers"
-					:items="$store.getters['dentist/patients']"
+					:items="$store.getters[`${this.role}/patients`]"
 					show-select
 					single-select
 					v-model="selectedPatients"
@@ -96,12 +96,12 @@
 <script lang='ts'>
 	import { Vue, Component, Watch } from 'vue-property-decorator';
 	import Patient from 'interfaces/Patient';
-	import PatientEditForm from '~/components/PatientEditForm.vue';
+	import PatientForm from '~/components/PatientForm.vue';
 	import AppointmentList from '~/components/AppointmentList.vue';
 	import AppointmentCalendar from '~/components/AppointmentCalendar.vue';
 	@Component({
 		components: {
-			PatientEditForm,
+			PatientForm,
 			AppointmentList,
 			AppointmentCalendar,
 		},
@@ -153,7 +153,7 @@
 		}
 
 		async refreshData() {
-			this.$store.dispatch('dentist/updatePatients');
+			this.$store.dispatch(`${this.role}/updatePatients`);
 		}
 
 		editPatient(patient: Patient) {
@@ -165,7 +165,7 @@
 			let initData: RequestInit = {
 				method: 'GET',
 				headers: {
-					'Authorization': `Bearer ${this.$store.getters['auth/token']}`,
+					'Authorization': `Bearer ${this.$store.getters['Auth/token']}`,
 				}
 			}
 			await fetch(`${process.env.APIURL}/Dentist/Patient/${id}/Unlink`, initData);
@@ -176,7 +176,7 @@
 			let initData: RequestInit = {
 				method: 'DELETE',
 				headers: {
-					'Authorization': `Bearer ${this.$store.getters['auth/token']}`,
+					'Authorization': `Bearer ${this.$store.getters['Auth/token']}`,
 				}
 			}
 			await fetch(`${process.env.APIURL}/Dentist/Patient/${id}`, initData);
@@ -184,7 +184,7 @@
 		}
 
 		get isLoggedIn() {
-			return this.$store.getters['auth/isLoggedIn'];
+			return this.$store.getters['Auth/isLoggedIn'];
 		}
 
 		get selectedPatientId() {

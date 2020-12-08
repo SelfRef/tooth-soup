@@ -48,22 +48,22 @@ export const mutations = {
 
 export const actions = {
 	async pullAccount({commit, rootGetters}) {
-		if (!rootGetters['auth/isLoggedIn']) return false;
+		if (!rootGetters['Auth/isLoggedIn']) return false;
 		const initData: RequestInit = {
 			method: 'GET',
 			headers: {
-				'Authorization': `Bearer ${rootGetters['auth/token']}`,
+				'Authorization': `Bearer ${rootGetters['Auth/token']}`,
 			}
 		}
 		const data = await fetch(`${process.env.APIURL}/Dentist/Me`, initData).then(response => response.json());
 		commit('setAccount', data);
 	},
 	async pushAccount({commit, rootGetters}, newData) {
-		if (!rootGetters['auth/isLoggedIn']) return false;
+		if (!rootGetters['Auth/isLoggedIn']) return false;
 		const initData: RequestInit = {
 			method: 'PUT',
 			headers: {
-				'Authorization': `Bearer ${rootGetters['auth/token']}`,
+				'Authorization': `Bearer ${rootGetters['Auth/token']}`,
 				'Content-Type': 'application/json'
 			},
 			body: JSON.stringify(newData)
@@ -75,30 +75,59 @@ export const actions = {
 		const initData: RequestInit = {
 			method: 'GET',
 			headers: {
-				'Authorization': `Bearer ${rootGetters['auth/token']}`,
+				'Authorization': `Bearer ${rootGetters['Auth/token']}`,
 			}
 		}
 		const data = await fetch(`${process.env.APIURL}/Dentist/Patients`, initData).then(response => response.json());
 		commit('setPatients', data);
 	},
-	async updateServices({commit, rootGetters}) {
-		const initData: RequestInit = {
-			method: 'GET',
-			headers: {
-				'Authorization': `Bearer ${rootGetters['auth/token']}`,
-			}
-		}
-		const data = await fetch(`${process.env.APIURL}/Dentist/Services`, initData).then(response => response.json());
-		commit('setServices', data);
-	},
+
+
 	async updateAppointments({commit, rootGetters}) {
 		const initData: RequestInit = {
 			method: 'GET',
 			headers: {
-				'Authorization': `Bearer ${rootGetters['auth/token']}`,
+				'Authorization': `Bearer ${rootGetters['Auth/token']}`,
 			}
 		}
 		const data = await fetch(`${process.env.APIURL}/Dentist/Appointments`, initData).then(response => response.json());
 		commit('setAppointments', data);
 	},
+
+
+	async pullServices({commit, rootGetters}) {
+		if (!rootGetters['Auth/isLoggedIn']) return false;
+		const initData: RequestInit = {
+			method: 'GET',
+			headers: {
+				'Authorization': `Bearer ${rootGetters['Auth/token']}`,
+			}
+		}
+		const data = await fetch(`${process.env.APIURL}/Dentist/Services`, initData).then(response => response.json());
+		commit('setServices', data);
+	},
+	async pushService({dispatch, rootGetters}, newData: Service) {
+		if (!rootGetters['Auth/isLoggedIn']) return false;
+		const initData: RequestInit = {
+			method: newData.id ? 'PUT' : 'POST',
+			headers: {
+				'Authorization': `Bearer ${rootGetters['Auth/token']}`,
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(newData)
+		}
+		await fetch(`${process.env.APIURL}/Dentist/Service`, initData);
+		dispatch('pullServices');
+	},
+	async dropService({dispatch, rootGetters}, id: number) {
+		if (!rootGetters['Auth/isLoggedIn']) return false;
+		const initData: RequestInit = {
+			method: 'DELETE',
+			headers: {
+				'Authorization': `Bearer ${rootGetters['Auth/token']}`,
+			},
+		}
+		await fetch(`${process.env.APIURL}/Dentist/Service/${id}`, initData);
+		dispatch('pullServices');
+	}
 }

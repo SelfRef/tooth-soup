@@ -26,7 +26,7 @@
 						/>
 						<v-select
 							v-if="role === 'Patient'"
-							:items="$store.getters['patient/dentists'].filter(d => d.canLink)"
+							:items="$store.getters[`${this.role}/dentists`].filter(d => d.canLink)"
 							:item-text="d => d.name"
 							:item-value="d => d.id"
 							label="Linked dentist"
@@ -78,14 +78,14 @@ export default class AccountInfo extends Vue {
 	};
 
 	get role() {
-		return this.$store.getters['auth/userRole'];
+		return this.$store.getters['Auth/userRole'];
 	}
 
 	get account(): Patient | Dentist {
 		if (this.role === 'Patient') {
-			return this.$store.getters['patient/account'];
+			return this.$store.getters[`${this.role}/account`];
 		} else {
-			return this.$store.getters['dentist/account'];
+			return this.$store.getters[`${this.role}/account`];
 		}
 	}
 
@@ -102,10 +102,10 @@ export default class AccountInfo extends Vue {
 	async mounted() {
 		this.loading = true
 		if (this.role === 'Patient') {
-			await this.$store.dispatch('patient/updateAccount');
-			await this.$store.dispatch('patient/updateDentists');
+			await this.$store.dispatch(`${this.role}/updateAccount`);
+			await this.$store.dispatch(`${this.role}/updateDentists`);
 		} else if (this.role === 'Dentist') {
-			await this.$store.dispatch('dentist/pullAccount');
+			await this.$store.dispatch(`${this.role}/pullAccount`);
 		}
 	}
 
@@ -113,10 +113,10 @@ export default class AccountInfo extends Vue {
 		this.loading = true
 		switch (this.role) {
 			case 'Patient':
-				await this.$store.dispatch('patient/pushPatient', this.data);
+				await this.$store.dispatch(`${this.role}/pushPatient`, this.data);
 				break;
 			case 'Dentist':
-				await this.$store.dispatch('dentist/pushAccount', this.data);
+				await this.$store.dispatch(`${this.role}/pushAccount`, this.data);
 				break;
 		}
 	}

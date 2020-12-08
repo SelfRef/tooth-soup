@@ -78,7 +78,7 @@ export default class LoginForm extends Vue {
 			if (!tokenResponse.ok) throw new Error("Wrong login data");
 
 			let tokenData = await tokenResponse.json()
-			this.$store.dispatch('auth/setToken', tokenData.token);
+			this.$store.dispatch('Auth/setToken', tokenData.token);
 			this.$emit('update:active', false);
 		} catch(e) {
 

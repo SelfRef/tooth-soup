@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using IdentityServer4.Extensions;
 
 namespace ToothSoupAPI.Controllers
 {
@@ -76,7 +77,7 @@ namespace ToothSoupAPI.Controllers
 			return users;
 		}
 
-		[HttpGet("User/{id}")]
+		[HttpGet("Users/{id}")]
 		public async Task<ActionResult<UserContract>> GetUser(int id) {
 			var userId = GetUserId();
 			if (!userId.HasValue) return Unauthorized();
@@ -128,7 +129,7 @@ namespace ToothSoupAPI.Controllers
 			return userResult;
 		}
 
-		[HttpPost("User")]
+		[HttpPost("Users")]
 		public async Task<ActionResult<UserContract>> CreateUser(UserContract newUser) {
 			var userId = GetUserId();
 			if (!userId.HasValue) return Unauthorized();
@@ -140,6 +141,7 @@ namespace ToothSoupAPI.Controllers
 				Email = newUser.Email,
 				FirstName = newUser.FirstName,
 				LastName = newUser.LastName,
+				Password = newUser.Password,
 				Role = newUser.Role,
 			};
 			await _db.Users.AddAsync(user);
@@ -167,7 +169,7 @@ namespace ToothSoupAPI.Controllers
 			return CreatedAtAction(nameof(GetUser), new { user.Id }, GetUser(user.Id).Result.Value);
 		}
 
-		[HttpPut("User")]
+		[HttpPut("Users")]
 		public async Task<ActionResult<UserContract>> UpdateUser(UserContract newUser) {
 			var userId = GetUserId();
 			if (!userId.HasValue) return Unauthorized();
@@ -176,14 +178,14 @@ namespace ToothSoupAPI.Controllers
 			if (user == null) return NotFound("User");
 
 			var emailUsed = _db.Users.Where(u => u.Id != user.Id && u.Email == newUser.Email).Any();
-			if (emailUsed) return BadRequest("Email already in use");
+			if (emailUsed) return BadRequest("Email is already in use");
 
 			if (user.Role != newUser.Role) return BadRequest("You cannot change user role");
 			
 			user.Email = newUser.Email;
 			user.FirstName = newUser.FirstName;
 			user.LastName = newUser.LastName;
-			if (user.Password != null) user.Password = newUser.Password;
+			if (!user.Password.IsNullOrEmpty()) user.Password = newUser.Password;
 
 			switch (user.Role)
 			{
@@ -204,7 +206,7 @@ namespace ToothSoupAPI.Controllers
 			return CreatedAtAction(nameof(GetUser), new { user.Id }, GetUser(user.Id).Result.Value);
 		}
 
-		[HttpDelete("User/{id}")]
+		[HttpDelete("Users/{id}")]
 		public async Task<ActionResult> UpdateUser(int id) {
 			var userId = GetUserId();
 			if (!userId.HasValue) return Unauthorized();
@@ -227,6 +229,94 @@ namespace ToothSoupAPI.Controllers
 			}
 
 			await _db.SaveChangesAsync();
+			return Ok(id);
+		}
+
+
+		
+
+		[HttpGet("Services")]
+		public async Task<ActionResult<IEnumerable<ServiceResponse>>> GetServices()
+		{
+			var userId = GetUserId();
+			if (!userId.HasValue) return Unauthorized();
+
+			var services = await _db.Services
+				.Where(s => !s.Deleted)
+				.Select(s => new ServiceResponse {
+					Id = s.Id,
+					Name = s.Name,
+					Price = s.Price,
+					AppointmentsCount = _db.Appointments.Where(a => a.ServiceId == s.Id).Count(),
+				})
+				.ToListAsync();
+			return services;
+		}
+
+		[HttpGet("Services/{id}")]
+		public async Task<ActionResult<ServiceResponse>> GetService(int id)
+		{
+			var userId = GetUserId();
+			if (!userId.HasValue) return Unauthorized();
+
+			var service = await _db.Services
+				.Where(s => !s.Deleted)
+				.Select(s => new ServiceResponse
+				{
+					Id = s.Id,
+					Name = s.Name,
+					Price = s.Price,
+					AppointmentsCount = _db.Appointments.Where(a => a.ServiceId == s.Id).Count(),
+				})
+				.FirstOrDefaultAsync(s => s.Id == id);
+			
+			if (service == null) return NotFound();
+			return service;
+		}
+
+		[HttpPost("Services")]
+		public async Task<ActionResult<Service>> CreateService(Service service)
+		{
+			var userId = GetUserId();
+			if (!userId.HasValue) return Unauthorized();
+
+			await _db.Services.AddAsync(service);
+			await _db.SaveChangesAsync();
+
+			return CreatedAtAction(nameof(GetService), new { service.Id }, null);
+		}
+
+		[HttpPut("Services")]
+		public async Task<ActionResult<Service>> UpdateService(Service newService)
+		{
+			var userId = GetUserId();
+			if (!userId.HasValue) return Unauthorized();
+
+			var service = await _db.Services
+				.FirstOrDefaultAsync(s => s.Id == newService.Id);
+			if (service == null) return NotFound();
+
+			service.Name = newService.Name;
+			service.Price = newService.Price;
+			await _db.SaveChangesAsync();
+
+			return CreatedAtAction(nameof(GetService), new { service.Id }, null);
+		}
+
+		[HttpDelete("Services/{id}")]
+		public async Task<ActionResult> DeleteService(int id)
+		{
+			var userId = GetUserId();
+			if (!userId.HasValue) return Unauthorized();
+
+			var service = await _db.Services
+				.Where(s => !s.Deleted)
+				.FirstOrDefaultAsync(s => s.Id == id);
+			if (service == null) return NotFound();
+
+			service.Deleted = true;
+			await _db.SaveChangesAsync();
+
 			return Ok(id);
 		}
 

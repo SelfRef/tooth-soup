@@ -261,7 +261,7 @@ export default class AppointmentForm extends Vue {
 		if (this.role === 'Dentist') this.refreshPatients();
 		if (this.role === 'Patient') {
 			this.refreshDentists();
-			this.$store.dispatch('patient/updateAccount');
+			this.$store.dispatch(`${this.role}/updateAccount`);
 		}
 		this.refreshServices();
 		this.updateAppointments();
@@ -280,7 +280,7 @@ export default class AppointmentForm extends Vue {
 			method: this.edit ? 'PUT' : 'POST',
 			body: JSON.stringify(this.appointment),
 			headers: {
-					'Authorization': `Bearer ${this.$store.getters['auth/token']}`,
+					'Authorization': `Bearer ${this.$store.getters['Auth/token']}`,
 					'Content-Type': 'application/json'
 				}
 		}
@@ -304,15 +304,15 @@ export default class AppointmentForm extends Vue {
 	}
 
 	get role() {
-		return this.$store.getters['auth/userRole'];
+		return this.$store.getters['Auth/userRole'];
 	}
 
 	get account() {
-		return this.$store.getters['patient/account'];
+		return this.$store.getters[`${this.role}/account`];
 	}
 
 	get id() {
-		return this.$store.getters['auth/userId'];
+		return this.$store.getters['Auth/userId'];
 	}
 
 	get dentistId() {
@@ -426,13 +426,13 @@ export default class AppointmentForm extends Vue {
 				let initData: RequestInit = {
 					method: 'GET',
 					headers: {
-						'Authorization': `Bearer ${this.$store.getters['auth/token']}`,
+						'Authorization': `Bearer ${this.$store.getters['Auth/token']}`,
 					}
 				}
 				this.dentistAppointments = await fetch(`${process.env.APIURL}/Patient/Appointments/Dentist/${this.dentistId}/${this.date}`, initData).then(response => response.json());
 			}
 		} else if (this.role === 'Dentist') {
-			this.dentistAppointments = this.$store.getters['dentist/appointments'];
+			this.dentistAppointments = this.$store.getters[`${this.role}/appointments`];
 		}
 	}
 
@@ -440,7 +440,7 @@ export default class AppointmentForm extends Vue {
 		let initData: RequestInit = {
 			method: 'GET',
 			headers: {
-				'Authorization': `Bearer ${this.$store.getters['auth/token']}`,
+				'Authorization': `Bearer ${this.$store.getters['Auth/token']}`,
 			}
 		}
 		this.services = await fetch(`${process.env.APIURL}/${this.role}/Services`, initData).then(response => response.json());
@@ -450,7 +450,7 @@ export default class AppointmentForm extends Vue {
 		let initData: RequestInit = {
 			method: 'GET',
 			headers: {
-				'Authorization': `Bearer ${this.$store.getters['auth/token']}`,
+				'Authorization': `Bearer ${this.$store.getters['Auth/token']}`,
 			}
 		}
 		this.patients = await fetch(`${process.env.APIURL}/Dentist/Patients`, initData).then(response => response.json());
@@ -460,7 +460,7 @@ export default class AppointmentForm extends Vue {
 		let initData: RequestInit = {
 			method: 'GET',
 			headers: {
-				'Authorization': `Bearer ${this.$store.getters['auth/token']}`,
+				'Authorization': `Bearer ${this.$store.getters['Auth/token']}`,
 			}
 		}
 		this.dentists = await fetch(`${process.env.APIURL}/Patient/Dentists`, initData).then(response => response.json());

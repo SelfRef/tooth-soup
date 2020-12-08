@@ -140,14 +140,14 @@ export default class AppointmentList extends Vue {
 
 	get filteredAppointments() {
 		if (this.role === 'Patient') {
-			return this.$store.getters['patient/appointments'].filter(a => !this.activeOnly || !a.canceled);
+			return this.$store.getters[`${this.role}/appointments`].filter(a => !this.activeOnly || !a.canceled);
 		} else {
 			return this.appointments.filter(a => !this.activeOnly || !a.canceled);
 		}
 	}
 
 	get role() {
-		return this.$store.getters['auth/userRole'];
+		return this.$store.getters['Auth/userRole'];
 	}
 
 	async mounted() {
@@ -163,10 +163,10 @@ export default class AppointmentList extends Vue {
 	@Emit('refreshData')
 	async refreshData() {
 		if (this.role === 'Patient') {
-			this.$store.dispatch('patient/updateAppointments');
+			this.$store.dispatch(`${this.role}/updateAppointments`);
 		}
 		if (this.role === 'Dentist') {
-			this.$store.dispatch('dentist/updateAppointments');
+			this.$store.dispatch(`${this.role}/updateAppointments`);
 			if (!this.patientId) {
 				this.appointments = [];
 				return;
@@ -174,7 +174,7 @@ export default class AppointmentList extends Vue {
 			let initData: RequestInit = {
 				method: 'GET',
 				headers: {
-					'Authorization': `Bearer ${this.$store.getters['auth/token']}`,
+					'Authorization': `Bearer ${this.$store.getters['Auth/token']}`,
 				}
 			}
 			this.appointments = await fetch(`${process.env.APIURL}/Dentist/Appointments/Patient/${this.patientId}`, initData).then(response => response.json());
@@ -190,7 +190,7 @@ export default class AppointmentList extends Vue {
 		let initData: RequestInit = {
 			method: 'PUT',
 			headers: {
-				'Authorization': `Bearer ${this.$store.getters['auth/token']}`,
+				'Authorization': `Bearer ${this.$store.getters['Auth/token']}`,
 				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({
@@ -206,7 +206,7 @@ export default class AppointmentList extends Vue {
 		let initData: RequestInit = {
 			method: 'DELETE',
 			headers: {
-				'Authorization': `Bearer ${this.$store.getters['auth/token']}`,
+				'Authorization': `Bearer ${this.$store.getters['Auth/token']}`,
 			}
 		}
 		await fetch(`${process.env.APIURL}/Dentist/Appointment/${id}`, initData);

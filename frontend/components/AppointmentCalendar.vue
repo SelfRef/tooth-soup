@@ -30,15 +30,15 @@ export default class AppointmentCalendar extends Vue {
 	private ready: boolean = false;
 
 	get role() {
-		return this.$store.getters['auth/userRole'];
+		return this.$store.getters['Auth/userRole'];
 	}
 
 	get items() {
 		let appointments;
 		if (this.role === 'Patient') {
-			appointments = this.$store.getters['patient/appointments'];
+			appointments = this.$store.getters[`${this.role}/appointments`];
 		} else if (this.role === 'Dentist') {
-			appointments = this.$store.getters['dentist/appointments'];
+			appointments = this.$store.getters[`${this.role}/appointments`];
 		}
 		if (!appointments) return [];
 		return appointments.map(a => ({
@@ -92,9 +92,9 @@ export default class AppointmentCalendar extends Vue {
 
 	async refreshData() {
 		if (this.role === 'Patient') {
-			this.$store.dispatch('patient/updateAppointments');
+			this.$store.dispatch(`${this.role}/updateAppointments`);
 		} else if (this.role === 'Patient') {
-			this.$store.dispatch('dentist/updateAppointments');
+			this.$store.dispatch(`${this.role}/updateAppointments`);
 		}
 	}
 

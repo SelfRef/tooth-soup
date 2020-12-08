@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using ToothSoupAPI.Models;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace ToothSoupAPI.Controllers
 {
@@ -24,8 +25,9 @@ namespace ToothSoupAPI.Controllers
 			_config = config;
 			_db = db;
 		}
-		[AllowAnonymous]
+
 		[HttpPost]
+		[AllowAnonymous]
 		public IActionResult Login([FromBody] User login)
 		{
 			IActionResult response = Unauthorized();
@@ -38,6 +40,32 @@ namespace ToothSoupAPI.Controllers
 			}
 
 			return response;
+		}
+
+		[HttpPost]
+		[AllowAnonymous]
+		public async Task<ActionResult> RegisterPatient(PatientRequest patient)
+		{
+			var newUser = new User {
+				Email = patient.Email,
+				Password = patient.Password,
+				FirstName = patient.FirstName,
+				LastName = patient.LastName,
+				Role = UserRole.PATIENT,
+			};
+			
+			var newPatient = new Patient {
+				Pesel = patient.Pesel,
+				BirthDate = patient.BirthDate,
+				User = newUser,
+				DentistId = null
+			};
+
+			await _db.Users.AddAsync(newUser);
+			await _db.Patients.AddAsync(newPatient);
+			await _db.SaveChangesAsync();
+
+			return Ok();
 		}
 
 		private string GenerateJSONWebToken(User userInfo)

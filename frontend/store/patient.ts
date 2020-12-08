@@ -40,44 +40,44 @@ export const mutations = {
 
 export const actions = {
 	async updateAccount({commit, rootGetters}) {
-		if (!rootGetters['auth/isLoggedIn']) return false;
+		if (!rootGetters['Auth/isLoggedIn']) return false;
 		const initData: RequestInit = {
 			method: 'GET',
 			headers: {
-				'Authorization': `Bearer ${rootGetters['auth/token']}`,
+				'Authorization': `Bearer ${rootGetters['Auth/token']}`,
 			}
 		}
 		const data = await fetch(`${process.env.APIURL}/Patient/Me`, initData).then(response => response.json());
 		commit('setAccount', data);
 	},
 	async updateAppointments({commit, rootGetters}) {
-		if (!rootGetters['auth/isLoggedIn']) return false;
+		if (!rootGetters['Auth/isLoggedIn']) return false;
 		const initData: RequestInit = {
 			method: 'GET',
 			headers: {
-				'Authorization': `Bearer ${rootGetters['auth/token']}`,
+				'Authorization': `Bearer ${rootGetters['Auth/token']}`,
 			}
 		}
 		const data = await fetch(`${process.env.APIURL}/Patient/Appointments`, initData).then(response => response.json());
 		commit('setAppointments', data);
 	},
 	async updateDentists({commit, rootGetters}) {
-		if (!rootGetters['auth/isLoggedIn']) return false;
+		if (!rootGetters['Auth/isLoggedIn']) return false;
 		const initData: RequestInit = {
 			method: 'GET',
 			headers: {
-				'Authorization': `Bearer ${rootGetters['auth/token']}`,
+				'Authorization': `Bearer ${rootGetters['Auth/token']}`,
 			}
 		}
 		const data = await fetch(`${process.env.APIURL}/Patient/Dentists`, initData).then(response => response.json());
 		commit('setDentists', data);
 	},
 	async pushPatient({commit, rootGetters}, newData) {
-		if (!rootGetters['auth/isLoggedIn']) return false;
+		if (!rootGetters['Auth/isLoggedIn']) return false;
 		const initData: RequestInit = {
 			method: 'PUT',
 			headers: {
-				'Authorization': `Bearer ${rootGetters['auth/token']}`,
+				'Authorization': `Bearer ${rootGetters['Auth/token']}`,
 				'Content-Type': 'application/json'
 			},
 			body: JSON.stringify(newData)
