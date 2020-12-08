@@ -5,18 +5,19 @@
 			persistent
 			max-width="600px"
 		>
-			<v-tabs v-model="currentTab" v-if="!edit" centered fixed-tabs>
+			<v-tabs v-model="currentTab" v-if="!edit && !register" centered fixed-tabs>
 				<v-tab>Create</v-tab>
 				<v-tab>Link</v-tab>
 			</v-tabs>
 			<v-tabs-items v-model="currentTab">
 				<v-tab-item>
-					<v-form ref="form">
-						<v-card>
-							<v-card-title>
-								<span class="headline">{{ edit ? 'Edit' : 'Create' }} Patient</span>
-							</v-card-title>
-							<v-card-text>
+					<v-card>
+						<v-card-title>
+							<span v-if="register" class="headline">Register as patient</span>
+							<span v-else class="headline">{{ edit ? 'Edit' : 'Create' }} Patient</span>
+						</v-card-title>
+						<v-card-text>
+							<v-form ref="form" v-if="patient">
 								<v-container>
 									<v-row>
 										<v-col
@@ -25,7 +26,6 @@
 										>
 											<v-text-field
 												label="PESEL number"
-												:required="!Boolean(edit)"
 												v-model="patient.pesel"
 												prepend-icon="mdi-numeric"
 												:rules="[rules.required, rules.pesel]"
@@ -40,18 +40,18 @@
 											>
 												<template v-slot:activator="{ on, attrs }">
 													<v-text-field
-														v-model="patient.birthDate"
+														:value="patient.birthDate | date"
 														label="Birth date"
 														persistent-hint
 														prepend-icon="mdi-calendar"
 														v-bind="attrs"
 														v-on="on"
-														:required="!Boolean(edit)"
 														:rules="[rules.required]"
 													></v-text-field>
 												</template>
 												<v-date-picker
-													v-model="patient.birthDate"
+													:value="patient.birthDate | date"
+													@change="patient.birthDate = $event"
 													no-title
 													@input="datePickerActive = false"
 												></v-date-picker>
@@ -63,7 +63,6 @@
 										>
 											<v-text-field
 												label="First name"
-												:required="!Boolean(edit)"
 												v-model="patient.firstName"
 												prepend-icon="mdi-card-account-details"
 												:rules="[rules.required]"
@@ -75,7 +74,6 @@
 										>
 											<v-text-field
 												label="Last name"
-												:required="!Boolean(edit)"
 												v-model="patient.lastName"
 												prepend-icon="mdi-card-account-details"
 												:rules="[rules.required]"
@@ -94,35 +92,46 @@
 											<v-text-field
 												label="Password"
 												type="password"
-												:required="!Boolean(edit)"
 												v-model="patient.password"
 												prepend-icon="mdi-lock"
-												:rules="[rules.required]"
-												:placeholder="edit ? '(unchanged)' : null"
+												:rules="!edit ? [rules.required] : undefined"
+												:placeholder="edit ? '(unchanged)' : undefined"
 											></v-text-field>
 										</v-col>
 									</v-row>
+									<v-row v-if="alert">
+										<v-col>
+											<v-alert type="error">{{alert}}</v-alert>
+										</v-col>
+									</v-row>
 								</v-container>
-							</v-card-text>
-							<v-card-actions>
-								<v-spacer></v-spacer>
-								<v-btn
-									color="blue darken-1"
-									text
-									@click="close"
-								>
-									Close
-								</v-btn>
-								<v-btn
-									color="blue darken-1"
-									text
-									@click="save"
-								>
-									Save
-								</v-btn>
-							</v-card-actions>
-						</v-card>
-					</v-form>
+							</v-form>
+						</v-card-text>
+						<v-card-actions>
+							<v-btn
+								text
+								@click="close"
+								color="primary"
+							>
+								Close
+							</v-btn>
+							<v-spacer></v-spacer>
+							<v-btn
+								v-if="register"
+								@click="registerPatient"
+								color="primary"
+							>
+								Register
+							</v-btn>
+							<v-btn
+								v-else
+								@click="save"
+								color="primary"
+							>
+								Save
+							</v-btn>
+						</v-card-actions>
+					</v-card>
 				</v-tab-item>
 				<v-tab-item>
 					<v-card>
@@ -171,29 +180,29 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop, Ref, Watch } from 'vue-property-decorator';
+import { Vue, Component, Prop, Ref, Watch, Emit } from 'vue-property-decorator';
 import Patient from '~/interfaces/Patient';
 
-@Component
+@Component({
+	filters: {
+		date: (isoDate: string) => isoDate ? isoDate.substr(0, 10) : null,
+	}
+})
 export default class PatientForm extends Vue {
 	@Prop({default: false}) active!: boolean;
+	@Prop({default: false}) register!: boolean;
 	@Prop({default: null}) patientData!: Patient | null;
 	@Ref('form') form;
+	private alert: string | null = null;
 	private datePickerActive = false;
 	private unlinkedUsers: Patient[] = [];
-	private currentTab: number | null = null;
+	private currentTab: number | null = 0;
 	private unlinkedUserSelected: number | null = null;
-	private patient: Patient = {
-		pesel: '',
-		birthDate: '',
-		firstName: '',
-		lastName: '',
-		email: '',
-		password: '',
-	}
+	private patient: Patient | null = null;
 	private rules = {
-		required: (v: string) => this.edit || Boolean(v) || 'Required',
+		required: (v: string) => Boolean(v) || 'Required',
 		pesel: (v: string) => {
+			if (!v) return false;
 			if (v.length !== 11) return 'Must be 11 digits long';
 			if (!/^\d+$/.test(v)) return 'Must have only digits';
 			return true;
@@ -204,12 +213,20 @@ export default class PatientForm extends Vue {
 		},
 	};
 
+	get edit() {
+		return Boolean(this.patientData);
+	}
+
+	@Emit('update:active')
 	close() {
-		this.form.resetValidation();
-		this.$emit('update:active', false);
+		console.log('close')
+		this.form.reset();
+		this.alert = null;
+		return false;
 	}
 
 	async save() {
+		console.log('save')
 		if (!this.form.validate()) return;
 		const fetchOptions: RequestInit = {
 			method: this.edit ? 'PUT' : 'POST',
@@ -219,7 +236,7 @@ export default class PatientForm extends Vue {
 					'Content-Type': 'application/json'
 				}
 		}
-		await fetch(`${process.env.APIURL}/Dentist/Patient`, fetchOptions);
+		await fetch(`${process.env.APIURL}/Dentist/Patients`, fetchOptions);
 		this.$emit('refresh');
 		this.close();
 	}
@@ -231,13 +248,27 @@ export default class PatientForm extends Vue {
 					'Authorization': `Bearer ${this.$store.getters['Auth/token']}`,
 				}
 		}
-		await fetch(`${process.env.APIURL}/Dentist/Patient/${this.unlinkedUserSelected}/Link`, fetchOptions);
+		await fetch(`${process.env.APIURL}/Dentist/Patients/${this.unlinkedUserSelected}/Link`, fetchOptions);
 		this.$emit('refresh');
 		this.close();
 	}
 
-	get edit() {
-		return Boolean(this.patientData);
+	async registerPatient() {
+		console.log('register')
+		if (!this.form.validate()) return;
+		let fetchOptions: RequestInit = {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(this.patient),
+		}
+		const result = await fetch(`${process.env.APIURL}/Login/RegisterPatient`, fetchOptions) as Response;
+		if (!result.ok) {
+			this.alert = await result.text();
+			return;
+		}
+		this.close();
 	}
 
 	@Watch('currentTab')
@@ -254,16 +285,19 @@ export default class PatientForm extends Vue {
 	}
 
 	@Watch('active')
-	onDialogShow() {
-		setTimeout(() => this.currentTab = 0, 500);
-		this.patient = this.patientData ? {...this.patientData} : {
-			pesel: '',
-			firstName: '',
-			lastName: '',
-			email: '',
-			password: '',
-			birthDate: '',
-		};
+	onDialogShow(active: boolean) {
+		console.log('change active', active)
+		if (active) {
+			this.patient = this.patientData ? {...this.patientData} : {
+				pesel: null,
+				firstName: null,
+				lastName: null,
+				email: null,
+				password: null,
+				birthDate: null,
+			};
+			this.form?.resetValidation();
+		}
 	}
 }
 </script>

@@ -11,7 +11,7 @@
 				<v-tab v-if="role === 'Patient'" to="/appointments">Appointments</v-tab>
 				<v-tab v-if="role === 'Admin'" to="/users">Users</v-tab>
 				<v-tab v-if="role === 'Dentist' || role === 'Admin'" to="/services">Services</v-tab>
-				<v-tab v-if="role !== 'Admin'" to="/account">Account</v-tab>
+				<v-tab v-if="loggedIn && role !== 'Admin'" to="/account">Account</v-tab>
 			</v-tabs>
 			<v-spacer />
 			<v-btn-toggle v-model="theme" class="mr-8">
@@ -55,97 +55,101 @@
 			<span>&copy; {{copyName}} {{ new Date().getFullYear() }}</span>
 		</v-footer>
 		<login-form :active.sync="loginDialog"/>
-		<patient-form :active.sync="registerDialog"/>
+		<patient-form :active.sync="registerDialog" :register="true" />
 	</v-app>
 </template>
 
-<script>
+<script lang="ts">
 import 'reflect-metadata';
+import { Watch } from 'vue-property-decorator';
 import { Vue, Component, Prop } from 'vue-property-decorator';
-import LoginForm from "~/components/LoginForm";
-import PatientForm from "~/components/PatientForm";
-export default {
+import LoginForm from "~/components/LoginForm.vue";
+import PatientForm from "~/components/PatientForm.vue";
+@Component({
 	components: {
 		LoginForm,
 		PatientForm,
-	},
-	data() {
-		return {
-			title: 'Vuetify.js',
-			copyName: 'Tooth Soup Corp.',
-			loginDialog: false,
-			registerDialog: false,
-			theme: 0,
+	}
+})
+export default class DefaultLayout extends Vue {
+	private title = 'Vuetify.js';
+	private copyName = 'Tooth Soup Corp.';
+	private loginDialog = false;
+	private registerDialog = false;
+	private theme = 0;
+
+	get loggedIn() {
+		return Boolean(this.$store.getters['Auth/token']);
+	}
+	
+	get role() {
+		return this.$store.getters['Auth/userRole'];
+	}
+
+	gettabNumber() {
+		switch(this.$route.path) {
+			case '/':
+				return 0;
+			case '/patients':
+				return 1;
+			case '/appointments':
+				return 2;
+			case '/users':
+				return 3;
+			case '/services':
+				return 4;
+			case '/account':
+				return 5;
+			default:
+				return null;
 		}
-	},
-	computed: {
-		loggedIn() {
-			return Boolean(this.$store.getters['Auth/token']);
-		},
-		role() {
-			return this.$store.getters['Auth/userRole'];
-		},
-		tabNumber() {
-			switch(this.$route.path) {
-				case '/':
-					return 0;
-				case '/patients':
-					return 1;
-				case '/appointments':
-					return 2;
-				case '/users':
-					return 3;
-				case '/services':
-					return 4;
-				case '/account':
-					return 5;
-				default:
-					return null;
-			}
+	}
+
+	logout() {
+		this.$store.dispatch('Auth/setToken', null);
+	}
+
+	changeTheme(theme) {
+		switch (theme) {
+			case 0:
+				const mq = window.matchMedia('(prefers-color-scheme: dark)');
+				this.$vuetify.theme.dark = mq.matches;
+				mq.addEventListener('change', (e) => {
+					this.$vuetify.theme.dark = e.matches;
+					this.theme = 0;
+				});
+				break;
+			case 1:
+				this.$vuetify.theme.dark = false;
+				break;
+			case 2:
+				this.$vuetify.theme.dark = true;
+				break;
 		}
-	},
-	methods: {
-		logout() {
-			this.$store.dispatch('Auth/setToken', null);
-		},
-		changeTheme(theme) {
-			switch (theme) {
-				case 0:
-					const mq = window.matchMedia('(prefers-color-scheme: dark)');
-					this.$vuetify.theme.dark = mq.matches;
-					mq.addEventListener('change', (e) => {
-						this.$vuetify.theme.dark = e.matches;
-						this.theme = 0;
-					});
-					break;
-				case 1:
-					this.$vuetify.theme.dark = false;
-					break;
-				case 2:
-					this.$vuetify.theme.dark = true;
-					break;
-			}
-		},
-		checkLoggedIn(loggedIt) {
-			if (!loggedIt) {
-				this.$router.push('/');
-			}
+	}
+	
+	checkLoggedIn(loggedIt) {
+		if (!loggedIt) {
+			this.$router.push('/');
 		}
-	},
+	}
+
 	mounted() {
 		this.theme = this.$store.getters['Auth/theme'];
 		this.changeTheme(this.theme);
 		this.$store.dispatch('Auth/checkToken');
 		this.checkLoggedIn(this.loggedIn);
-	},
-	watch: {
-		theme(theme) {
-			this.$store.dispatch('Auth/setTheme', theme);
-			this.changeTheme(theme);
-		},
-		loggedIn(loggedIn) {
-			this.checkLoggedIn(loggedIn);
-		}
+	}
+
+	@Watch('theme')
+	themeChange(theme) {
+		this.$store.dispatch('Auth/setTheme', theme);
+		this.changeTheme(theme);
+	}
+
+	@Watch('loggedIn')
+	loggedInChange(loggedIn) {
+		this.checkLoggedIn(loggedIn);
 	}
 }
 </script>

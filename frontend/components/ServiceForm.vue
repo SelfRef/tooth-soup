@@ -84,6 +84,14 @@ export default class ServiceForm extends Vue {
 		number: (v: string) => this.edit || /^\d+$/.test(v) || 'Must be number',
 	};
 
+	get role() {
+		return this.$store.getters['Auth/userRole'];
+	}
+
+	get edit() {
+		return Boolean(this.item);
+	}
+
 	@Emit('update:active')
 	close() {
 		this.form.resetValidation();
@@ -93,20 +101,8 @@ export default class ServiceForm extends Vue {
 	@Emit('refresh')
 	async save() {
 		if (!this.form.validate()) return;
-		const fetchOptions: RequestInit = {
-			method: this.edit ? 'PUT' : 'POST',
-			body: JSON.stringify(this.service),
-			headers: {
-					'Authorization': `Bearer ${this.$store.getters['Auth/token']}`,
-					'Content-Type': 'application/json'
-				}
-		}
-		await fetch(`${process.env.APIURL}/Dentist/Services`, fetchOptions);
+		this.$store.dispatch(`${this.role}/pushService`, this.service);
 		this.close();
-	}
-
-	get edit() {
-		return Boolean(this.item);
 	}
 
 	@Watch('active')

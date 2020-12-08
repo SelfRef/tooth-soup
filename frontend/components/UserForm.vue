@@ -48,7 +48,7 @@
 										type="email"
 										v-model="data.email"
 										prepend-icon="mdi-email"
-										:rules="[rules.required]"
+										:rules="[rules.required, rules.email]"
 									></v-text-field>
 								</v-col>
 								<v-col
@@ -116,7 +116,7 @@
 											label="PESEL number"
 											v-model="data.patient.pesel"
 											prepend-icon="mdi-numeric"
-											:rules="[rules.required, rules.number]"
+											:rules="[rules.required, rules.pesel]"
 										></v-text-field>
 									</v-col>
 									<v-col
@@ -214,7 +214,16 @@ export default class UserForm extends Vue {
 
 	private rules = {
 		required: (v: string) => Boolean(v) || 'Required',
-		number: (v: string) => /^\d+$/.test(v) || 'Must be a number',
+		pesel: (v: string) => {
+			if (!v) return false;
+			if (v.length !== 11) return 'Must be 11 digits long';
+			if (!/^\d+$/.test(v)) return 'Must have only digits';
+			return true;
+		},
+		email: (v: string) => {
+			const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+			return pattern.test(v) || 'Invalid e-mail'
+		},
 	};
 
 	get edit() {

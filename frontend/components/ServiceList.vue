@@ -101,6 +101,10 @@
 			return this.$store.getters['Auth/userRole'];
 		}
 
+		get isLoggedIn() {
+			return this.$store.getters['Auth/isLoggedIn'];
+		}
+
 		async mounted() {
 			await this.refreshData();
 		}
@@ -115,18 +119,7 @@
 		}
 
 		async remove(id: number) {
-			let initData: RequestInit = {
-				method: 'DELETE',
-				headers: {
-					'Authorization': `Bearer ${this.$store.getters['Auth/token']}`,
-				}
-			}
-			await fetch(`${process.env.APIURL}/${this.role}/Services/${id}`, initData);
-			await this.refreshData();
-		}
-
-		get isLoggedIn() {
-			return this.$store.getters['Auth/isLoggedIn'];
+			this.$store.dispatch(`${this.role}/dropService`, id);
 		}
 
 		@Watch('dialog')

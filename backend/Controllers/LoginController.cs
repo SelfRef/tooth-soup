@@ -42,7 +42,7 @@ namespace ToothSoupAPI.Controllers
 			return response;
 		}
 
-		[HttpPost]
+		[HttpPost("RegisterPatient")]
 		[AllowAnonymous]
 		public async Task<ActionResult> RegisterPatient(PatientRequest patient)
 		{
