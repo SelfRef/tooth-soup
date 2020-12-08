@@ -159,6 +159,8 @@
 											:events="items"
 											:event-color="e => e.color"
 											:event-name="getName"
+											:first-interval="firstHour"
+											:interval-count="hoursCount"
 										/>
 									</v-sheet>
 								</v-col>
@@ -334,6 +336,28 @@ export default class AppointmentForm extends Vue {
 			console.log('old', aStart, aEnd);
 			return (start > aStart && start < aEnd) || (end > aStart && end < aEnd) || (aStart > start && aEnd < end);
 		});
+	}
+
+	get firstHour(): number {
+		let first = 8;
+		this.items.filter(i => {
+			return i.start.substr(0, 10) === this.date;
+		}).forEach(i => {
+			const start = Number(i.start.substr(11, 2));
+			if (start < first) first = start;
+		});
+		return first;
+	}
+
+	get hoursCount(): number {
+		let last = 16;
+		this.items.filter(i => {
+			return i.start.substr(0, 10) === this.date;
+		}).forEach(i => {
+			const end = Number(i.end.substr(11, 2));
+			if (end > last) last = end;
+		});
+		return ++last - this.firstHour;
 	}
 
 	@Watch('active')

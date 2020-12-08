@@ -67,11 +67,15 @@ namespace ToothSoupAPI.Seed
 				new Dentist {
 					Id = 1,
 					UserId = 1,
+					CanLink = true,
+					CanCreateAppointment = false
 				},
 				new Dentist
 				{
 					Id = 2,
 					UserId = 2,
+					CanLink = true,
+					CanCreateAppointment = true
 				}
 			);
 

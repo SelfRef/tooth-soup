@@ -95,7 +95,6 @@ export default class AccountInfo extends Vue {
 
 	get isUpdated(): boolean {
 		return Object.keys(this.data).some(k => {
-			console.log(k, this.data[k] || '', this.account[k] || '')
 			return (this.data[k] || '') !== (this.account[k] || '');
 		});
 	}

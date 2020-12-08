@@ -1,11 +1,13 @@
 <template>
-	<v-sheet height="800">
+	<v-sheet max-height="800">
 		<v-calendar
 			ref="calendar"
 			:events="items"
 			:type="calendarType"
 			:event-color="i => i.color"
 			:event-name="getName"
+			:first-interval="firstHour"
+			:interval-count="hoursCount"
 		>
 			<template v-slot:day-body="{ date, week }">
 				<div
@@ -48,18 +50,33 @@ export default class AppointmentCalendar extends Vue {
 		}))
 	}
 
-	get calendarType() {
+	get calendarType(): string {
 		if (this.$vuetify.breakpoint.xlOnly) return '4day';
 		if (this.$vuetify.breakpoint.mdOnly) return '4day';
 		else return 'day';
 	}
 
-	get cal () {
-		return this.ready ? this.calendar : null
+	get firstHour(): number {
+		let first = 8;
+		this.items.forEach(i => {
+			const start = Number(i.start.substr(11, 2));
+			if (start < first) first = start;
+		});
+		return first;
+	}
+
+	get hoursCount(): number {
+		let last = 16;
+		this.items.forEach(i => {
+			const end = Number(i.end.substr(11, 2));
+			if (end > last) last = end;
+		});
+		return ++last - this.firstHour;
 	}
 
 	get nowY () {
-		return this.cal ? this.cal.timeToY(this.cal.times.now) + 'px' : '-10px'
+		const cal = this.ready ? this.calendar : null;
+		return cal ? cal.timeToY(cal.times.now) + 'px' : '-10px'
 	}
 
 	getName(item) {
