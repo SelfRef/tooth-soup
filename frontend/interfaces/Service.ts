@@ -3,4 +3,6 @@ export default interface Service {
 	name?: string | null;
 	price?: number | null;
 	appointmentsCount?: number | null;
+	dentistsCount?: number | null;
+	canDelete?: boolean | null;
 }

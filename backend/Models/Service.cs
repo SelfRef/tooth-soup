@@ -4,5 +4,6 @@ namespace ToothSoupAPI.Models {
 		public string Name { get; set; }
 		public float Price { get; set; }
 		public bool Deleted { get; set; }
+		public bool Linked { get; set; }
 	}
 }

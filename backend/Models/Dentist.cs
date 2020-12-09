@@ -6,6 +6,7 @@ namespace ToothSoupAPI.Models {
 		public List<Patient> Patients { get; set; }
 		public User User { get; set; }
 		public int UserId { get; set; }
+		public List<Service> Services { get; set; }
 
 		/// <summary>Allow patient to link this dentist in account page</summary>
 		public bool CanLink { get; set; }

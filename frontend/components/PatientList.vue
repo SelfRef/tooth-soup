@@ -1,5 +1,5 @@
 <template>
-	<v-container v-if="isLoggedIn">
+	<v-container>
 		<v-row>
 			<v-col cols="12" lg="8" xl="6">
 				<v-row>
@@ -61,29 +61,9 @@
 								</v-card-actions>
 							</v-card>
 						</v-menu>
-						<v-menu :close-on-content-click="false">
-							<template #activator="{on: onMenu}">
-								<v-tooltip bottom>
-									Remove patient
-									<template #activator="{on: onTip}">
-										<v-btn
-											v-on="{...onTip, ...onMenu}"
-											icon
-											color="error"
-										><v-icon>mdi-account-remove</v-icon></v-btn>
-									</template>
-								</v-tooltip>
-							</template>
-							<v-card>
-								<v-card-text>Are you sure you want to remove this user?</v-card-text>
-								<v-card-actions>
-									<v-btn color="error" text @click="removePatient(item.id)">Remove</v-btn>
-								</v-card-actions>
-							</v-card>
-						</v-menu>
 					</template>
 				</v-data-table>
-				<patient-edit-form :active.sync="userDialog" :patientData="patient" @refresh="refreshData"/>
+				<patient-form :active.sync="userDialog" :patientData="patient" @refresh="refreshData"/>
 				<appointment-list :patientId="selectedPatientId" />
 			</v-col>
 			<v-col>
@@ -144,9 +124,13 @@
 			{
 				text: 'Actions',
 				value: 'actions',
-				width: 150,
+				width: 110,
 			},
 		];
+
+		get role() {
+			return this.$store.getters['Auth/userRole'];
+		}
 
 		async mounted() {
 			await this.refreshData();
@@ -163,12 +147,12 @@
 
 		async unlinkPatient(id: number) {
 			let initData: RequestInit = {
-				method: 'GET',
+				method: 'PUT',
 				headers: {
 					'Authorization': `Bearer ${this.$store.getters['Auth/token']}`,
 				}
 			}
-			await fetch(`${process.env.APIURL}/Dentist/Patient/${id}/Unlink`, initData);
+			await fetch(`${process.env.APIURL}/${this.role}/Patients/${id}/Unlink`, initData);
 			await this.refreshData();
 		}
 
@@ -179,12 +163,8 @@
 					'Authorization': `Bearer ${this.$store.getters['Auth/token']}`,
 				}
 			}
-			await fetch(`${process.env.APIURL}/Dentist/Patient/${id}`, initData);
+			await fetch(`${process.env.APIURL}/${this.role}/Patients/${id}`, initData);
 			await this.refreshData();
-		}
-
-		get isLoggedIn() {
-			return this.$store.getters['Auth/isLoggedIn'];
 		}
 
 		get selectedPatientId() {

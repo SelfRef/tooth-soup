@@ -77,6 +77,10 @@ export default class LoginForm extends Vue {
 		required: (v: string) => Boolean(v) || 'Required',
 	}
 
+	get role() {
+		return this.$store.getters['Auth/userRole'];
+	}
+
 	@Emit('update:active')
 	close() {
 		this.form.reset();

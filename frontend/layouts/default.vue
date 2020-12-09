@@ -86,7 +86,7 @@ export default class DefaultLayout extends Vue {
 		return this.$store.getters['Auth/userRole'];
 	}
 
-	gettabNumber() {
+	get tabNumber() {
 		switch(this.$route.path) {
 			case '/':
 				return 0;

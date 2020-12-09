@@ -116,7 +116,7 @@ export const actions = {
 			},
 			body: JSON.stringify(newData)
 		}
-		await fetch(`${process.env.APIURL}/Dentist/Service`, initData);
+		await fetch(`${process.env.APIURL}/Dentist/Services`, initData);
 		dispatch('pullServices');
 	},
 	async dropService({dispatch, rootGetters}, id: number) {
@@ -127,7 +127,18 @@ export const actions = {
 				'Authorization': `Bearer ${rootGetters['Auth/token']}`,
 			},
 		}
-		await fetch(`${process.env.APIURL}/Dentist/Service/${id}`, initData);
+		await fetch(`${process.env.APIURL}/Dentist/Services/${id}`, initData);
+		dispatch('pullServices');
+	},
+	async linkService({dispatch, rootGetters}, {id, link}: {id: number, link: boolean}) {
+		if (!rootGetters['Auth/isLoggedIn']) return false;
+		const initData: RequestInit = {
+			method: 'PUT',
+			headers: {
+				'Authorization': `Bearer ${rootGetters['Auth/token']}`,
+			},
+		}
+		await fetch(`${process.env.APIURL}/Dentist/Services/${id}/${link ? 'Link' : 'Unlink'}`, initData);
 		dispatch('pullServices');
 	}
 }

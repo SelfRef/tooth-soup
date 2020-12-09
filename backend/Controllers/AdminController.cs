@@ -233,7 +233,6 @@ namespace ToothSoupAPI.Controllers
 		}
 
 
-		
 
 		[HttpGet("Services")]
 		public async Task<ActionResult<IEnumerable<ServiceResponse>>> GetServices()
@@ -248,6 +247,9 @@ namespace ToothSoupAPI.Controllers
 					Name = s.Name,
 					Price = s.Price,
 					AppointmentsCount = _db.Appointments.Where(a => a.ServiceId == s.Id).Count(),
+					DentistsCount = _db.Dentists.Where(d => d.Services.Contains(s)).Count(),
+					CanDelete = true,
+					Linked = false,
 				})
 				.ToListAsync();
 			return services;
@@ -267,6 +269,9 @@ namespace ToothSoupAPI.Controllers
 					Name = s.Name,
 					Price = s.Price,
 					AppointmentsCount = _db.Appointments.Where(a => a.ServiceId == s.Id).Count(),
+					DentistsCount = _db.Dentists.Where(d => d.Services.Contains(s)).Count(),
+					CanDelete = true,
+					Linked = false,
 				})
 				.FirstOrDefaultAsync(s => s.Id == id);
 			

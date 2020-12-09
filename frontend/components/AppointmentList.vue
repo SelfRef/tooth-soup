@@ -177,7 +177,7 @@ export default class AppointmentList extends Vue {
 					'Authorization': `Bearer ${this.$store.getters['Auth/token']}`,
 				}
 			}
-			this.appointments = await fetch(`${process.env.APIURL}/Dentist/Appointments/Patient/${this.patientId}`, initData).then(response => response.json());
+			this.appointments = await fetch(`${process.env.APIURL}/${this.role}/Appointments/Patients/${this.patientId}`, initData).then(response => response.json());
 		}
 	}
 
@@ -198,7 +198,7 @@ export default class AppointmentList extends Vue {
 				canceled: cancel,
 			})
 		}
-		await fetch(`${process.env.APIURL}/${this.role}/Appointment`, initData);
+		await fetch(`${process.env.APIURL}/${this.role}/Appointments`, initData);
 		await this.refreshData();
 	}
 
@@ -209,7 +209,7 @@ export default class AppointmentList extends Vue {
 				'Authorization': `Bearer ${this.$store.getters['Auth/token']}`,
 			}
 		}
-		await fetch(`${process.env.APIURL}/Dentist/Appointment/${id}`, initData);
+		await fetch(`${process.env.APIURL}/${this.role}/Appointments/${id}`, initData);
 		await this.refreshData();
 	}
 

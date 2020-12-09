@@ -213,6 +213,10 @@ export default class PatientForm extends Vue {
 		},
 	};
 
+	get role() {
+		return this.$store.getters['Auth/userRole'];
+	}
+
 	get edit() {
 		return Boolean(this.patientData);
 	}
@@ -236,19 +240,19 @@ export default class PatientForm extends Vue {
 					'Content-Type': 'application/json'
 				}
 		}
-		await fetch(`${process.env.APIURL}/Dentist/Patients`, fetchOptions);
+		await fetch(`${process.env.APIURL}/${this.role}/Patients`, fetchOptions);
 		this.$emit('refresh');
 		this.close();
 	}
 
 	async linkUser() {
 		const fetchOptions: RequestInit = {
-			method: 'GET',
+			method: 'PUT',
 			headers: {
 					'Authorization': `Bearer ${this.$store.getters['Auth/token']}`,
 				}
 		}
-		await fetch(`${process.env.APIURL}/Dentist/Patients/${this.unlinkedUserSelected}/Link`, fetchOptions);
+		await fetch(`${process.env.APIURL}/${this.role}/Patients/${this.unlinkedUserSelected}/Link`, fetchOptions);
 		this.$emit('refresh');
 		this.close();
 	}
@@ -281,7 +285,7 @@ export default class PatientForm extends Vue {
 					'Authorization': `Bearer ${this.$store.getters['Auth/token']}`,
 				},
 		}
-		this.unlinkedUsers = await fetch(`${process.env.APIURL}/Dentist/Patients?unlinked`, fetchOptions).then(r => r.json());
+		this.unlinkedUsers = await fetch(`${process.env.APIURL}/${this.role}/Patients?unlinked`, fetchOptions).then(r => r.json());
 	}
 
 	@Watch('active')

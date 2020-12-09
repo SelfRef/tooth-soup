@@ -1,5 +1,5 @@
 <template>
-	<v-container>
+	<v-container v-if="loggedIn">
 		<v-row justify="center">
 			<v-col cols="auto">
 				<account-info />
@@ -17,6 +17,8 @@ import AccountInfo from '~/components/AccountInfo.vue';
 	}
 })
 export default class Account extends Vue {
-
+	get loggedIn() {
+		return Boolean(this.$store.getters['Auth/token']);
+	}
 }
 </script>

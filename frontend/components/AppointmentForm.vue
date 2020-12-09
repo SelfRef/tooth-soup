@@ -230,6 +230,10 @@ export default class AppointmentForm extends Vue {
 		required: (v: string) => this.edit || Boolean(v) || 'Required',
 	};
 
+	get role() {
+		return this.$store.getters['Auth/userRole'];
+	}
+
 	get items() {
 		const appointments = this.dentistAppointments.map(a => ({
 			name: this.eventName(a),
@@ -284,7 +288,7 @@ export default class AppointmentForm extends Vue {
 					'Content-Type': 'application/json'
 				}
 		}
-		await fetch(`${process.env.APIURL}/${this.role}/Appointment`, fetchOptions);
+		await fetch(`${process.env.APIURL}/${this.role}/Appointments`, fetchOptions);
 		this.form.reset();
 		this.close();
 	}
@@ -301,10 +305,6 @@ export default class AppointmentForm extends Vue {
 
 	get edit() {
 		return Boolean(this.item);
-	}
-
-	get role() {
-		return this.$store.getters['Auth/userRole'];
 	}
 
 	get account() {
@@ -429,7 +429,7 @@ export default class AppointmentForm extends Vue {
 						'Authorization': `Bearer ${this.$store.getters['Auth/token']}`,
 					}
 				}
-				this.dentistAppointments = await fetch(`${process.env.APIURL}/Patient/Appointments/Dentist/${this.dentistId}/${this.date}`, initData).then(response => response.json());
+				this.dentistAppointments = await fetch(`${process.env.APIURL}/${this.role}/Appointments/Dentists/${this.dentistId}/${this.date}`, initData).then(response => response.json());
 			}
 		} else if (this.role === 'Dentist') {
 			this.dentistAppointments = this.$store.getters[`${this.role}/appointments`];
@@ -453,7 +453,7 @@ export default class AppointmentForm extends Vue {
 				'Authorization': `Bearer ${this.$store.getters['Auth/token']}`,
 			}
 		}
-		this.patients = await fetch(`${process.env.APIURL}/Dentist/Patients`, initData).then(response => response.json());
+		this.patients = await fetch(`${process.env.APIURL}/${this.role}/Patients`, initData).then(response => response.json());
 	}
 
 	async refreshDentists() {
@@ -463,7 +463,7 @@ export default class AppointmentForm extends Vue {
 				'Authorization': `Bearer ${this.$store.getters['Auth/token']}`,
 			}
 		}
-		this.dentists = await fetch(`${process.env.APIURL}/Patient/Dentists`, initData).then(response => response.json());
+		this.dentists = await fetch(`${process.env.APIURL}/${this.role}/Dentists`, initData).then(response => response.json());
 	}
 
 	formatDate(dateIso: string) {

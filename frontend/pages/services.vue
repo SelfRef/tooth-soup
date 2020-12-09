@@ -1,5 +1,5 @@
 <template>
-	<service-list/>
+	<service-list v-if="loggedIn"/>
 </template>
 
 <script lang='ts'>
@@ -11,5 +11,8 @@
 		}
 	})
 	export default class Services extends Vue {
+		get loggedIn() {
+			return Boolean(this.$store.getters['Auth/token']);
+		}
 	}
 </script>
