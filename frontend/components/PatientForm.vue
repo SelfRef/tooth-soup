@@ -108,25 +108,25 @@
 							</v-form>
 						</v-card-text>
 						<v-card-actions>
+							<v-spacer></v-spacer>
 							<v-btn
+								color="secondary"
 								text
 								@click="close"
-								color="primary"
 							>
 								Close
 							</v-btn>
-							<v-spacer></v-spacer>
 							<v-btn
 								v-if="register"
-								@click="registerPatient"
 								color="primary"
+								@click="registerPatient"
 							>
 								Register
 							</v-btn>
 							<v-btn
 								v-else
-								@click="save"
 								color="primary"
+								@click="save"
 							>
 								Save
 							</v-btn>
@@ -158,7 +158,7 @@
 						<v-card-actions>
 							<v-spacer></v-spacer>
 							<v-btn
-								color="primary"
+								color="secondary"
 								text
 								@click="close"
 							>
@@ -166,7 +166,6 @@
 							</v-btn>
 							<v-btn
 								color="primary"
-								text
 								@click="linkUser"
 							>
 								Link

@@ -170,7 +170,7 @@
 					<v-card-actions>
 						<v-spacer></v-spacer>
 						<v-btn
-							color="primary"
+							color="secondary"
 							text
 							@click="close"
 						>
@@ -178,7 +178,6 @@
 						</v-btn>
 						<v-btn
 							color="primary"
-							text
 							@click="save"
 						>
 							Save

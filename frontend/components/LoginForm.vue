@@ -40,14 +40,14 @@
 					</v-form>
 				</v-card-text>
 				<v-card-actions>
+					<v-spacer/>
 					<v-btn
-						color="blue darken-1"
+						color="secondary"
 						text
 						@click="close"
 					>
 						Close
 					</v-btn>
-					<v-spacer/>
 					<v-btn
 						color="primary"
 						@click="login"
