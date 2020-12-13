@@ -55,15 +55,17 @@
 				</v-menu>
 			</template>
 			<template #item.actions="{item}">
-				<v-tooltip bottom>
+				<v-tooltip bottom :open-delay="500">
 					Edit appointment
 					<template #activator="{on, attrs}">
-						<v-btn :disabled="item.canceled" v-on="on" v-bind="attrs" icon color="info" @click="edit(item)"><v-icon>mdi-calendar-edit</v-icon></v-btn>
+						<v-btn :disabled="item.canceled" v-on="on" v-bind="attrs" icon color="info" @click="edit(item)">
+							<v-icon>mdi-calendar-edit</v-icon>
+						</v-btn>
 					</template>
 				</v-tooltip>
 				<v-menu :close-on-content-click="false" v-if="role === 'Dentist'">
 					<template #activator="{on: onMenu}">
-						<v-tooltip bottom>
+						<v-tooltip bottom :open-delay="500">
 							Remove appointment
 							<template #activator="{on: onTip}">
 								<v-btn
@@ -71,8 +73,8 @@
 									icon
 									color="error"
 								><v-icon>mdi-calendar-remove</v-icon></v-btn>
-								</template>
-							</v-tooltip>
+							</template>
+						</v-tooltip>
 					</template>
 					<v-card>
 						<v-card-text>Are you sure you want to remove this appointment?</v-card-text>

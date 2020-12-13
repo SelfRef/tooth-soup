@@ -23,7 +23,7 @@
 		>
 			<template #item.patient.dentistName="{item, value}">{{value || (item.role === 'Patient' ? '[not linked]' : '[n/a]')}}</template>
 			<template #item.actions="{item}">
-				<v-tooltip bottom>
+				<v-tooltip bottom :open-delay="500">
 					Edit user
 					<template #activator="{on, attrs}">
 						<v-btn v-on="on" v-bind="attrs" icon color="blue" @click="edit(item)"><v-icon>mdi-account-edit</v-icon></v-btn>
@@ -31,7 +31,7 @@
 				</v-tooltip>
 				<v-menu :close-on-content-click="false">
 					<template #activator="{on: onMenu}">
-						<v-tooltip bottom>
+						<v-tooltip bottom :open-delay="500">
 							Remove user
 							<template #activator="{on: onTip}">
 								<v-btn

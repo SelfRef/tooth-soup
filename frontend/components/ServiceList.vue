@@ -23,7 +23,7 @@
 		>
 			<template #item.price="{value}">{{value | price}}</template>
 			<template #item.actions="{item}">
-				<v-tooltip bottom>
+				<v-tooltip bottom :open-delay="500">
 					Edit service
 					<template #activator="{on, attrs}">
 						<v-btn v-on="on" v-bind="attrs" icon color="blue" @click="edit(item)"><v-icon>mdi-puzzle-edit</v-icon></v-btn>
@@ -31,7 +31,7 @@
 				</v-tooltip>
 				<v-menu :close-on-content-click="false">
 					<template #activator="{on: onMenu}">
-						<v-tooltip bottom>
+						<v-tooltip bottom :open-delay="500">
 							Remove service
 							<template #activator="{on: onTip}">
 								<v-btn

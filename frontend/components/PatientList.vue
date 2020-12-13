@@ -35,7 +35,7 @@
 				>
 					<template #item.birthDate="{value}">{{value | dateTime}}</template>
 					<template #item.actions="{item}">
-						<v-tooltip bottom>
+						<v-tooltip bottom :open-delay="500">
 							Edit patient
 							<template #activator="{on, attrs}">
 								<v-btn v-on="on" v-bind="attrs" icon color="info" @click="editPatient(item)"><v-icon>mdi-account-edit</v-icon></v-btn>
@@ -43,7 +43,7 @@
 						</v-tooltip>
 						<v-menu :close-on-content-click="false">
 							<template #activator="{on: onMenu}">
-								<v-tooltip bottom>
+								<v-tooltip bottom :open-delay="500">
 									Unlink patient
 									<template #activator="{on: onTip}">
 										<v-btn
