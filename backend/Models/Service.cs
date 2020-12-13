@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace ToothSoupAPI.Models {
 	public class Service {
 		public int Id { get; set; }
@@ -5,5 +7,6 @@ namespace ToothSoupAPI.Models {
 		public float Price { get; set; }
 		public bool Deleted { get; set; }
 		public bool Linked { get; set; }
+		public ICollection<Dentist> Dentists { get; set; }
 	}
 }

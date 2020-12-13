@@ -260,6 +260,33 @@ namespace ToothSoupAPI.Seed
 					Price = 70000000
 				}
 			);
+
+			// modelBuilder.Entity<DentistService>().HasData(
+			// 	new DentistService {
+			// 		DentistId = 1,
+			// 		ServiceId = 1
+			// 	},
+			// 	new DentistService {
+			// 		DentistId = 1,
+			// 		ServiceId = 2
+			// 	},
+			// 	new DentistService {
+			// 		DentistId = 1,
+			// 		ServiceId = 3
+			// 	},
+			// 	new DentistService {
+			// 		DentistId = 1,
+			// 		ServiceId = 4
+			// 	},
+			// 	new DentistService {
+			// 		DentistId = 2,
+			// 		ServiceId = 1
+			// 	},
+			// 	new DentistService {
+			// 		DentistId = 2,
+			// 		ServiceId = 2
+			// 	}
+			// );
 		}
 	}
 }

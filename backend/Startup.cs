@@ -34,7 +34,8 @@ namespace ToothSoupAPI
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddDbContext<Database>(options =>
-				options.UseInMemoryDatabase("Database"));
+				options.UseInMemoryDatabase("Database").EnableSensitiveDataLogging()
+			);
 
 			services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 				.AddJwtBearer(options =>
