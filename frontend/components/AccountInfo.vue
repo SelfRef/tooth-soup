@@ -15,6 +15,7 @@
 						<v-text-field
 							v-model="data.email"
 							label="Email"
+							prepend-icon="mdi-email"
 							:append-icon="data.email !== account.email ? 'mdi-cog-sync' : null"
 						/>
 						<v-text-field
@@ -22,6 +23,7 @@
 							type="password"
 							label="Password"
 							placeholder="(unchanged)"
+							prepend-icon="mdi-lock"
 							:append-icon="data.password !== '' ? 'mdi-cog-sync' : null"
 						/>
 						<v-select
