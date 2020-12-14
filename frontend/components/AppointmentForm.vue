@@ -74,7 +74,7 @@
 												</template>
 												<v-date-picker
 													v-model="date"
-													:min="new Date().toISOString().substr(0, 10)"
+													:min="now.substr(0, 10)"
 													no-title
 													@change="$refs.datePicker.save(date)"
 												></v-date-picker>
@@ -103,7 +103,7 @@
 													v-model="timeStart"
 													@click:minute="$refs.timeStartPicker.save(timeStart)"
 													:max="timeEnd"
-													:min="new Date().toISOString().substr(11, 5)"
+													:min="minTime"
 													format="24hr"
 												></v-time-picker>
 											</v-menu>
@@ -252,8 +252,12 @@ export default class AppointmentForm extends Vue {
 				canceled: false,
 			})
 		}
-
 		return appointments;
+	}
+
+	get minTime() {
+		if (this.date === this.now.substr(0, 10)) return this.now.substr(11, 5);
+		else return undefined;
 	}
 
 	getName(item) {
@@ -371,7 +375,7 @@ export default class AppointmentForm extends Vue {
 			duration: null,
 			canceled: false,
 		}
-		if (active && !this.item) this.date = new Date().toISOString().substr(0, 10);
+		if (active && !this.item) this.date = this.now.substr(0, 10);
 		this.setUserIds();
 		this.updateAppointments()
 	}
@@ -383,7 +387,7 @@ export default class AppointmentForm extends Vue {
 			this.timeStart = item.startDate?.substr(11, 5) ?? '';
 			this.timeEnd = item.endDate?.substr(11, 5) ?? '';
 		} else {
-			this.date = new Date().toISOString().substr(0, 10);
+			this.date = this.now.substr(0, 10);
 			this.timeStart = '';
 			this.timeEnd = '';
 			this.duration = '';
@@ -395,10 +399,10 @@ export default class AppointmentForm extends Vue {
 	@Watch('timeEnd')
 	calcDate() {
 		if (this.date && this.timeStart) {
-			this.appointment.startDate = new Date(`${this.date}T${this.timeStart}Z`).toISOString();
+			this.appointment.startDate = this.dateToLocalISO(new Date(`${this.date}T${this.timeStart}`));
 		}
 		if (this.date && this.timeEnd) {
-			this.appointment.endDate = new Date(`${this.date}T${this.timeEnd}Z`).toISOString();
+			this.appointment.endDate = this.dateToLocalISO(new Date(`${this.date}T${this.timeEnd}`));
 		}
 		if (this.timeStart && this.timeEnd) {
 			const [timeStartHours, timeStartMinutes] = this.timeStart.split(':')
@@ -470,6 +474,19 @@ export default class AppointmentForm extends Vue {
 		} else {
 			return 'Busy';
 		}
+	}
+
+	dateToLocalISO(date) {
+		const offsetMs = date.getTimezoneOffset() * 60 * 1000;
+		const msLocal = date.getTime() - offsetMs;
+		const dateLocal = new Date(msLocal);
+		const iso = dateLocal.toISOString();
+		const isoLocal = iso.slice(0, 19);
+		return isoLocal;
+	}
+
+	get now() {
+		return this.dateToLocalISO(new Date());
 	}
 }
 </script>

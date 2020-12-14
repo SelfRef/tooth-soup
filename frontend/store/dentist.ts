@@ -34,7 +34,7 @@ export const getters = {
 };
 
 export const mutations = {
-	setAccount(state: State, data: Patient) {
+	setAccount(state: State, data: Dentist) {
 		state.account = data;
 	},
 	setPatients(state: State, data: Patient[]) {
@@ -152,6 +152,7 @@ export const actions = {
 		inputData.forEach(appointment => {
 			data.push({...appointment});
 		});
+		console.log(getters.account)
 		data = data.map(a => ([
 			a.startDate.substr(0, 10),
 			a.startDate.substr(11, 5),

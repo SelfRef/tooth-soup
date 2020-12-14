@@ -203,7 +203,7 @@ export default class AppointmentList extends Vue {
 		} else {
 			data = this.appointments;
 		}
-		return data.filter(a => this.showPast || (!a.canceled && !this.pastAppointment(a)));
+		return data.filter(a => this.showPast || (!this.pastAppointment(a)));
 	}
 
 	get role() {

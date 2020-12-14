@@ -3,8 +3,8 @@
 		<v-card>
 			<v-row>
 				<v-col cols="4">
-					<v-img src="https://thumbs.dreamstime.com/z/senior-doctor-holding-papers-smiling-23096004.jpg"></v-img>
-
+					<v-img v-if="loggedIn" src="https://hungarytoday.hu/wp-content/uploads/2018/02/18ps27.jpg"></v-img>
+					<v-img v-else src="https://thumbs.dreamstime.com/z/senior-doctor-holding-papers-smiling-23096004.jpg"></v-img>
 				</v-col>
 				<v-col>
 					<v-card-title>Welcome to our clinic!</v-card-title>
