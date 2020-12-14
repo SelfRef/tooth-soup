@@ -46,6 +46,9 @@ namespace ToothSoupAPI.Controllers
 		[AllowAnonymous]
 		public async Task<ActionResult> RegisterPatient(PatientRequest patient)
 		{
+			if (_db.Users.Any(u => u.Email == patient.Email)) return Conflict("User with this email already exists");
+			if (_db.Patients.Any(u => u.Pesel == patient.Pesel)) return Conflict("User with this PESEL already exists");
+
 			var newUser = new User {
 				Email = patient.Email,
 				Password = patient.Password,
@@ -95,7 +98,7 @@ namespace ToothSoupAPI.Controllers
 			return user;
 		}
 
-		private string Initials(User user) {
+		private static string Initials(User user) {
 			var first = user.FirstName.Substring(0, 1);
 			var second = user.LastName.Substring(0, 1);
 			return first + second;

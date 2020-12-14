@@ -31,6 +31,14 @@ namespace ToothSoupAPI.Seed
 				},
 				new User {
 					Id = 3,
+					Email = "dentist3@qwe.pl",
+					Password = "qwe",
+					FirstName = "Stefan",
+					LastName = "Testowiak",
+					Role = UserRole.DENTIST,
+				},
+				new User {
+					Id = 4,
 					Email = "patient1@qwe.pl",
 					Password = "qwe",
 					FirstName = "Janusz",
@@ -38,7 +46,7 @@ namespace ToothSoupAPI.Seed
 					Role = UserRole.PATIENT,
 				},
 				new User {
-					Id = 4,
+					Id = 5,
 					Email = "patient2@qwe.pl",
 					Password = "qwe",
 					FirstName = "Zbigniew",
@@ -46,7 +54,7 @@ namespace ToothSoupAPI.Seed
 					Role = UserRole.PATIENT,
 				},
 				new User {
-					Id = 5,
+					Id = 6,
 					Email = "patient3@qwe.pl",
 					Password = "qwe",
 					FirstName = "Karol",
@@ -54,7 +62,7 @@ namespace ToothSoupAPI.Seed
 					Role = UserRole.PATIENT,
 				},
 				new User {
-					Id = 6,
+					Id = 7,
 					Email = "admin1@qwe.pl",
 					Password = "qwe",
 					FirstName = "Jacek",
@@ -67,15 +75,22 @@ namespace ToothSoupAPI.Seed
 				new Dentist {
 					Id = 1,
 					UserId = 1,
-					CanLink = true,
+					CanLink = false,
 					CanCreateAppointment = false
 				},
 				new Dentist
 				{
 					Id = 2,
 					UserId = 2,
-					CanLink = true,
+					CanLink = false,
 					CanCreateAppointment = true
+				},
+				new Dentist
+				{
+					Id = 3,
+					UserId = 3,
+					CanLink = true,
+					CanCreateAppointment = false
 				}
 			);
 
@@ -84,21 +99,21 @@ namespace ToothSoupAPI.Seed
 					Id = 1,
 					Pesel = "01234567891",
 					BirthDate = today.AddYears(-40),
-					UserId = 3,
+					UserId = 4,
 					DentistId = 1
 				},
 				new Patient {
 					Id = 2,
 					Pesel = "98765432109",
 					BirthDate = today.AddYears(-30),
-					UserId = 4,
+					UserId = 5,
 					DentistId = 1
 				},
 				new Patient {
 					Id = 3,
 					Pesel = "23456789012",
 					BirthDate = today.AddYears(-60),
-					UserId = 5,
+					UserId = 6,
 					DentistId = null
 				}
 			);
