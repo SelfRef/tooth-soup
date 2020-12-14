@@ -5,54 +5,52 @@
 				<h2>Appointment List</h2>
 			</v-col>
 			<v-col cols="auto">
-				<v-tooltip bottom :open-delay="500">
-					Refresh
-					<template #activator="{on}">
-						<v-btn icon @click="refreshData" color="secondary" v-on="on" :disabled="!patientId && role !== 'Patient'">
-							<v-icon>mdi-refresh</v-icon>
-						</v-btn>
-					</template>
-				</v-tooltip>
-			</v-col>
-				<v-col cols="auto">
-				<v-tooltip bottom :open-delay="500">
-					Export appointments to XML
-					<template #activator="{on}">
-						<v-btn
-							icon
-							@click="$store.dispatch(`${role}/exportAppointmentsXml`, {id: patientId})"
-							color="secondary"
-							v-on="on"
-							:disabled="!patientId && role !== 'Patient'"
-						>
-							<v-icon>mdi-file-code</v-icon>
-						</v-btn>
-					</template>
-				</v-tooltip>
-			</v-col>
-			<v-col cols="auto">
-				<v-tooltip bottom :open-delay="500">
-					Export appointments to PDF
-					<template #activator="{on}">
-						<v-btn
-							icon
-							@click="$store.dispatch(`${role}/exportAppointmentsPdf`, {id: patientId})"
-							color="secondary"
-							v-on="on"
-							:disabled="!patientId && role !== 'Patient'"
-						>
-							<v-icon>mdi-file-pdf</v-icon>
-						</v-btn>
-					</template>
-				</v-tooltip>
+				<div>
+					<v-tooltip bottom :open-delay="500">
+						Refresh
+						<template #activator="{on}">
+							<v-btn icon @click="refreshData" color="secondary" v-on="on" :disabled="!patientId && role !== 'Patient'">
+								<v-icon>mdi-refresh</v-icon>
+							</v-btn>
+						</template>
+					</v-tooltip>
+					<v-tooltip bottom :open-delay="500">
+						Export appointments to XML
+						<template #activator="{on}">
+							<v-btn
+								icon
+								@click="$store.dispatch(`${role}/exportAppointmentsXml`, {id: patientId})"
+								color="teal"
+								v-on="on"
+								:disabled="!patientId && role !== 'Patient'"
+							>
+								<v-icon>mdi-file-code</v-icon>
+							</v-btn>
+						</template>
+					</v-tooltip>
+					<v-tooltip bottom :open-delay="500">
+						Export appointments to PDF
+						<template #activator="{on}">
+							<v-btn
+								icon
+								@click="$store.dispatch(`${role}/exportAppointmentsPdf`, {id: patientId})"
+								color="orange"
+								v-on="on"
+								:disabled="!patientId && role !== 'Patient'"
+							>
+								<v-icon>mdi-file-pdf</v-icon>
+							</v-btn>
+						</template>
+					</v-tooltip>
+				</div>
 			</v-col>
 			<v-spacer></v-spacer>
 			<v-col cols="auto">
 				<v-switch
 					hide-details
 					height="0"
-					v-model="activeOnly"
-					label="Active only"
+					v-model="showPast"
+					label="Show past"
 					:disabled="!patientId && role !== 'Patient'"
 				/>
 			</v-col>
@@ -99,7 +97,7 @@
 						<v-btn
 							icon
 							@click="$store.dispatch(`${role}/exportAppointmentsPdf`, {id: patientId, appointment: item})"
-							color="secondary"
+							color="orange"
 							v-on="on"
 						>
 							<v-icon>mdi-file-pdf</v-icon>
@@ -173,7 +171,7 @@ export default class AppointmentList extends Vue {
 	private appointments: Appointment[] = [];
 	private appointment: Appointment | null = null;
 	private dialog = false;
-	private activeOnly = false;
+	private showPast = false;
 	private headers = [
 		{
 			text: 'Date',
@@ -199,11 +197,13 @@ export default class AppointmentList extends Vue {
 	];
 
 	get filteredAppointments() {
+		let data;
 		if (this.role === 'Patient') {
-			return this.$store.getters[`${this.role}/appointments`].filter(a => !this.activeOnly || !a.canceled);
+			data = this.$store.getters[`${this.role}/appointments`]
 		} else {
-			return this.appointments.filter(a => !this.activeOnly || !a.canceled);
+			data = this.appointments;
 		}
+		return data.filter(a => this.showPast || (!a.canceled && !this.pastAppointment(a)));
 	}
 
 	get role() {
@@ -286,6 +286,10 @@ export default class AppointmentList extends Vue {
 		if (this.role === 'Patient') {
 			return new Date(appointment.startDate) > new Date();
 		} else return true;
+	}
+
+	pastAppointment(appointment: Appointment) {
+		return new Date(appointment.endDate) < new Date();
 	}
 
 	@Watch('dialog')
