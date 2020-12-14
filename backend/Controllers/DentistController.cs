@@ -399,7 +399,7 @@ namespace ToothSoupAPI.Controllers
 					Name = s.Name,
 					Price = s.Price,
 					AppointmentsCount = _db.Appointments.Where(a => a.ServiceId == s.Id).Count(),
-					DentistsCount = _db.Dentists.Where(d => d.Services.Contains(s)).Count(),
+					DentistsCount = s.Dentists.Count,
 					Linked = dentist.Services.Contains(s)
 				})
 				.ToListAsync();
@@ -429,7 +429,7 @@ namespace ToothSoupAPI.Controllers
 					Name = s.Name,
 					Price = s.Price,
 					AppointmentsCount = _db.Appointments.Where(a => a.ServiceId == s.Id).Count(),
-					DentistsCount = _db.Dentists.Where(d => d.Services.Contains(s)).Count(),
+					DentistsCount = s.Dentists.Count,
 					Linked = dentist.Services.Contains(s)
 				})
 				.FirstOrDefaultAsync(s => s.Id == id);

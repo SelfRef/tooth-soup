@@ -237,7 +237,7 @@ namespace ToothSoupAPI.Seed
 				new Service {
 					Id = 1,
 					Name = "Overview",
-					Price = 100
+					Price = 100,
 				},
 				new Service {
 					Id = 2,
@@ -261,32 +261,43 @@ namespace ToothSoupAPI.Seed
 				}
 			);
 
-			// modelBuilder.Entity<DentistService>().HasData(
-			// 	new DentistService {
-			// 		DentistId = 1,
-			// 		ServiceId = 1
-			// 	},
-			// 	new DentistService {
-			// 		DentistId = 1,
-			// 		ServiceId = 2
-			// 	},
-			// 	new DentistService {
-			// 		DentistId = 1,
-			// 		ServiceId = 3
-			// 	},
-			// 	new DentistService {
-			// 		DentistId = 1,
-			// 		ServiceId = 4
-			// 	},
-			// 	new DentistService {
-			// 		DentistId = 2,
-			// 		ServiceId = 1
-			// 	},
-			// 	new DentistService {
-			// 		DentistId = 2,
-			// 		ServiceId = 2
-			// 	}
-			// );
+			modelBuilder.Entity<Dentist>()
+				.HasMany(d => d.Services)
+				.WithMany(s => s.Dentists)
+				.UsingEntity<Dictionary<string, object>>(
+					"DentistService",
+					r => r.HasOne<Service>().WithMany().HasForeignKey("ServiceId"),
+					l => l.HasOne<Dentist>().WithMany().HasForeignKey("DentistId"),
+					ds => {
+						ds.HasKey("DentistId", "ServiceId");
+						ds.HasData(
+							new {
+								DentistId = 1,
+								ServiceId = 1
+							},
+							new {
+								DentistId = 1,
+								ServiceId = 2
+							},
+							new {
+								DentistId = 1,
+								ServiceId = 3
+							},
+							new {
+								DentistId = 1,
+								ServiceId = 4
+							},
+							new {
+								DentistId = 2,
+								ServiceId = 1
+							},
+							new {
+								DentistId = 2,
+								ServiceId = 2
+							}
+						);
+					}
+				);
 		}
 	}
 }
