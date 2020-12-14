@@ -45,7 +45,7 @@ export default class AppointmentCalendar extends Vue {
 			name: this.eventName(a),
 			start: this.formatDate(a.startDate),
 			end: this.formatDate(a.endDate),
-			color: a.canceled ? 'error' : 'primary',
+			color: this.appointmentColor(a),
 			canceled: a.canceled,
 		}))
 	}
@@ -111,6 +111,16 @@ export default class AppointmentCalendar extends Vue {
 		} else {
 			return 'Busy';
 		}
+	}
+
+	appointmentColor(appointment: Appointment) {
+		if (this.pastAppointment(appointment)) return'grey';
+		else if (appointment.canceled) return 'red';
+		else return 'primary';
+	}
+
+	pastAppointment(appointment: Appointment) {
+		return new Date(appointment.endDate) < new Date();
 	}
 }
 </script>

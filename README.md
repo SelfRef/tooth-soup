@@ -6,28 +6,42 @@ A system supporting the work of a dentist.
 
 ## Features
 
-- Patient
-  - can set main dentist in settings
-  - can create appointments for main dentist
-  - can create appointments for other dentists if dentist allowed for this
-  - can edit or cancel appointment
+- Patient can
+  - set main dentist in settings
+  - change email or password
+  - view own appointments
+  - create appointments for main dentist
+  - create appointments for other dentists if dentist allowed for this
+  - edit or cancel appointment
+  - export appointments of invoice
+- Dentist can
+  - link/unlink patients
+  - view own appointments
+  - create appointments for linked patients
+  - edit or cancel/uncancel appointments
+  - create and edit patients
+  - create/link/remove services (conditionally)
+  - export appointments of invoice
+- Admin can
+  - fully manage users
+  - fully manager services
 
 ## Roles & privileges
 
 Action | Guest | Patient | Dentist | Admin
 --- | :---: | :---: | :---: | :---:
-Login | ✔ | ❌ | ❌ | ❌
-Register | ✔ | ❌ | ❌ | ❌
+Login as anyone | ✔ | ❌ | ❌ | ❌
+Register as patient | ✔ | ❌ | ❌ | ❌
 Home page | ✔ | ✔ | ✔ | ✔
 --- | --- | --- | --- | ---
 My account page | ❌ | ✔ | ✔ | ❌
-Edit my email | ❌ | ✔ | ✔ | ❌
-Edit my password | ❌ | ✔ | ✔ | ❌
-Edit linked dentist | ❌ | ✔ | ❌ | ❌
-Edit linking agreement | ❌ | ❌ | ✔ | ❌
-Edit unlinked appointments | ❌ | ❌ | ✔ | ❌
+Edit my email | - | ✔ | ✔ | -
+Edit my password | - | ✔ | ✔ | -
+Edit linked dentist | - | ✔ | ❌ | -
+Edit linking agreement | - | ❌ | ✔ | -
+Edit unlinked appointments | - | ❌ | ✔ | -
 --- | --- | --- | --- | ---
-Patients page | ❌ | ❌ | ✔ | ❌
+Patient list page | ❌ | ❌ | ✔ | ❌
 List my patients | - | - | ✔ | -
 Create patient | - | - | ✔ | -
 Link patient | - | - | ✔ | -
@@ -35,7 +49,7 @@ Unlink patient | - | - | ✔ | -
 Edit linked patient | - | - | ✔ | -
 Remove patient | - | - | ❌ | -
 --- | --- | --- | --- | ---
-Appointments page | ❌ | ✔ | ✔ | ❌
+Appointment list page | ❌ | ✔ | ✔ | ❌
 List my appointments | - | ✔ | ✔ | -
 Create appointment | - | ✔ | ✔ | -
 Cancel appointment | - | ✔ | ✔ | -
@@ -44,13 +58,16 @@ Edit active appointment | - | ✔ | ✔ | -
 Edit canceled appointment | - | ❌ | ✔ | -
 Edit past appointment | - | ❌ | ✔ | -
 Remove appointment | - | ❌ | ✔ | -
+Export appointments in PDF | - | ✔ | ✔ | -
+Export appointments in XML | - | ✔ | ✔ | -
+Export invoice in PDF | - | ✔ | ✔ | -
 --- | --- | --- | --- | ---
-Users page | ❌ | ❌ | ❌ | ✔
+User list page | ❌ | ❌ | ❌ | ✔
 Create any user | - | - | - | ✔
 Edit any user | - | - | - | ✔
 Remove any user | - | - | - | ✔
 --- | --- | --- | --- | ---
-Services page | ❌ | ❌ | ✔ | ✔
+Service list page | ❌ | ❌ | ✔ | ✔
 Create service | - | - | ✔ | ✔
 Link service | - | - | ✔ | ❌
 Unlink service | - | - | ✔ | ❌

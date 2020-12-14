@@ -274,7 +274,9 @@ export default class AppointmentList extends Vue {
 	}
 
 	canceledRow(item: Appointment) {
-		if (item.canceled) {
+		if (new Date(item.endDate) < new Date()) {
+			return this.$vuetify.theme.dark ? 'black' : 'grey lighten-2'
+		} else if (item.canceled) {
 			return this.$vuetify.theme.dark ? 'brown darken-4' : 'red lighten-5'
 		}
 		return '';
@@ -282,9 +284,7 @@ export default class AppointmentList extends Vue {
 
 	canEditOrCancel(appointment: Appointment) {
 		if (this.role === 'Patient') {
-			const now = new Date();
-			const date = new Date(appointment.startDate);
-			return date > now;
+			return new Date(appointment.startDate) > new Date();
 		} else return true;
 	}
 

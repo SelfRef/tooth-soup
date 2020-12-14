@@ -32,24 +32,15 @@
 		</v-row>
 
 		<v-data-table
-			:headers="headers"
+			:headers="tableHeaders"
 			:items="services"
 			:item-class="unlinkedRow"
 		>
 			<template #item.price="{value}">{{value | price}}</template>
-			<template #item.actions="{item}">
+			<template #item.linked="{item, value}">
 				<v-menu>
-					<template #activator="{on: onMenu}">
-						<v-tooltip bottom :open-delay="500">
-							{{ item.linked ? 'Unlink' : 'Link' }} service
-							<template #activator="{on: onTip}">
-								<v-btn
-									v-on="{...onTip, ...onMenu}"
-									icon
-									:color="item.linked ? 'warning' : 'success'"
-								><v-icon>mdi-puzzle-{{ item.linked ? 'minus' : 'plus' }}</v-icon></v-btn>
-							</template>
-						</v-tooltip>
+					<template #activator="{on}">
+						<v-simple-checkbox readonly v-on="on" :value="value" />
 					</template>
 					<v-card>
 						<v-card-text>Are you sure you want to {{ item.linked ? 'unlink' : 'link' }} this service?</v-card-text>
@@ -58,6 +49,8 @@
 						</v-card-actions>
 					</v-card>
 				</v-menu>
+			</template>
+			<template #item.actions="{item}">
 				<v-tooltip bottom :open-delay="500">
 					Edit service
 					<template #activator="{on, attrs}">
@@ -139,11 +132,24 @@
 				value: 'appointmentsCount',
 			},
 			{
+				text: 'Linked',
+				value: 'linked',
+			},
+			{
 				text: 'Actions',
 				value: 'actions',
-				width: 150,
+				width: 110,
 			},
 		];
+
+		get tableHeaders() {
+			if (this.role === 'Dentist') return this.headers;
+			else {
+				const newHeaders = [...this.headers];
+				newHeaders.splice(4, 1);
+				return newHeaders;
+			}
+		}
 
 		get role() {
 			return this.$store.getters['Auth/userRole'];
@@ -177,7 +183,7 @@
 		}
 
 		unlinkedRow(item: Service) {
-			if (!item.linked) {
+			if (this.role === 'Dentist' && !item.linked) {
 				return this.$vuetify.theme.dark ? 'brown darken-4' : 'red lighten-5'
 			}
 			return '';
