@@ -2,7 +2,7 @@
 	<v-app>
 		<v-app-bar fixed app>
 			<v-toolbar-title style="overflow: visible" class="mr-6">
-				Tooth Soup
+				ToothSoup
 				<v-icon right>mdi-tooth</v-icon>
 				<v-icon>mdi-bowl-mix</v-icon></v-toolbar-title>
 			<v-tabs :value="tabNumber">
@@ -26,7 +26,7 @@
 							color="primary"
 							v-bind="attrs"
 							v-on="on"
-						>JN</v-avatar>
+						>{{ initials }}</v-avatar>
 					</template>
 					<v-list>
 						<v-list-item @click="logout" color="error">
@@ -52,7 +52,7 @@
 			<nuxt />
 		</v-main>
 		<v-footer app>
-			<span>&copy; {{copyName}} {{ new Date().getFullYear() }}</span>
+			<span>&copy; ToothSoup Corp. {{ new Date().getFullYear() }}</span>
 		</v-footer>
 		<login-form :active.sync="loginDialog"/>
 		<patient-form :active.sync="registerDialog" :register="true" />
@@ -72,8 +72,6 @@ import PatientForm from "~/components/PatientForm.vue";
 	}
 })
 export default class DefaultLayout extends Vue {
-	private title = 'Vuetify.js';
-	private copyName = 'Tooth Soup Corp.';
 	private loginDialog = false;
 	private registerDialog = false;
 	private theme = 0;
@@ -84,6 +82,10 @@ export default class DefaultLayout extends Vue {
 	
 	get role() {
 		return this.$store.getters['Auth/userRole'];
+	}
+
+	get initials() {
+		return this.$store.getters['Auth/userInitials'];
 	}
 
 	get tabNumber() {

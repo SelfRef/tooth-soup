@@ -44,7 +44,7 @@ export const mutations = {
 }
 
 export const actions = {
-	async updateAccount({commit, rootGetters}) {
+	async pullAccount({commit, rootGetters}) {
 		if (!rootGetters['Auth/isLoggedIn']) return false;
 		const initData: RequestInit = {
 			method: 'GET',

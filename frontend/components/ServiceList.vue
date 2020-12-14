@@ -184,7 +184,7 @@
 
 		unlinkedRow(item: Service) {
 			if (this.role === 'Dentist' && !item.linked) {
-				return this.$vuetify.theme.dark ? 'brown darken-4' : 'red lighten-5'
+				return this.$vuetify.theme.dark ? 'black' : 'grey lighten-2'
 			}
 			return '';
 		}

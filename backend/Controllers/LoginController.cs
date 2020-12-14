@@ -75,7 +75,8 @@ namespace ToothSoupAPI.Controllers
 
 			var claims = new[] {
 				new Claim(ClaimTypes.Name, userInfo.Id.ToString()),
-				new Claim(ClaimTypes.Role, userInfo.Role)
+				new Claim(ClaimTypes.Role, userInfo.Role),
+				new Claim(ClaimTypes.NameIdentifier, Initials(userInfo))
 			};
 
 			var token = new JwtSecurityToken(_config["Jwt:Issuer"],
@@ -92,6 +93,12 @@ namespace ToothSoupAPI.Controllers
 			User user = _db.Users.Where(u => u.Email == userData.Email && u.Password == userData.Password).FirstOrDefault();
 
 			return user;
+		}
+
+		private string Initials(User user) {
+			var first = user.FirstName.Substring(0, 1);
+			var second = user.LastName.Substring(0, 1);
+			return first + second;
 		}
 	}
 }

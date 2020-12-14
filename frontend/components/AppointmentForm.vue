@@ -264,7 +264,7 @@ export default class AppointmentForm extends Vue {
 	mounted() {
 		if (this.role === 'Patient') {
 			this.refreshDentists();
-			this.$store.dispatch(`${this.role}/updateAccount`);
+			this.$store.dispatch(`${this.role}/pullAccount`);
 		}
 		this.refreshServices(this.dentistId);
 		this.updateAppointments();

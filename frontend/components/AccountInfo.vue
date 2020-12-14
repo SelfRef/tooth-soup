@@ -16,7 +16,6 @@
 							v-model="data.email"
 							label="Email"
 							prepend-icon="mdi-email"
-							:append-icon="data.email !== account.email ? 'mdi-cog-sync' : null"
 						/>
 						<v-text-field
 							v-model="data.password"
@@ -24,7 +23,6 @@
 							label="Password"
 							placeholder="(unchanged)"
 							prepend-icon="mdi-lock"
-							:append-icon="data.password !== '' ? 'mdi-cog-sync' : null"
 						/>
 						<v-select
 							v-if="role === 'Patient'"
@@ -33,30 +31,39 @@
 							:item-value="d => d.id"
 							label="Linked dentist"
 							v-model="data.dentistId"
-							:append-icon="data.dentistId !== account.dentistId ? 'mdi-cog-sync' : null"
+							prepend-icon="mdi-account-star"
 						/>
 						<v-switch
 							v-if="role === 'Dentist'"
 							label="Patients can link me as the main dentist"
 							v-model="data.canLink"
-							:append-icon="data.canLink !== account.canLink ? 'mdi-cog-sync' : null"
+							:prepend-icon="data.canLink ? 'mdi-link' : 'mdi-link-lock'"
 						/>
 						<v-switch
 							v-if="role === 'Dentist'"
 							label="Not mine patients can create appointments"
 							v-model="data.canCreateAppointment"
-							:append-icon="data.canCreateAppointment !== account.canCreateAppointment ? 'mdi-cog-sync' : null"
+							:prepend-icon="data.canCreateAppointment ? 'mdi-calendar-account' : 'mdi-calendar-lock'"
 						/>
 					</v-form>
 				</v-card-text>
-				<v-card-actions>
+				<v-card-actions class="mr-2">
+					<v-spacer></v-spacer>
 					<v-btn
 						color="primary"
 						@click="pushData"
 						:disabled="!isUpdated"
 					>
-						<v-icon left>mdi-cog-sync</v-icon>
+						<v-icon left>mdi-content-save-cog</v-icon>
 						Update
+					</v-btn>
+					<v-btn
+						color="error"
+						@click="resetData"
+						:disabled="!isUpdated"
+					>
+						<v-icon left>mdi-content-save-off</v-icon>
+						Reset
 					</v-btn>
 				</v-card-actions>
 			</v-col>
@@ -103,11 +110,9 @@ export default class AccountInfo extends Vue {
 
 	async mounted() {
 		this.loading = true
+		await this.$store.dispatch(`${this.role}/pullAccount`);
 		if (this.role === 'Patient') {
-			await this.$store.dispatch(`${this.role}/updateAccount`);
 			await this.$store.dispatch(`${this.role}/updateDentists`);
-		} else if (this.role === 'Dentist') {
-			await this.$store.dispatch(`${this.role}/pullAccount`);
 		}
 	}
 
@@ -121,6 +126,10 @@ export default class AccountInfo extends Vue {
 				await this.$store.dispatch(`${this.role}/pushAccount`, this.data);
 				break;
 		}
+	}
+
+	async resetData() {
+		await this.$store.dispatch(`${this.role}/pullAccount`);
 	}
 
 	@Watch('account')

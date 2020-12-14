@@ -2,6 +2,7 @@ type State = {
 	token: string | null
 	userId: number | null
 	userRole: string | null
+	userInitials: string | null
 	tokenExpiration: string | null
 	theme: number
 }
@@ -10,6 +11,7 @@ export const state = (): State => ({
 	token: null,
 	userId: null,
 	userRole: null,
+	userInitials: null,
 	tokenExpiration: null,
 	theme: 0,
 })
@@ -23,6 +25,9 @@ export const getters = {
 	},
 	userRole(state: State) {
 		return state.userRole;
+	},
+	userInitials(state: State) {
+		return state.userInitials;
 	},
 	tokenExpiration(state: State) {
 		return state.tokenExpiration ? new Date(state.tokenExpiration) : null;
@@ -45,6 +50,9 @@ export const mutations = {
 	setUserRole(state: State, userRole: string | null) {
 		state.userRole = userRole;
 	},
+	setUserInitials(state: State, userInitials: string | null) {
+		state.userInitials = userInitials;
+	},
 	setTokenExpiration(state: State, tokenExpiration: Date | null) {
 		state.tokenExpiration = tokenExpiration ? tokenExpiration.toISOString() : null;
 	},
@@ -56,7 +64,7 @@ export const mutations = {
 export const actions = {
 	setToken({commit}, token: string) {
 		commit('setToken', token);
-		let id = null, role = null, exp = null;
+		let id = null, role = null, exp = null, initials = null;
 
 		if (token) {
 			const dataStr = token.split('.')[1];
@@ -64,11 +72,13 @@ export const actions = {
 
 			id = data['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'];
 			role = data['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+			initials = data['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'];
 			exp = new Date(data['exp'] * 1000);
 		}
 
 		commit('setUserId', id);
 		commit('setUserRole', role);
+		commit('setUserInitials', initials);
 		commit('setTokenExpiration', exp);
 	},
 
