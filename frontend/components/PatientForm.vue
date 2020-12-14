@@ -222,14 +222,12 @@ export default class PatientForm extends Vue {
 
 	@Emit('update:active')
 	close() {
-		console.log('close')
 		this.form.reset();
 		this.alert = null;
 		return false;
 	}
 
 	async save() {
-		console.log('save')
 		if (!this.form.validate()) return;
 		const fetchOptions: RequestInit = {
 			method: this.edit ? 'PUT' : 'POST',
@@ -257,7 +255,6 @@ export default class PatientForm extends Vue {
 	}
 
 	async registerPatient() {
-		console.log('register')
 		if (!this.form.validate()) return;
 		let fetchOptions: RequestInit = {
 			method: 'POST',
@@ -289,7 +286,6 @@ export default class PatientForm extends Vue {
 
 	@Watch('active')
 	onDialogShow(active: boolean) {
-		console.log('change active', active)
 		if (active) {
 			this.patient = this.patientData ? {...this.patientData} : {
 				pesel: null,

@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using IdentityServer4.Extensions;
+using Namotion.Reflection;
 
 namespace ToothSoupAPI.Controllers
 {
@@ -392,6 +393,8 @@ namespace ToothSoupAPI.Controllers
 			var dentist = await _db.Dentists.Include(d => d.Services).FirstOrDefaultAsync(d => d.UserId == userId);
 			if (dentist == null) return NotFound("Dentist");
 
+			var linkedOnly = Request.Query.ContainsKey("Linked");
+
 			var services = await _db.Services
 				.Where(s => !s.Deleted)
 				.Select(s => new ServiceResponse {
@@ -400,8 +403,9 @@ namespace ToothSoupAPI.Controllers
 					Price = s.Price,
 					AppointmentsCount = _db.Appointments.Where(a => a.ServiceId == s.Id).Count(),
 					DentistsCount = s.Dentists.Count,
-					Linked = dentist.Services.Contains(s)
+					Linked = s.Dentists.Contains(dentist)
 				})
+				.Where(s => !linkedOnly || s.Linked)
 				.ToListAsync();
 
 			foreach (var service in services)
@@ -430,7 +434,7 @@ namespace ToothSoupAPI.Controllers
 					Price = s.Price,
 					AppointmentsCount = _db.Appointments.Where(a => a.ServiceId == s.Id).Count(),
 					DentistsCount = s.Dentists.Count,
-					Linked = dentist.Services.Contains(s)
+					Linked = s.Dentists.Contains(dentist)
 				})
 				.FirstOrDefaultAsync(s => s.Id == id);
 
@@ -480,8 +484,7 @@ namespace ToothSoupAPI.Controllers
 				.FirstOrDefaultAsync(s => s.Id == id);
 			if (service == null) return NotFound();
 
-			var areConnectedDentists = _db.Dentists.Any(d => d.Services.Contains(service));
-			if (areConnectedDentists) return Forbid("Cannot remove service with connected dentists");
+			if (service.Dentists.Count > 0) return Forbid("Cannot remove service with connected dentists");
 
 			service.Deleted = true;
 			await _db.SaveChangesAsync();
@@ -498,7 +501,7 @@ namespace ToothSoupAPI.Controllers
 			var service = await _db.Services.FindAsync(id);
 			if (service == null) return NotFound("Service");
 
-			var dentist = await _db.Dentists.FirstOrDefaultAsync(d => d.UserId == userId);
+			var dentist = await _db.Dentists.Include(d => d.Services).FirstOrDefaultAsync(d => d.UserId == userId);
 			if (dentist == null) return NotFound("Dentist");
 
 			switch (link)

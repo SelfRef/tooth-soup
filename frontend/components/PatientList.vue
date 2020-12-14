@@ -41,7 +41,7 @@
 								<v-btn v-on="on" v-bind="attrs" icon color="info" @click="editPatient(item)"><v-icon>mdi-account-edit</v-icon></v-btn>
 							</template>
 						</v-tooltip>
-						<v-menu :close-on-content-click="false">
+						<v-menu>
 							<template #activator="{on: onMenu}">
 								<v-tooltip bottom :open-delay="500">
 									Unlink patient

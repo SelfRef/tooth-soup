@@ -98,14 +98,14 @@ namespace ToothSoupAPI.Controllers
 			return dentists;
 		}
 
-		[HttpGet("Services")]
-		public async Task<ActionResult<IEnumerable<ServiceResponse>>> GetServices()
+		[HttpGet("Services/Dentists/{dentistId}")]
+		public async Task<ActionResult<IEnumerable<ServiceResponse>>> GetServices(int dentistId)
 		{
 			var userId = GetPatientId();
 			if (!userId.HasValue) return Unauthorized();
 
 			var services = await _db.Services
-				.Where(s => !s.Deleted)
+				.Where(s => !s.Deleted && s.Dentists.Any(d => d.Id == dentistId))
 				.Select(s => new ServiceResponse {
 					Id = s.Id,
 					Name = s.Name,

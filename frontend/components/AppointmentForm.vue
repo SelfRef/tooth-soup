@@ -31,7 +31,7 @@
 									<v-row v-if="role === 'Dentist'">
 										<v-col cols="12">
 											<v-select
-												:items="patients"
+												:items="$store.getters['Dentist/patients']"
 												:item-text="u => `(${u.pesel}) ${u.firstName} ${u.lastName}`"
 												item-value="id"
 												v-model="appointment.patientId"
@@ -151,7 +151,8 @@
 									</v-row>
 								</v-col>
 								<v-col>
-									<v-sheet height="400">
+									<h2 class="mb-2"><v-icon left>mdi-calendar</v-icon>{{ role === 'Dentist' ? 'Your' : "Dentist's" }} calendar for selected day</h2>
+									<v-sheet height="500">
 										<v-calendar
 											type="day"
 											hide-header
@@ -203,7 +204,6 @@ export default class AppointmentForm extends Vue {
 	@Prop({default: null}) selectedPatientId!: number | null;
 	@Ref('form') form;
 	private dentists: Dentist[] = []
-	private patients: Patient[] = []
 	private services: Service[] = []
 	private dentistAppointments: Appointment[] = []
 	private datePickerActive = false;
@@ -261,12 +261,11 @@ export default class AppointmentForm extends Vue {
 	}
 
 	mounted() {
-		if (this.role === 'Dentist') this.refreshPatients();
 		if (this.role === 'Patient') {
 			this.refreshDentists();
 			this.$store.dispatch(`${this.role}/updateAccount`);
 		}
-		this.refreshServices();
+		this.refreshServices(this.dentistId);
 		this.updateAppointments();
 	}
 
@@ -328,11 +327,9 @@ export default class AppointmentForm extends Vue {
 		if (!this.date || !this.timeStart || !this.timeEnd) return false;
 		const start = new Date(`${this.date}T${this.timeStart}`);
 		const end = new Date(`${this.date}T${this.timeEnd}`);
-		console.log('new', start, end);
 		return this.dentistAppointments.some(a => {
 			const aStart = new Date(a.startDate);
 			const aEnd = new Date(a.endDate);
-			console.log('old', aStart, aEnd);
 			return (start > aStart && start < aEnd) || (end > aStart && end < aEnd) || (aStart > start && aEnd < end);
 		});
 	}
@@ -435,24 +432,18 @@ export default class AppointmentForm extends Vue {
 		}
 	}
 
-	async refreshServices() {
+	@Watch('dentistId')
+	async refreshServices(dentistId: number | null) {
+		if (dentistId === null) return;
 		let initData: RequestInit = {
 			method: 'GET',
 			headers: {
 				'Authorization': `Bearer ${this.$store.getters['Auth/token']}`,
 			}
 		}
-		this.services = await fetch(`${process.env.APIURL}/${this.role}/Services`, initData).then(response => response.json());
-	}
 
-	async refreshPatients() {
-		let initData: RequestInit = {
-			method: 'GET',
-			headers: {
-				'Authorization': `Bearer ${this.$store.getters['Auth/token']}`,
-			}
-		}
-		this.patients = await fetch(`${process.env.APIURL}/${this.role}/Patients`, initData).then(response => response.json());
+		const forDentistId = this.role === 'Patient' ? `/Dentists/${this.dentistId}` : '?Linked';
+		this.services = await fetch(`${process.env.APIURL}/${this.role}/Services${forDentistId}`, initData).then(response => response.json());
 	}
 
 	async refreshDentists() {

@@ -36,7 +36,7 @@
 			<template #item.startDate="{value}">{{value | dateTime}}</template>
 			<template #item.duration="{value}">{{value | duration}}</template>
 			<template #item.canceled="{item, value}">
-				<v-menu :close-on-content-click="true">
+				<v-menu>
 					<template #activator="{on}">
 						<v-simple-checkbox readonly v-on="on" :value="value" />
 					</template>
@@ -63,7 +63,7 @@
 						</v-btn>
 					</template>
 				</v-tooltip>
-				<v-menu :close-on-content-click="false" v-if="role === 'Dentist'">
+				<v-menu v-if="role === 'Dentist'">
 					<template #activator="{on: onMenu}">
 						<v-tooltip bottom :open-delay="500">
 							Remove appointment
@@ -216,12 +216,10 @@ export default class AppointmentList extends Vue {
 	}
 
 	canceledRow(item: Appointment) {
-		let colorClass = '';
 		if (item.canceled) {
-			colorClass += 'red '
-			colorClass += this.$vuetify.theme.dark ? 'darken-4' : 'lighten-5'
+			return this.$vuetify.theme.dark ? 'brown darken-4' : 'red lighten-5'
 		}
-		return colorClass;
+		return '';
 	}
 
 	@Watch('dialog')
