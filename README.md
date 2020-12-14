@@ -1,18 +1,24 @@
 # tooth-soup
 
+## Overview
+
 A system supporting the work of a dentist.
 
 ## Features
 
-## Roles
+- Patient
+  - can set main dentist in settings
+  - can create appointments for main dentist
+  - can create appointments for other dentists if dentist allowed for this
+  - can edit or cancel appointment
 
-## Role privileges
+## Roles & privileges
 
 Action | Guest | Patient | Dentist | Admin
 --- | :---: | :---: | :---: | :---:
 Login | ✔ | ❌ | ❌ | ❌
 Register | ✔ | ❌ | ❌ | ❌
-View home page | ✔ | ✔ | ✔ | ✔
+Home page | ✔ | ✔ | ✔ | ✔
 --- | --- | --- | --- | ---
 My account page | ❌ | ✔ | ✔ | ❌
 Edit my email | ❌ | ✔ | ✔ | ❌
@@ -35,7 +41,6 @@ Create appointment | - | ✔ | ✔ | -
 Cancel appointment | - | ✔ | ✔ | -
 Uncancel appointment | - | ❌ | ✔ | -
 Edit active appointment | - | ✔ | ✔ | -
-Edit any appointment | - | ❌ | ✔ | -
 Remove appointment | - | ❌ | ✔ | -
 --- | --- | --- | --- | ---
 Users page | ❌ | ❌ | ❌ | ✔
@@ -45,8 +50,9 @@ Remove any user | - | - | - | ✔
 --- | --- | --- | --- | ---
 Services page | ❌ | ❌ | ✔ | ✔
 Create service | - | - | ✔ | ✔
-Link service | - | - | ✔ | ✔
-Unlink service | - | - | ✔ | ✔
-Edit service | - | - | ✔ | ✔
-Remove unlinked service | - | - | ✔ | ✔
-Remove any service | - | - | ✔ | ✔
+Link service | - | - | ✔ | ❌
+Unlink service | - | - | ✔ | ❌
+Edit only my service | - | - | ✔ | ❌
+Edit any service | - | - | ❌ | ✔
+Remove only my service | - | - | ✔ | ❌
+Remove any service | - | - | ❌ | ✔

@@ -103,6 +103,7 @@
 													v-model="timeStart"
 													@click:minute="$refs.timeStartPicker.save(timeStart)"
 													:max="timeEnd"
+													:min="new Date().toISOString().substr(11, 5)"
 													format="24hr"
 												></v-time-picker>
 											</v-menu>

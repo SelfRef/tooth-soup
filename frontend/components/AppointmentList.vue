@@ -44,9 +44,9 @@
 			<template #item.canceled="{item, value}">
 				<v-menu>
 					<template #activator="{on}">
-						<v-simple-checkbox readonly v-on="on" :value="value" />
+						<v-simple-checkbox readonly v-on="on" :value="value" :disabled="!canEditOrCancel(item)" />
 					</template>
-					<v-card v-if="role === 'Dentist' || !value">
+					<v-card v-if="role === 'Dentist' || (!value && canEditOrCancel(item))">
 						<v-card-text>Are you sure you want to {{ item.canceled ? 'uncancel' : 'cancel' }} this appointment?</v-card-text>
 						<v-card-actions>
 							<v-btn
@@ -64,7 +64,14 @@
 				<v-tooltip bottom :open-delay="500">
 					Edit appointment
 					<template #activator="{on, attrs}">
-						<v-btn :disabled="item.canceled" v-on="on" v-bind="attrs" icon color="info" @click="edit(item)">
+						<v-btn
+							:disabled="item.canceled || !canEditOrCancel(item)"
+							v-on="on"
+							v-bind="attrs"
+							icon
+							color="info"
+							@click="edit(item)"
+						>
 							<v-icon>mdi-calendar-edit</v-icon>
 						</v-btn>
 					</template>
@@ -226,6 +233,15 @@ export default class AppointmentList extends Vue {
 			return this.$vuetify.theme.dark ? 'brown darken-4' : 'red lighten-5'
 		}
 		return '';
+	}
+
+	canEditOrCancel(appointment: Appointment) {
+		if (this.role === 'Patient') {
+			const now = new Date();
+			const date = new Date(appointment.startDate);
+			console.log(now, date)
+			return date > now;
+		} else return true;
 	}
 
 	@Watch('dialog')
