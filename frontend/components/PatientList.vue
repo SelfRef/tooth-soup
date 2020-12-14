@@ -6,6 +6,16 @@
 					<v-col cols="auto">
 						<h2>Patient List</h2>
 					</v-col>
+					<v-col cols="auto">
+						<v-tooltip bottom :open-delay="500">
+							Refresh
+							<template #activator="{on}">
+								<v-btn icon @click="refreshData" color="secondary" v-on="on">
+									<v-icon>mdi-refresh</v-icon>
+								</v-btn>
+							</template>
+						</v-tooltip>
+					</v-col>
 					<v-col>
 						<v-text-field
 							v-model="searchText"
@@ -15,12 +25,8 @@
 						></v-text-field>
 					</v-col>
 					<v-col cols="12" sm="auto">
-						<v-btn @click="refreshData" color="info">
-							Refresh
-							<v-icon right>mdi-refresh</v-icon>
-						</v-btn>
 						<v-btn @click="userDialog = true" color="success">
-							Add user
+							Add patient
 							<v-icon right>mdi-account-plus</v-icon>
 						</v-btn>
 					</v-col>
@@ -35,12 +41,6 @@
 				>
 					<template #item.birthDate="{value}">{{value | dateTime}}</template>
 					<template #item.actions="{item}">
-						<v-tooltip bottom :open-delay="500">
-							Edit patient
-							<template #activator="{on, attrs}">
-								<v-btn v-on="on" v-bind="attrs" icon color="info" @click="editPatient(item)"><v-icon>mdi-account-edit</v-icon></v-btn>
-							</template>
-						</v-tooltip>
 						<v-menu>
 							<template #activator="{on: onMenu}">
 								<v-tooltip bottom :open-delay="500">
@@ -61,6 +61,12 @@
 								</v-card-actions>
 							</v-card>
 						</v-menu>
+						<v-tooltip bottom :open-delay="500">
+							Edit patient
+							<template #activator="{on, attrs}">
+								<v-btn v-on="on" v-bind="attrs" icon color="info" @click="editPatient(item)"><v-icon>mdi-account-edit</v-icon></v-btn>
+							</template>
+						</v-tooltip>
 					</template>
 				</v-data-table>
 				<patient-form :active.sync="userDialog" :patientData="patient" @refresh="refreshData"/>

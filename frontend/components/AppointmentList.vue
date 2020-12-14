@@ -4,6 +4,16 @@
 			<v-col cols="auto">
 				<h2>Appointment List</h2>
 			</v-col>
+			<v-col cols="auto">
+				<v-tooltip bottom :open-delay="500">
+					Refresh
+					<template #activator="{on}">
+						<v-btn icon @click="refreshData" color="secondary" v-on="on" :disabled="!patientId && role !== 'Patient'">
+							<v-icon>mdi-refresh</v-icon>
+						</v-btn>
+					</template>
+				</v-tooltip>
+			</v-col>
 			<v-spacer></v-spacer>
 			<v-col cols="auto">
 				<v-switch
@@ -15,10 +25,6 @@
 				/>
 			</v-col>
 			<v-col cols="auto">
-				<v-btn @click="refreshData" color="info" :disabled="!patientId && role !== 'Patient'">
-					Refresh
-					<v-icon right>mdi-refresh</v-icon>
-				</v-btn>
 				<v-btn @click="dialog = true" color="success" :disabled="!patientId && role !== 'Patient'">
 					Add appointment
 					<v-icon right>mdi-calendar-plus</v-icon>

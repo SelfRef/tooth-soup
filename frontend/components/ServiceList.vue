@@ -1,8 +1,18 @@
 <template>
 	<v-container>
 		<v-row>
-			<v-col>
+			<v-col cols="auto">
 				<h2>Service List</h2>
+			</v-col>
+			<v-col cols="auto">
+				<v-tooltip bottom :open-delay="500">
+					Refresh
+					<template #activator="{on}">
+						<v-btn icon @click="refreshData" color="secondary" v-on="on">
+							<v-icon>mdi-refresh</v-icon>
+						</v-btn>
+					</template>
+				</v-tooltip>
 			</v-col>
 			<v-spacer></v-spacer>
 			<v-col cols="auto" v-if="role === 'Dentist'">
@@ -14,10 +24,6 @@
 				/>
 			</v-col>
 			<v-col cols="auto">
-				<v-btn @click="refreshData" color="primary">
-					Refresh
-					<v-icon right>mdi-refresh</v-icon>
-				</v-btn>
 				<v-btn @click="dialog = true" color="success">
 					Add service
 					<v-icon right>mdi-puzzle-plus</v-icon>
@@ -32,12 +38,6 @@
 		>
 			<template #item.price="{value}">{{value | price}}</template>
 			<template #item.actions="{item}">
-				<v-tooltip bottom :open-delay="500">
-					Edit service
-					<template #activator="{on, attrs}">
-						<v-btn v-on="on" v-bind="attrs" icon color="primary" @click="edit(item)"><v-icon>mdi-puzzle-edit</v-icon></v-btn>
-					</template>
-				</v-tooltip>
 				<v-menu>
 					<template #activator="{on: onMenu}">
 						<v-tooltip bottom :open-delay="500">
@@ -46,7 +46,7 @@
 								<v-btn
 									v-on="{...onTip, ...onMenu}"
 									icon
-									color="warning"
+									:color="item.linked ? 'warning' : 'success'"
 								><v-icon>mdi-puzzle-{{ item.linked ? 'minus' : 'plus' }}</v-icon></v-btn>
 							</template>
 						</v-tooltip>
@@ -58,6 +58,21 @@
 						</v-card-actions>
 					</v-card>
 				</v-menu>
+				<v-tooltip bottom :open-delay="500">
+					Edit service
+					<template #activator="{on, attrs}">
+						<v-btn
+							v-on="on"
+							v-bind="attrs"
+							icon
+							color="primary"
+							@click="edit(item)"
+							:disabled="!item.canEdit"
+							>
+								<v-icon>mdi-puzzle-edit</v-icon>
+							</v-btn>
+					</template>
+				</v-tooltip>
 				<v-menu>
 					<template #activator="{on: onMenu}">
 						<v-tooltip bottom :open-delay="500">
@@ -67,7 +82,7 @@
 									v-on="{...onTip, ...onMenu}"
 									icon
 									color="error"
-									:disabled="!item.canDelete"
+									:disabled="!item.canEdit"
 								><v-icon>mdi-puzzle-remove</v-icon></v-btn>
 							</template>
 						</v-tooltip>

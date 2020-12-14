@@ -4,6 +4,6 @@ export default interface Service {
 	price?: number | null;
 	appointmentsCount?: number | null;
 	dentistsCount?: number | null;
-	canDelete?: boolean | null;
+	canEdit?: boolean | null;
 	linked?: boolean | null;
 }

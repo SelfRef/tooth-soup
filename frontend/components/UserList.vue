@@ -1,15 +1,21 @@
 <template>
 	<v-container>
 		<v-row>
-			<v-col>
+			<v-col cols="auto">
 				<h2>User List</h2>
+			</v-col>
+			<v-col cols="auto">
+				<v-tooltip bottom :open-delay="500">
+					Refresh
+					<template #activator="{on}">
+						<v-btn icon @click="refreshData" color="secondary" v-on="on">
+							<v-icon>mdi-refresh</v-icon>
+						</v-btn>
+					</template>
+				</v-tooltip>
 			</v-col>
 			<v-spacer></v-spacer>
 			<v-col cols="auto">
-				<v-btn @click="refresh" color="blue">
-					Refresh
-					<v-icon right>mdi-refresh</v-icon>
-				</v-btn>
 				<v-btn @click="dialog = true" color="green">
 					Add user
 					<v-icon right>mdi-account-plus</v-icon>
@@ -126,7 +132,7 @@
 			this.dialog = true;
 		}
 
-		async refresh() {
+		async refreshData() {
 			await this.$store.dispatch(`${this.role}/pullUsers`);
 		}
 

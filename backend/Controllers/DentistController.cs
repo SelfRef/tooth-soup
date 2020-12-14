@@ -402,16 +402,12 @@ namespace ToothSoupAPI.Controllers
 					Name = s.Name,
 					Price = s.Price,
 					AppointmentsCount = _db.Appointments.Where(a => a.ServiceId == s.Id).Count(),
+					Linked = s.Dentists.Contains(dentist),
 					DentistsCount = s.Dentists.Count,
-					Linked = s.Dentists.Contains(dentist)
+					CanEdit = !s.Dentists.Any(d => d.UserId != userId)
 				})
 				.Where(s => !linkedOnly || s.Linked)
 				.ToListAsync();
-
-			foreach (var service in services)
-			{
-				service.CanDelete = service.DentistsCount == 0;
-			}
 
 			return services;
 		}
@@ -433,14 +429,13 @@ namespace ToothSoupAPI.Controllers
 					Name = s.Name,
 					Price = s.Price,
 					AppointmentsCount = _db.Appointments.Where(a => a.ServiceId == s.Id).Count(),
+					Linked = s.Dentists.Contains(dentist),
 					DentistsCount = s.Dentists.Count,
-					Linked = s.Dentists.Contains(dentist)
+					CanEdit = !s.Dentists.Any(d => d.UserId != userId)
 				})
 				.FirstOrDefaultAsync(s => s.Id == id);
 
 			if (service == null) return NotFound();
-
-			service.CanDelete = service.DentistsCount == 0;
 			return service;
 		}
 
@@ -462,9 +457,14 @@ namespace ToothSoupAPI.Controllers
 			var userId = GetUserId();
 			if (!userId.HasValue) return Unauthorized();
 
+			var dentist = await _db.Dentists.Include(d => d.Services).FirstOrDefaultAsync(d => d.UserId == userId);
+			if (dentist == null) return NotFound("Dentist");
+
 			var service = await _db.Services
 				.FirstOrDefaultAsync(s => s.Id == newService.Id);
-			if (service == null) return NotFound();
+			if (service == null) return NotFound("Service");
+
+			if (service.Dentists.Any(d => d.UserId != userId)) return Forbid("Cannot edit service with linked other dentists");
 
 			service.Name = newService.Name;
 			service.Price = newService.Price;
@@ -479,14 +479,18 @@ namespace ToothSoupAPI.Controllers
 			var userId = GetUserId();
 			if (!userId.HasValue) return Unauthorized();
 
+			var dentist = await _db.Dentists.Include(d => d.Services).FirstOrDefaultAsync(d => d.UserId == userId);
+			if (dentist == null) return NotFound("Dentist");
+
 			var service = await _db.Services
 				.Where(s => !s.Deleted)
 				.FirstOrDefaultAsync(s => s.Id == id);
-			if (service == null) return NotFound();
+			if (service == null) return NotFound("Service");
 
-			if (service.Dentists.Count > 0) return Forbid("Cannot remove service with connected dentists");
+			if (service.Dentists.Any(d => d.UserId != userId)) return Forbid("Cannot remove service with linked other dentists");
 
 			service.Deleted = true;
+			if (dentist.Services.Contains(service)) dentist.Services.Remove(service);
 			await _db.SaveChangesAsync();
 
 			return Ok();
