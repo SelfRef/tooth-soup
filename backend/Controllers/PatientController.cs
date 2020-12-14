@@ -12,6 +12,8 @@ using IdentityServer4.Extensions;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using Namotion.Reflection;
+using System.Xml.Serialization;
+using System.IO;
 
 namespace ToothSoupAPI.Controllers
 {
@@ -135,11 +137,49 @@ namespace ToothSoupAPI.Controllers
 					DentistId = a.DentistId,
 					DentistName = GetUserName(a.Dentist.User),
 					ServiceId = a.ServiceId,
-					ServiceName = a.Service.Name
+					ServiceName = a.Service.Name,
+					ServicePrice = a.Service.Price,
 				})
 				.ToListAsync();
 
 			return appointments;
+		}
+
+		[HttpGet("Appointments/Xml")]
+		public async Task<ActionResult<string>> GetAppointmentsXml()
+		{
+			var userId = GetPatientId();
+			if (!userId.HasValue) return Unauthorized();
+
+			var patient = await _db.Patients.FirstOrDefaultAsync(p => p.UserId == userId);
+			if (patient == null) return NotFound("Patient");
+
+			var appointments = await _db.Appointments
+				.Where(a => a.PatientId == patient.Id)
+				.Select(a => new AppointmentPatientResponse {
+					Id = a.Id,
+					StartDate = a.StartDate,
+					EndDate = a.EndDate,
+					Duration = a.Duration,
+					Canceled = a.Canceled,
+					DentistId = a.DentistId,
+					DentistName = GetUserName(a.Dentist.User),
+					ServiceId = a.ServiceId,
+					ServiceName = a.Service.Name,
+					ServicePrice = a.Service.Price,
+				})
+				.ToListAsync();
+
+			var appointmentsRoot = new PatientAppointmentList {
+				Appointments = appointments
+			};
+
+			var serializer = new XmlSerializer(typeof(PatientAppointmentList));
+			var ms = new MemoryStream();
+			serializer.Serialize(ms, appointmentsRoot);
+			ms.Position = 0;
+			var sr = new StreamReader(ms);
+			return sr.ReadToEnd();
 		}
 
 		[HttpGet("Appointments/{id}")]
@@ -165,7 +205,8 @@ namespace ToothSoupAPI.Controllers
 				DentistId = appointment.DentistId,
 				DentistName = GetUserName(appointment.Dentist.User),
 				ServiceId = appointment.ServiceId,
-				ServiceName = appointment.Service.Name
+				ServiceName = appointment.Service.Name,
+				ServicePrice = appointment.Service.Price,
 			};
 		}
 
@@ -190,6 +231,7 @@ namespace ToothSoupAPI.Controllers
 					DentistName = GetUserName(a.Dentist.User),
 					ServiceId = a.PatientId == patient.Id ? a.ServiceId : 0,
 					ServiceName = a.PatientId == patient.Id ? a.Service.Name : null,
+					ServicePrice = a.Service.Price,
 				})
 				.ToListAsync();
 

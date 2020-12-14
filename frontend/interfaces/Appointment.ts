@@ -10,4 +10,5 @@ export default interface Appointment {
 	patientName: string | null;
 	serviceId: number | null;
 	serviceName: string | null;
+	servicePrice: number | null;
 }

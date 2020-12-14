@@ -41,6 +41,8 @@ Create appointment | - | ✔ | ✔ | -
 Cancel appointment | - | ✔ | ✔ | -
 Uncancel appointment | - | ❌ | ✔ | -
 Edit active appointment | - | ✔ | ✔ | -
+Edit canceled appointment | - | ❌ | ✔ | -
+Edit past appointment | - | ❌ | ✔ | -
 Remove appointment | - | ❌ | ✔ | -
 --- | --- | --- | --- | ---
 Users page | ❌ | ❌ | ❌ | ✔

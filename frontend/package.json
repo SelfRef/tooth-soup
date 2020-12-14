@@ -25,11 +25,15 @@
   "dependencies": {
     "@nuxt/typescript-runtime": "^1.0.0",
     "@nuxtjs/axios": "^5.12.0",
+    "js2xmlparser": "^4.0.1",
+    "jspdf": "^2.2.0",
+    "jspdf-autotable": "^3.5.13",
     "nuxt": "^2.14.0",
     "reflect-metadata": "^0.1.13",
     "vue-class-component": "^7.2.6",
     "vue-property-decorator": "^9.0.2",
-    "vuex-persistedstate": "^4.0.0-beta.1"
+    "vuex-persistedstate": "^4.0.0-beta.1",
+    "xml-js": "^1.6.11"
   },
   "devDependencies": {
     "@nuxt/types": "^2.14.0",

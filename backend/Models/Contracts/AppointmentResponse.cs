@@ -12,5 +12,6 @@ namespace ToothSoupAPI.Models {
 		public string PatientName { get; set; }
 		public int ServiceId { get; set; }
 		public string ServiceName { get; set; }
+		public float ServicePrice { get; set; }
 	}
 }

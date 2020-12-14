@@ -1,7 +1,13 @@
 <template>
 	<v-container v-if="loggedIn">
-		<appointment-list />
-		<appointment-calendar />
+		<v-row>
+			<v-col cols="12" lg="8">
+				<appointment-list />
+			</v-col>
+			<v-col>
+				<appointment-calendar />
+			</v-col>
+		</v-row>
 	</v-container>
 </template>
 

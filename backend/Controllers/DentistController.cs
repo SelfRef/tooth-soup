@@ -11,6 +11,10 @@ using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using IdentityServer4.Extensions;
 using Namotion.Reflection;
+using System.Xml.Serialization;
+using System.IO;
+using System.Xml.Linq;
+using System.Xml;
 
 namespace ToothSoupAPI.Controllers
 {
@@ -266,9 +270,47 @@ namespace ToothSoupAPI.Controllers
 					PatientName = $"{a.Patient.User.FirstName} {a.Patient.User.LastName}",
 					ServiceId = a.ServiceId,
 					ServiceName = a.Service.Name,
+					ServicePrice = a.Service.Price,
 				})
 				.ToListAsync();
 			return appointments;
+		}
+
+		[HttpGet("Appointments/Xml")]
+		public async Task<ActionResult<string>> GetAppointmentsXml()
+		{
+			var userId = GetUserId();
+			if (!userId.HasValue) return Unauthorized();
+
+			var dentist = await _db.Dentists.FirstOrDefaultAsync(d => d.UserId == userId);
+			if (dentist == null) return NotFound("Dentist");
+
+			var appointments = await _db.Appointments
+				.Where(a => a.DentistId == dentist.Id)
+				.Select(a => new AppointmentResponse {
+					Id = a.Id,
+					StartDate = a.StartDate,
+					EndDate = a.EndDate,
+					Duration = a.Duration,
+					Canceled = a.Canceled,
+					PatientId = a.PatientId,
+					PatientName = $"{a.Patient.User.FirstName} {a.Patient.User.LastName}",
+					ServiceId = a.ServiceId,
+					ServiceName = a.Service.Name,
+					ServicePrice = a.Service.Price,
+				})
+				.ToListAsync();
+
+			var appointmentsRoot = new DentistAppointmentList {
+				Appointments = appointments
+			};
+
+			var serializer = new XmlSerializer(typeof(DentistAppointmentList));
+			var ms = new MemoryStream();
+			serializer.Serialize(ms, appointmentsRoot);
+			ms.Position = 0;
+			var sr = new StreamReader(ms);
+			return sr.ReadToEnd();
 		}
 
 		[HttpGet("Appointments/Patients/{id}")]
@@ -293,9 +335,48 @@ namespace ToothSoupAPI.Controllers
 					PatientName = $"{a.Patient.User.FirstName} {a.Patient.User.LastName}",
 					ServiceId = a.ServiceId,
 					ServiceName = a.Service.Name,
+					ServicePrice = a.Service.Price,
 				})
 				.ToListAsync();
 			return appointments;
+		}
+
+		[HttpGet("Appointments/Patients/{id}/Xml")]
+		public async Task<ActionResult<string>> GetAppointmentsForPatientXml(int id)
+		{
+			var userId = GetUserId();
+			if (!userId.HasValue) return Unauthorized();
+
+			var dentist = await _db.Dentists.FirstOrDefaultAsync(d => d.UserId == userId);
+			if (dentist == null) return NotFound("Dentist");
+
+			var appointments = await _db.Appointments
+				.Where(a => a.DentistId == dentist.Id && a.PatientId == id)
+				.Select(a => new AppointmentResponse
+				{
+					Id = a.Id,
+					StartDate = a.StartDate,
+					EndDate = a.EndDate,
+					Duration = a.Duration,
+					Canceled = a.Canceled,
+					PatientId = a.PatientId,
+					PatientName = $"{a.Patient.User.FirstName} {a.Patient.User.LastName}",
+					ServiceId = a.ServiceId,
+					ServiceName = a.Service.Name,
+					ServicePrice = a.Service.Price,
+				})
+				.ToListAsync();
+
+			var appointmentsRoot = new DentistAppointmentList {
+				Appointments = appointments
+			};
+			
+			var serializer = new XmlSerializer(typeof(DentistAppointmentList));
+			var ms = new MemoryStream();
+			serializer.Serialize(ms, appointmentsRoot);
+			ms.Position = 0;
+			var sr = new StreamReader(ms);
+			return sr.ReadToEnd();
 		}
 
 		[HttpGet("Appointments/{id}")]
@@ -320,6 +401,7 @@ namespace ToothSoupAPI.Controllers
 					PatientName = $"{a.Patient.User.FirstName} {a.Patient.User.LastName}",
 					ServiceId = a.ServiceId,
 					ServiceName = a.Service.Name,
+					ServicePrice = a.Service.Price,
 				})
 				.FirstOrDefaultAsync();
 			if (appointment == null) return NotFound();

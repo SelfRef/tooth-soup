@@ -14,6 +14,38 @@
 					</template>
 				</v-tooltip>
 			</v-col>
+				<v-col cols="auto">
+				<v-tooltip bottom :open-delay="500">
+					Export appointments to XML
+					<template #activator="{on}">
+						<v-btn
+							icon
+							@click="$store.dispatch(`${role}/exportAppointmentsXml`, {id: patientId})"
+							color="secondary"
+							v-on="on"
+							:disabled="!patientId && role !== 'Patient'"
+						>
+							<v-icon>mdi-file-code</v-icon>
+						</v-btn>
+					</template>
+				</v-tooltip>
+			</v-col>
+			<v-col cols="auto">
+				<v-tooltip bottom :open-delay="500">
+					Export appointments to PDF
+					<template #activator="{on}">
+						<v-btn
+							icon
+							@click="$store.dispatch(`${role}/exportAppointmentsPdf`, {id: patientId})"
+							color="secondary"
+							v-on="on"
+							:disabled="!patientId && role !== 'Patient'"
+						>
+							<v-icon>mdi-file-pdf</v-icon>
+						</v-btn>
+					</template>
+				</v-tooltip>
+			</v-col>
 			<v-spacer></v-spacer>
 			<v-col cols="auto">
 				<v-switch
@@ -61,6 +93,19 @@
 				</v-menu>
 			</template>
 			<template #item.actions="{item}">
+				<v-tooltip bottom :open-delay="500">
+					Export invoice to PDF
+					<template #activator="{on}">
+						<v-btn
+							icon
+							@click="$store.dispatch(`${role}/exportAppointmentsPdf`, {id: patientId, appointment: item})"
+							color="secondary"
+							v-on="on"
+						>
+							<v-icon>mdi-file-pdf</v-icon>
+						</v-btn>
+					</template>
+				</v-tooltip>
 				<v-tooltip bottom :open-delay="500">
 					Edit appointment
 					<template #activator="{on, attrs}">
@@ -149,7 +194,7 @@ export default class AppointmentList extends Vue {
 		{
 			text: 'Actions',
 			value: 'actions',
-			width: this.role === 'Dentist' ? 110 : null,
+			width: this.role === 'Dentist' ? 150 : null,
 		},
 	];
 
@@ -239,7 +284,6 @@ export default class AppointmentList extends Vue {
 		if (this.role === 'Patient') {
 			const now = new Date();
 			const date = new Date(appointment.startDate);
-			console.log(now, date)
 			return date > now;
 		} else return true;
 	}
