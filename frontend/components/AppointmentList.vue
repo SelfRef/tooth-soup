@@ -9,7 +9,7 @@
 					<v-tooltip bottom :open-delay="500">
 						Refresh
 						<template #activator="{on}">
-							<v-btn icon @click="refreshData" color="secondary" v-on="on" :disabled="!patientId && role !== 'Patient'">
+							<v-btn icon @click="refreshData" color="secondary" v-on="on" :disabled="disableActions">
 								<v-icon>mdi-refresh</v-icon>
 							</v-btn>
 						</template>
@@ -22,7 +22,7 @@
 								@click="$store.dispatch(`${role}/exportAppointmentsXml`, {id: patientId})"
 								color="teal"
 								v-on="on"
-								:disabled="!patientId && role !== 'Patient'"
+								:disabled="disableActions || emptyList"
 							>
 								<v-icon>mdi-file-code</v-icon>
 							</v-btn>
@@ -36,7 +36,7 @@
 								@click="$store.dispatch(`${role}/exportAppointmentsPdf`, {id: patientId})"
 								color="orange"
 								v-on="on"
-								:disabled="!patientId && role !== 'Patient'"
+								:disabled="disableActions || emptyList"
 							>
 								<v-icon>mdi-file-pdf</v-icon>
 							</v-btn>
@@ -51,11 +51,11 @@
 					height="0"
 					v-model="showPast"
 					label="Show past"
-					:disabled="!patientId && role !== 'Patient'"
+					:disabled="disableActions || emptyList"
 				/>
 			</v-col>
 			<v-col cols="auto">
-				<v-btn @click="dialog = true" color="success" :disabled="!patientId && role !== 'Patient'">
+				<v-btn @click="dialog = true" color="success" :disabled="disableActions">
 					Add appointment
 					<v-icon right>mdi-calendar-plus</v-icon>
 				</v-btn>
@@ -99,6 +99,7 @@
 							@click="$store.dispatch(`${role}/exportAppointmentsPdf`, {id: patientId, appointment: item})"
 							color="orange"
 							v-on="on"
+							:disabled="!pastAppointment(item)"
 						>
 							<v-icon>mdi-file-pdf</v-icon>
 						</v-btn>
@@ -208,6 +209,14 @@ export default class AppointmentList extends Vue {
 
 	get role() {
 		return this.$store.getters['Auth/userRole'];
+	}
+
+	get emptyList() {
+		return this.appointments.length === 0 || (!this.patientId && this.role !== 'Patient');
+	}
+
+	get disableActions() {
+		return !this.patientId && this.role !== 'Patient';
 	}
 
 	async mounted() {

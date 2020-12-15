@@ -54,6 +54,7 @@
 													@change="patient.birthDate = $event"
 													no-title
 													@input="datePickerActive = false"
+													:max="now.substr(0, 10)"
 												></v-date-picker>
 											</v-menu>
 										</v-col>
@@ -263,12 +264,38 @@ export default class PatientForm extends Vue {
 			},
 			body: JSON.stringify(this.patient),
 		}
-		const result = await fetch(`${process.env.APIURL}/Login/RegisterPatient`, fetchOptions) as Response;
+		let result = await fetch(`${process.env.APIURL}/Login/RegisterPatient`, fetchOptions) as Response;
 		if (!result.ok) {
 			this.alert = await result.text();
 			return;
 		}
+
+		fetchOptions = {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(this.patient),
+		}
+		result = await fetch(`${process.env.APIURL}/Login`, fetchOptions) as Response;
+		if (result.ok) {
+			let tokenData = await result.json()
+			await this.$store.dispatch('Auth/setToken', tokenData.token);
+		}
 		this.close();
+	}
+
+	dateToLocalISO(date) {
+		const offsetMs = date.getTimezoneOffset() * 60 * 1000;
+		const msLocal = date.getTime() - offsetMs;
+		const dateLocal = new Date(msLocal);
+		const iso = dateLocal.toISOString();
+		const isoLocal = iso.slice(0, 19);
+		return isoLocal;
+	}
+
+	get now() {
+		return this.dateToLocalISO(new Date());
 	}
 
 	@Watch('currentTab')

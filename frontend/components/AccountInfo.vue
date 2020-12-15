@@ -26,7 +26,7 @@
 						/>
 						<v-select
 							v-if="role === 'Patient'"
-							:items="$store.getters[`${this.role}/dentists`].filter(d => d.canLink)"
+							:items="dentistsForLinking"
 							:item-text="d => d.name"
 							:item-value="d => d.id"
 							label="Linked dentist"
@@ -108,6 +108,11 @@ export default class AccountInfo extends Vue {
 		});
 	}
 
+	get dentistsForLinking() {
+		const dentists = this.$store.getters[`${this.role}/dentists`].filter(d => d.canLink);
+		
+	}
+
 	async mounted() {
 		this.loading = true
 		await this.$store.dispatch(`${this.role}/pullAccount`);
@@ -134,6 +139,7 @@ export default class AccountInfo extends Vue {
 
 	@Watch('account')
 	pullData(account: Patient | Dentist) {
+		if (!account) return;
 		this.data.email = account.email;
 		this.data.password = '';
 		if (this.role === 'Patient') {

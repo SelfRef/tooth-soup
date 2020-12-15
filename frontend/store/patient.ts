@@ -134,7 +134,7 @@ export const actions = {
 		doc.setFontSize(14);
 		doc.text(`${patient.firstName} ${patient.lastName}`, 20, 48);
 		doc.text(patient.email, 20, 68);
-		doc.text(patient.dentistName, 100, 48);
+		doc.text(patient?.dentistName ?? '[none]', 100, 48);
 		doc.text(String(getters.appointments.length), 100, 68);
 
 		doc.setFontSize(16);
