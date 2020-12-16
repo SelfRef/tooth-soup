@@ -18,7 +18,7 @@
 										v-model="data.email"
 										label="Email"
 										prepend-icon="mdi-email"
-										:rules=[rules.required]
+										:rules="[rules.required, rules.email]"
 									></v-text-field>
 								</v-col>
 								<v-col cols="12">

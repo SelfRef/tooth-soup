@@ -8,7 +8,7 @@
 				<v-card-title>{{name}}</v-card-title>
 				<v-card-subtitle>
 					<v-icon small left>mdi-tooth</v-icon>
-					{{ role === "Patient" ? 'Patient' : 'Dentist' }}
+					{{ role === 'Patient' ? `Patient | PESEL ${account.pesel}` : 'Dentist' }}
 				</v-card-subtitle>
 				<v-card-text>
 					<v-form v-if="data">
@@ -16,6 +16,7 @@
 							v-model="data.email"
 							label="Email"
 							prepend-icon="mdi-email"
+							:rules="[rules.required, rules.email]"
 						/>
 						<v-text-field
 							v-model="data.password"
@@ -50,20 +51,20 @@
 				<v-card-actions class="mr-2">
 					<v-spacer></v-spacer>
 					<v-btn
-						color="primary"
-						@click="pushData"
-						:disabled="!isUpdated"
-					>
-						<v-icon left>mdi-content-save-cog</v-icon>
-						Update
-					</v-btn>
-					<v-btn
 						color="error"
 						@click="resetData"
 						:disabled="!isUpdated"
 					>
 						<v-icon left>mdi-content-save-off</v-icon>
 						Reset
+					</v-btn>
+					<v-btn
+						color="primary"
+						@click="pushData"
+						:disabled="!isUpdated"
+					>
+						<v-icon left>mdi-content-save-cog</v-icon>
+						Update
 					</v-btn>
 				</v-card-actions>
 			</v-col>
@@ -75,8 +76,10 @@
 import { Vue, Component, Watch } from 'vue-property-decorator';
 import Dentist from '~/interfaces/Dentist';
 import Patient from '~/interfaces/Patient';
+import { rules } from "~/lib/helpers";
 @Component
 export default class AccountInfo extends Vue {
+	private rules = rules;
 	private loading = true;
 	private data: Patient | Dentist = {
 		email: '',
@@ -109,8 +112,9 @@ export default class AccountInfo extends Vue {
 	}
 
 	get dentistsForLinking() {
-		const dentists = this.$store.getters[`${this.role}/dentists`].filter(d => d.canLink);
-		
+		const dentists: Dentist[] = this.$store.getters[`${this.role}/dentists`].filter(d => d.canLink || d.id === this.data.dentistId);
+		dentists.unshift({ id: 0, name: '[none]' });
+		return dentists;
 	}
 
 	async mounted() {
@@ -143,7 +147,7 @@ export default class AccountInfo extends Vue {
 		this.data.email = account.email;
 		this.data.password = '';
 		if (this.role === 'Patient') {
-			this.data.dentistId = account.dentistId;
+			this.data.dentistId = account.dentistId || 0;
 		}
 		if (this.role === 'Dentist') {
 			this.data.canLink = account.canLink;

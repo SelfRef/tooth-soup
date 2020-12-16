@@ -10,5 +10,6 @@ namespace ToothSoupAPI.Models {
 		public DateTime BirthDate { get; set; }
 		public int? DentistId { get; set; }
 		public string DentistName { get; set; }
+		public bool LinkedToMe { get; set; }
 	}
 }

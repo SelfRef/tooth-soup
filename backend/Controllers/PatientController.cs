@@ -65,12 +65,17 @@ namespace ToothSoupAPI.Controllers
 
 			if (newUser.DentistId.HasValue) {
 				var patient = await _db.Patients.FirstOrDefaultAsync(p => p.UserId == userId);
-				var dentist = await _db.Dentists.FindAsync(newUser.DentistId.Value);
 				if (patient == null) return NotFound("Patient");
-				if (dentist == null) return NotFound("Dentist");
-				if (patient.DentistId != dentist.Id) {
-					if (!dentist.CanLink) return Forbid("CanLink");
-					patient.DentistId = dentist.Id;
+
+				if (newUser.DentistId == 0) patient.DentistId = null;
+				else {
+					var dentist = await _db.Dentists.FindAsync(newUser.DentistId.Value);
+					if (dentist == null) return NotFound("Dentist");
+
+					if (patient.DentistId != dentist.Id) {
+						if (!dentist.CanLink) return Forbid("CanLink");
+						patient.DentistId = dentist.Id;
+					}
 				}
 			}
 

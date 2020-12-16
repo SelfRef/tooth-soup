@@ -18,7 +18,7 @@
 									<v-row v-if="role === 'Patient'">
 										<v-col cols="12">
 											<v-select
-												:items="dentists.filter(d => d.canCreateAppointment)"
+												:items="this.edit ? dentists : dentists.filter(d => d.canCreateAppointment)"
 												:item-text="u => `${u.firstName} ${u.lastName}`"
 												item-value="id"
 												v-model="appointment.dentistId"
@@ -324,7 +324,6 @@ export default class AppointmentForm extends Vue {
 			this.refreshDentists();
 			this.$store.dispatch(`${this.role}/pullAccount`);
 		}
-		this.refreshServices(this.dentistId);
 		this.updateAppointments();
 	}
 
@@ -335,11 +334,11 @@ export default class AppointmentForm extends Vue {
 
 	setUserIds() {
 		if (this.role === 'Patient') {
-			this.appointment.dentistId = this.account?.dentistId;
+			this.appointment.dentistId = this.item?.dentistId ?? this.account?.dentistId;
 			this.appointment.patientId = this.id;
 		} else if (this.role === 'Dentist') {
 			this.appointment.dentistId = this.dentistId;
-			this.appointment.patientId = this.patientId;
+			this.appointment.patientId = this.item?.patientId ?? this.patientId;
 		}
 	}
 
@@ -405,6 +404,7 @@ export default class AppointmentForm extends Vue {
 			canceled: false,
 		}
 		if (active && !this.item) this.date = this.now.substr(0, 10);
+		if (active) this.refreshServices(this.dentistId);
 		this.setUserIds();
 		this.updateAppointments()
 	}

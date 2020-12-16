@@ -22,7 +22,7 @@
 								@click="$store.dispatch(`${role}/exportAppointmentsXml`, {id: patientId})"
 								color="teal"
 								v-on="on"
-								:disabled="disableActions || emptyList"
+								:disabled="emptyList"
 							>
 								<v-icon>mdi-file-code</v-icon>
 							</v-btn>
@@ -36,7 +36,7 @@
 								@click="$store.dispatch(`${role}/exportAppointmentsPdf`, {id: patientId})"
 								color="orange"
 								v-on="on"
-								:disabled="disableActions || emptyList"
+								:disabled="emptyList"
 							>
 								<v-icon>mdi-file-pdf</v-icon>
 							</v-btn>
@@ -51,7 +51,7 @@
 					height="0"
 					v-model="showPast"
 					label="Show past"
-					:disabled="disableActions || emptyList"
+					:disabled="emptyList"
 				/>
 			</v-col>
 			<v-col cols="auto">
@@ -212,7 +212,7 @@ export default class AppointmentList extends Vue {
 	}
 
 	get emptyList() {
-		return this.appointments.length === 0 || (!this.patientId && this.role !== 'Patient');
+		return this.filteredAppointments.length === 0 || (!this.patientId && this.role !== 'Patient');
 	}
 
 	get disableActions() {

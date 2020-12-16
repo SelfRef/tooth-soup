@@ -8,4 +8,5 @@ export default interface Patient extends User {
 	birthDate: string;
 	dentistName?: string;
 	dentistId?: number;
+	linkedToMe?: boolean;
 }

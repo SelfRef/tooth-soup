@@ -73,14 +73,14 @@ export const actions = {
 		const data = await fetch(`${process.env.APIURL}/Dentist/Me`, initData).then(response => response.json());
 		commit('setAccount', data);
 	},
-	async updatePatients({commit, rootGetters}) {
+	async updatePatients({commit, rootGetters}, all) {
 		const initData: RequestInit = {
 			method: 'GET',
 			headers: {
 				'Authorization': `Bearer ${rootGetters['Auth/token']}`,
 			}
 		}
-		const data = await fetch(`${process.env.APIURL}/Dentist/Patients`, initData).then(response => response.json());
+		const data = await fetch(`${process.env.APIURL}/Dentist/Patients${all ? '?all' : ''}`, initData).then(response => response.json());
 		commit('setPatients', data);
 	},
 

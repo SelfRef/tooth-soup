@@ -77,6 +77,7 @@ namespace ToothSoupAPI.Controllers
 			var userId = GetUserId();
 			if (!userId.HasValue) return Unauthorized();
 
+			bool all = Request.Query.ContainsKey("all");
 			bool unlinked = Request.Query.ContainsKey("unlinked");
 			string filter = Request.Query["filter"].FirstOrDefault()?.ToLower();
 
@@ -86,7 +87,7 @@ namespace ToothSoupAPI.Controllers
 			if (unlinked) dentistId = null;
 
 			return await _db.Patients
-				.Where(p => p.DentistId == dentistId)
+				.Where(p => all || p.DentistId == dentistId)
 				.Where(p => $"{p.Pesel} {p.User.FirstName} {p.User.LastName} {p.User.Email}".ToLower().Contains(filter ?? string.Empty))
 				.Select(p => new PatientResult {
 					Id = p.Id,
@@ -96,6 +97,7 @@ namespace ToothSoupAPI.Controllers
 					Email = p.User.Email,
 					BirthDate = p.BirthDate,
 					DentistId = p.DentistId,
+					LinkedToMe = p.DentistId == dentist.Id,
 				}).ToListAsync();
 		}
 
@@ -119,10 +121,10 @@ namespace ToothSoupAPI.Controllers
 					Email = p.User.Email,
 					BirthDate = p.BirthDate,
 					DentistId = p.DentistId,
+					LinkedToMe = p.DentistId == dentist.Id,
 				}).FirstOrDefaultAsync();
 
 			if (patient == null) return NotFound();
-			if (patient.DentistId != dentist.Id) return Unauthorized("Patient is not linked to you");
 
 			return patient;
 		}

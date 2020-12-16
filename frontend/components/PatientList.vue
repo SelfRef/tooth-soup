@@ -24,6 +24,14 @@
 							dense
 						></v-text-field>
 					</v-col>
+					<v-col cols="auto">
+						<v-switch
+							hide-details
+							height="0"
+							v-model="showAll"
+							label="All"
+						/>
+					</v-col>
 					<v-col cols="12" sm="auto">
 						<v-btn @click="userDialog = true" color="success">
 							Add patient
@@ -32,7 +40,7 @@
 					</v-col>
 				</v-row>
 				<v-data-table
-					:headers="headers"
+					:headers="dynamicHeaders"
 					:items="$store.getters[`${this.role}/patients`]"
 					show-select
 					single-select
@@ -40,24 +48,30 @@
 					:search="searchText"
 				>
 					<template #item.birthDate="{value}">{{value | dateTime}}</template>
+					<template #item.linkedToMe="{value}">
+						<v-simple-checkbox readonly :value="value" />
+					</template>
 					<template #item.actions="{item}">
 						<v-menu>
 							<template #activator="{on: onMenu}">
 								<v-tooltip bottom :open-delay="500">
-									Unlink patient
+									{{item.linkedToMe ? 'Unlink' : 'Link'}} patient
 									<template #activator="{on: onTip}">
 										<v-btn
 											v-on="{...onTip, ...onMenu}"
 											icon
-											color="warning"
-										><v-icon>mdi-account-minus</v-icon></v-btn>
+											:color="item.linkedToMe ? 'warning' : 'success'"
+											:disabled="!item.linkedToMe && item.dentistId"
+										><v-icon>mdi-account-{{item.linkedToMe ? 'minus' : 'plus'}}</v-icon></v-btn>
 									</template>
 								</v-tooltip>
 							</template>
 							<v-card>
-								<v-card-text>Are you sure you want to unlink this user?</v-card-text>
+								<v-card-text>Are you sure you want to {{item.linkedToMe ? 'unlink' : 'link'}} this user?</v-card-text>
 								<v-card-actions>
-									<v-btn color="error" text @click="unlinkPatient(item.id)">Unlink</v-btn>
+									<v-btn :color="item.linkedToMe ? 'warning' : 'success'" text @click="linkPatient(item.id, !item.linkedToMe)">
+										{{item.linkedToMe ? 'Unlink' : 'Link'}}
+									</v-btn>
 								</v-card-actions>
 							</v-card>
 						</v-menu>
@@ -104,6 +118,7 @@
 	export default class PatientList extends Vue {
 		private selectedPatients: Patient[] = [];
 		private userDialog = false;
+		private showAll = false;
 		private patient: Patient | null = null;
 		private searchText: string = '';
 		private headers = [
@@ -146,12 +161,20 @@
 			}
 		}
 
-		async mounted() {
-			await this.refreshData();
+		get dynamicHeaders() {
+			if (this.showAll) {
+				const headers = [...this.headers];
+				headers.splice(5, 0, {
+					text: 'Linked',
+					value: 'linkedToMe',
+				});
+				return headers;
+			}
+			return this.headers;
 		}
 
-		async refreshData() {
-			this.$store.dispatch(`${this.role}/updatePatients`);
+		async mounted() {
+			await this.refreshData();
 		}
 
 		editPatient(patient: Patient) {
@@ -159,14 +182,14 @@
 			this.userDialog = true;
 		}
 
-		async unlinkPatient(id: number) {
+		async linkPatient(id: number, link: boolean) {
 			let initData: RequestInit = {
 				method: 'PUT',
 				headers: {
 					'Authorization': `Bearer ${this.$store.getters['Auth/token']}`,
 				}
 			}
-			await fetch(`${process.env.APIURL}/${this.role}/Patients/${id}/Unlink`, initData);
+			await fetch(`${process.env.APIURL}/${this.role}/Patients/${id}/${link ? 'Link' : 'Unlink'}`, initData);
 			await this.refreshData();
 		}
 
@@ -179,6 +202,11 @@
 			}
 			await fetch(`${process.env.APIURL}/${this.role}/Patients/${id}`, initData);
 			await this.refreshData();
+		}
+
+		@Watch('showAll')
+		async refreshData() {
+			this.$store.dispatch(`${this.role}/updatePatients`, this.showAll);
 		}
 
 		@Watch('userDialog')
