@@ -106,7 +106,7 @@ By default project uses `InMemory` database with provided seed that populates al
 
 ## Screenshots
 
-- | -
+--- | ---
 --- | ---
 ![](assets/home_anonymous.png) | ![](assets/home_logged.png)
 ![](assets/login.png) | ![](assets/register.png)
