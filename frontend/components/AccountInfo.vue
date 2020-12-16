@@ -42,7 +42,7 @@
 						/>
 						<v-switch
 							v-if="role === 'Dentist'"
-							label="Not mine patients can create appointments"
+							label="Other patients can create appointments"
 							v-model="data.canCreateAppointment"
 							:prepend-icon="data.canCreateAppointment ? 'mdi-calendar-account' : 'mdi-calendar-lock'"
 						/>

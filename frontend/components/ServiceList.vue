@@ -45,7 +45,7 @@
 					<v-card>
 						<v-card-text>Are you sure you want to {{ item.linked ? 'unlink' : 'link' }} this service?</v-card-text>
 						<v-card-actions>
-							<v-btn color="warning" text @click="link(item.id, !item.linked)">{{ item.linked ? 'Unlink' : 'Link' }}</v-btn>
+							<v-btn :color="item.linked ? 'warning' : 'success'" text @click="link(item.id, !item.linked)">{{ item.linked ? 'Unlink' : 'Link' }}</v-btn>
 						</v-card-actions>
 					</v-card>
 				</v-menu>
