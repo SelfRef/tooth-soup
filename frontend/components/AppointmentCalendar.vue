@@ -79,15 +79,15 @@ export default class AppointmentCalendar extends Vue {
 		return cal ? cal.timeToY(cal.times.now) + 'px' : '-10px'
 	}
 
-	getName(item) {
-		if (item.input.canceled) return `❌ ${item.input.name}`;
-		return item.input.name
-	}
-
 	async mounted() {
 		await this.refreshData();
 		this.ready = true;
 		this.calendar.scrollToTime(new Date().toTimeString().substr(0, 5));
+	}
+
+	getName(item) {
+		if (item.input.canceled) return `❌ ${item.input.name}`;
+		return item.input.name
 	}
 
 	async refreshData() {

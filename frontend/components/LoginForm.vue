@@ -62,30 +62,21 @@
 
 <script lang="ts">
 import { Vue, Component, Prop, Ref, Emit } from 'vue-property-decorator';
+import { rules } from "~/lib/helpers";
 
 @Component
 export default class LoginForm extends Vue {
 	@Prop({default: false}) active;
 	@Ref() form!;
+	private rules = rules;
 	private alert: string | null = null;
 	private data = {
 		email: '',
 		password: '',
 	};
 
-	private rules = {
-		required: (v: string) => Boolean(v) || 'Required',
-	}
-
 	get role() {
 		return this.$store.getters['Auth/userRole'];
-	}
-
-	@Emit('update:active')
-	close() {
-		this.form.reset();
-		this.alert = null;
-		return false;
 	}
 
 	async login() {
@@ -106,6 +97,13 @@ export default class LoginForm extends Vue {
 		await this.$store.dispatch('Auth/setToken', tokenData.token);
 		this.close()
 		this.$router.push('/');
+	}
+
+	@Emit('update:active')
+	close() {
+		this.form.reset();
+		this.alert = null;
+		return false;
 	}
 }
 </script>

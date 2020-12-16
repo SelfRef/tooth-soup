@@ -229,27 +229,6 @@ export default class AppointmentList extends Vue {
 		}
 	}
 
-	@Emit('refreshData')
-	async refreshData() {
-		if (this.role === 'Patient') {
-			this.$store.dispatch(`${this.role}/updateAppointments`);
-		}
-		if (this.role === 'Dentist') {
-			this.$store.dispatch(`${this.role}/updateAppointments`);
-			if (!this.patientId) {
-				this.appointments = [];
-				return;
-			}
-			let initData: RequestInit = {
-				method: 'GET',
-				headers: {
-					'Authorization': `Bearer ${this.$store.getters['Auth/token']}`,
-				}
-			}
-			this.appointments = await fetch(`${process.env.APIURL}/${this.role}/Appointments/Patients/${this.patientId}`, initData).then(response => response.json());
-		}
-	}
-
 	edit(appointment: Appointment) {
 		this.appointment = appointment;
 		this.dialog = true;
@@ -299,6 +278,27 @@ export default class AppointmentList extends Vue {
 
 	pastAppointment(appointment: Appointment) {
 		return new Date(appointment.endDate) < new Date();
+	}
+
+	@Emit('refreshData')
+	async refreshData() {
+		if (this.role === 'Patient') {
+			this.$store.dispatch(`${this.role}/updateAppointments`);
+		}
+		if (this.role === 'Dentist') {
+			this.$store.dispatch(`${this.role}/updateAppointments`);
+			if (!this.patientId) {
+				this.appointments = [];
+				return;
+			}
+			let initData: RequestInit = {
+				method: 'GET',
+				headers: {
+					'Authorization': `Bearer ${this.$store.getters['Auth/token']}`,
+				}
+			}
+			this.appointments = await fetch(`${process.env.APIURL}/${this.role}/Appointments/Patients/${this.patientId}`, initData).then(response => response.json());
+		}
 	}
 
 	@Watch('dialog')

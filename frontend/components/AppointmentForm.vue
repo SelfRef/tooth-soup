@@ -198,6 +198,7 @@ import Dentist from '~/interfaces/Dentist';
 import Patient from '~/interfaces/Patient';
 import Service from '~/interfaces/Service';
 import '~/lib/extensions';
+import { rules } from "~/lib/helpers";
 
 @Component
 export default class AppointmentForm extends Vue {
@@ -205,6 +206,7 @@ export default class AppointmentForm extends Vue {
 	@Prop({default: null}) item!: Appointment | null;
 	@Prop({default: null}) selectedPatientId!: number | null;
 	@Ref('form') form;
+	private rules = rules;
 	private dentists: Dentist[] = []
 	private services: Service[] = []
 	private dentistAppointments: Appointment[] = []
@@ -227,9 +229,6 @@ export default class AppointmentForm extends Vue {
 		duration: null,
 		canceled: false,
 	}
-	private rules = {
-		required: (v: string) => this.edit || Boolean(v) || 'Required',
-	};
 
 	get role() {
 		return this.$store.getters['Auth/userRole'];
@@ -259,52 +258,6 @@ export default class AppointmentForm extends Vue {
 	get minTime() {
 		if (this.date === this.now.substr(0, 10)) return this.now.substr(11, 5);
 		else return undefined;
-	}
-
-	getName(item) {
-		if (item.input.canceled) return `❌ ${item.input.name}`;
-		return item.input.name
-	}
-
-	mounted() {
-		if (this.role === 'Patient') {
-			this.refreshDentists();
-			this.$store.dispatch(`${this.role}/pullAccount`);
-		}
-		this.refreshServices(this.dentistId);
-		this.updateAppointments();
-	}
-
-	@Emit('update:active')
-	close() {
-		this.form.resetValidation();
-		return false;
-	}
-
-	@Emit('refresh')
-	async save() {
-		if (!this.form.validate()) return;
-		const fetchOptions: RequestInit = {
-			method: this.edit ? 'PUT' : 'POST',
-			body: JSON.stringify(this.appointment),
-			headers: {
-					'Authorization': `Bearer ${this.$store.getters['Auth/token']}`,
-					'Content-Type': 'application/json'
-				}
-		}
-		await fetch(`${process.env.APIURL}/${this.role}/Appointments`, fetchOptions);
-		this.form.reset();
-		this.close();
-	}
-
-	setUserIds() {
-		if (this.role === 'Patient') {
-			this.appointment.dentistId = this.account?.dentistId;
-			this.appointment.patientId = this.id;
-		} else if (this.role === 'Dentist') {
-			this.appointment.dentistId = this.dentistId;
-			this.appointment.patientId = this.patientId;
-		}
 	}
 
 	get edit() {
@@ -360,6 +313,81 @@ export default class AppointmentForm extends Vue {
 			if (end > last) last = end;
 		});
 		return ++last - this.firstHour;
+	}
+
+	get now() {
+		return new Date().toLocalISO();
+	}
+
+	mounted() {
+		if (this.role === 'Patient') {
+			this.refreshDentists();
+			this.$store.dispatch(`${this.role}/pullAccount`);
+		}
+		this.refreshServices(this.dentistId);
+		this.updateAppointments();
+	}
+
+	getName(item) {
+		if (item.input.canceled) return `❌ ${item.input.name}`;
+		return item.input.name
+	}
+
+	setUserIds() {
+		if (this.role === 'Patient') {
+			this.appointment.dentistId = this.account?.dentistId;
+			this.appointment.patientId = this.id;
+		} else if (this.role === 'Dentist') {
+			this.appointment.dentistId = this.dentistId;
+			this.appointment.patientId = this.patientId;
+		}
+	}
+
+	async refreshDentists() {
+		let initData: RequestInit = {
+			method: 'GET',
+			headers: {
+				'Authorization': `Bearer ${this.$store.getters['Auth/token']}`,
+			}
+		}
+		this.dentists = await fetch(`${process.env.APIURL}/${this.role}/Dentists`, initData).then(response => response.json());
+	}
+
+	formatDate(dateIso: string) {
+		return dateIso.substr(0, 16).replace('T', ' ');
+	}
+
+	eventName(appointment: Appointment) {
+		if (appointment.serviceName) {
+			let name;
+			if (this.role === 'Patient') name = appointment.dentistName;
+			else if (this.role === 'Dentist') name = appointment.patientName;
+			return `${appointment.serviceName} (${name})`;
+		} else {
+			return 'Busy';
+		}
+	}
+
+	@Emit('update:active')
+	close() {
+		this.form.resetValidation();
+		return false;
+	}
+
+	@Emit('refresh')
+	async save() {
+		if (!this.form.validate()) return;
+		const fetchOptions: RequestInit = {
+			method: this.edit ? 'PUT' : 'POST',
+			body: JSON.stringify(this.appointment),
+			headers: {
+					'Authorization': `Bearer ${this.$store.getters['Auth/token']}`,
+					'Content-Type': 'application/json'
+				}
+		}
+		await fetch(`${process.env.APIURL}/${this.role}/Appointments`, fetchOptions);
+		this.form.reset();
+		this.close();
 	}
 
 	@Watch('active')
@@ -450,35 +478,6 @@ export default class AppointmentForm extends Vue {
 
 		const forDentistId = this.role === 'Patient' ? `/Dentists/${this.dentistId}` : '?Linked';
 		this.services = await fetch(`${process.env.APIURL}/${this.role}/Services${forDentistId}`, initData).then(response => response.json());
-	}
-
-	async refreshDentists() {
-		let initData: RequestInit = {
-			method: 'GET',
-			headers: {
-				'Authorization': `Bearer ${this.$store.getters['Auth/token']}`,
-			}
-		}
-		this.dentists = await fetch(`${process.env.APIURL}/${this.role}/Dentists`, initData).then(response => response.json());
-	}
-
-	formatDate(dateIso: string) {
-		return dateIso.substr(0, 16).replace('T', ' ');
-	}
-
-	eventName(appointment: Appointment) {
-		if (appointment.serviceName) {
-			let name;
-			if (this.role === 'Patient') name = appointment.dentistName;
-			else if (this.role === 'Dentist') name = appointment.patientName;
-			return `${appointment.serviceName} (${name})`;
-		} else {
-			return 'Busy';
-		}
-	}
-
-	get now() {
-		return new Date().toLocalISO();
 	}
 }
 </script>

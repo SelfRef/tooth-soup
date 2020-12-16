@@ -194,6 +194,7 @@ import { Vue, Component, Prop, Ref, Watch, Emit } from 'vue-property-decorator';
 import User from '~/interfaces/User';
 import Dentist from '~/interfaces/Dentist';
 import Patient from '~/interfaces/Patient';
+import { rules } from "~/lib/helpers";
 
 @Component({
 	filters: {
@@ -205,25 +206,11 @@ export default class UserForm extends Vue {
 	@Prop({default: null}) item!: User | null;
 	@Prop() dentists!: Array;
 	@Ref('form') form;
+	private rules = rules;
 	private datePickerActive = false;
 	private alert: string | null = null;
 	private data: User | null = null;
-
 	private roles = [ 'Patient', 'Dentist', 'Admin' ];
-
-	private rules = {
-		required: (v: string) => Boolean(v) || 'Required',
-		pesel: (v: string) => {
-			if (!v) return false;
-			if (v.length !== 11) return 'Must be 11 digits long';
-			if (!/^\d+$/.test(v)) return 'Must have only digits';
-			return true;
-		},
-		email: (v: string) => {
-			const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-			return pattern.test(v) || 'Invalid e-mail'
-		},
-	};
 
 	get edit() {
 		return Boolean(this.item);

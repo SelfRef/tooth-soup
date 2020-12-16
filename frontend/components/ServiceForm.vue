@@ -68,20 +68,18 @@
 <script lang="ts">
 import { Vue, Component, Prop, Ref, Watch, Emit } from 'vue-property-decorator';
 import Service from '~/interfaces/Service';
+import { rules } from "~/lib/helpers";
 
 @Component
 export default class ServiceForm extends Vue {
 	@Prop({default: false}) active!: boolean;
 	@Prop({default: null}) item!: Service | null;
 	@Ref('form') form;
+	private rules = rules;
 	private service: Service = {
 		name: '',
 		price: 0,
 	}
-	private rules = {
-		required: (v: string) => this.edit || Boolean(v) || 'Required',
-		number: (v: string) => this.edit || /^\d+$/.test(v) || 'Must be number',
-	};
 
 	get role() {
 		return this.$store.getters['Auth/userRole'];

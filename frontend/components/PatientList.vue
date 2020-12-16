@@ -138,6 +138,14 @@
 			return this.$store.getters['Auth/userRole'];
 		}
 
+		get selectedPatientId() {
+			if (this.selectedPatients.length === 1) {
+				return this.selectedPatients[0].id;
+			} else {
+				return null;
+			}
+		}
+
 		async mounted() {
 			await this.refreshData();
 		}
@@ -171,14 +179,6 @@
 			}
 			await fetch(`${process.env.APIURL}/${this.role}/Patients/${id}`, initData);
 			await this.refreshData();
-		}
-
-		get selectedPatientId() {
-			if (this.selectedPatients.length === 1) {
-				return this.selectedPatients[0].id;
-			} else {
-				return null;
-			}
 		}
 
 		@Watch('userDialog')

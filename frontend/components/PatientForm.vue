@@ -183,7 +183,7 @@
 import { Vue, Component, Prop, Ref, Watch, Emit } from 'vue-property-decorator';
 import Patient from '~/interfaces/Patient';
 import '~/lib/extensions';
-import { peselToDateString } from "~/lib/helpers";
+import { peselToDateString, rules } from "~/lib/helpers";
 
 @Component({
 	filters: {
@@ -195,25 +195,13 @@ export default class PatientForm extends Vue {
 	@Prop({default: false}) register!: boolean;
 	@Prop({default: null}) patientData!: Patient | null;
 	@Ref('form') form;
+	private rules = rules;
 	private alert: string | null = null;
 	private datePickerActive = false;
 	private unlinkedUsers: Patient[] = [];
 	private currentTab: number | null = 0;
 	private unlinkedUserSelected: number | null = null;
 	private patient: Patient | null = null;
-	private rules = {
-		required: (v: string) => Boolean(v) || 'Required',
-		pesel: (v: string) => {
-			if (!v) return false;
-			if (v.length !== 11) return 'Must be 11 digits long';
-			if (!/^\d+$/.test(v)) return 'Must have only digits';
-			return true;
-		},
-		email: (v: string) => {
-			const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-			return pattern.test(v) || 'Invalid e-mail'
-		},
-	};
 
 	get role() {
 		return this.$store.getters['Auth/userRole'];
@@ -223,11 +211,8 @@ export default class PatientForm extends Vue {
 		return Boolean(this.patientData);
 	}
 
-	@Emit('update:active')
-	close() {
-		this.form.reset();
-		this.alert = null;
-		return false;
+	get now() {
+		return new Date().toLocalISO();
 	}
 
 	async save() {
@@ -287,8 +272,11 @@ export default class PatientForm extends Vue {
 		this.close();
 	}
 
-	get now() {
-		return new Date().toLocalISO();
+	@Emit('update:active')
+	close() {
+		this.form.reset();
+		this.alert = null;
+		return false;
 	}
 
 	@Watch('currentTab')
