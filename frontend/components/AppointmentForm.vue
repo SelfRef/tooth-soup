@@ -197,6 +197,7 @@ import Appointment from '~/interfaces/Appointment';
 import Dentist from '~/interfaces/Dentist';
 import Patient from '~/interfaces/Patient';
 import Service from '~/interfaces/Service';
+import '~/lib/extensions';
 
 @Component
 export default class AppointmentForm extends Vue {
@@ -399,10 +400,10 @@ export default class AppointmentForm extends Vue {
 	@Watch('timeEnd')
 	calcDate() {
 		if (this.date && this.timeStart) {
-			this.appointment.startDate = this.dateToLocalISO(new Date(`${this.date}T${this.timeStart}`));
+			this.appointment.startDate = new Date(`${this.date}T${this.timeStart}`).toLocalISO();
 		}
 		if (this.date && this.timeEnd) {
-			this.appointment.endDate = this.dateToLocalISO(new Date(`${this.date}T${this.timeEnd}`));
+			this.appointment.endDate = new Date(`${this.date}T${this.timeEnd}`).toLocalISO();
 		}
 		if (this.timeStart && this.timeEnd) {
 			const [timeStartHours, timeStartMinutes] = this.timeStart.split(':')
@@ -476,17 +477,8 @@ export default class AppointmentForm extends Vue {
 		}
 	}
 
-	dateToLocalISO(date) {
-		const offsetMs = date.getTimezoneOffset() * 60 * 1000;
-		const msLocal = date.getTime() - offsetMs;
-		const dateLocal = new Date(msLocal);
-		const iso = dateLocal.toISOString();
-		const isoLocal = iso.slice(0, 19);
-		return isoLocal;
-	}
-
 	get now() {
-		return this.dateToLocalISO(new Date());
+		return new Date().toLocalISO();
 	}
 }
 </script>

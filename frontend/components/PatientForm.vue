@@ -182,6 +182,8 @@
 <script lang="ts">
 import { Vue, Component, Prop, Ref, Watch, Emit } from 'vue-property-decorator';
 import Patient from '~/interfaces/Patient';
+import '~/lib/extensions';
+import { peselToDateString } from "~/lib/helpers";
 
 @Component({
 	filters: {
@@ -285,17 +287,8 @@ export default class PatientForm extends Vue {
 		this.close();
 	}
 
-	dateToLocalISO(date) {
-		const offsetMs = date.getTimezoneOffset() * 60 * 1000;
-		const msLocal = date.getTime() - offsetMs;
-		const dateLocal = new Date(msLocal);
-		const iso = dateLocal.toISOString();
-		const isoLocal = iso.slice(0, 19);
-		return isoLocal;
-	}
-
 	get now() {
-		return this.dateToLocalISO(new Date());
+		return new Date().toLocalISO();
 	}
 
 	@Watch('currentTab')
@@ -323,6 +316,13 @@ export default class PatientForm extends Vue {
 				birthDate: null,
 			};
 			this.form?.resetValidation();
+		}
+	}
+
+	@Watch('patient.pesel')
+	onPeselChange(pesel: string) {
+		if (pesel && pesel.length >= 6 && this.patient) {
+			this.patient.birthDate = peselToDateString(pesel);
 		}
 	}
 }
