@@ -27,7 +27,7 @@
 			:headers="headers"
 			:items="users"
 		>
-			<template #item.patient.dentistName="{item, value}">{{value || (item.role === 'Patient' ? '[not linked]' : '[n/a]')}}</template>
+			<template #item.patient.dentistName="{item, value}">{{value || (item.role === 'Patient' ? '[none]' : '[n/a]')}}</template>
 			<template #item.actions="{item}">
 				<v-tooltip bottom :open-delay="500">
 					Edit user
@@ -57,7 +57,7 @@
 				</v-menu>
 			</template>
 		</v-data-table>
-		<user-form :active.sync="dialog" :item="itemToEdit" @refresh="refresh" :dentists="dentists"/>
+		<user-form :active.sync="dialog" :item="itemToEdit" @refresh="refreshData" :dentists="dentists"/>
 	</v-container>
 </template>
 
@@ -117,14 +117,14 @@
 				name: u.name
 			}));
 			dentists.unshift({
-				id: null,
-				name: '[not linked]'
+				id: 0,
+				name: '[none]'
 			});
 			return dentists;
 		}
 
 		async mounted() {
-			await this.refresh();
+			await this.refreshData();
 		}
 
 		edit(item: User) {

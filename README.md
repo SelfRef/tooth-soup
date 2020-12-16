@@ -21,7 +21,7 @@ A system supporting the work of a dentist.
   - edit or cancel/uncancel appointments
   - create and edit patients
   - create/link/remove services (conditionally)
-  - export appointments of invoice
+  - export appointments of invoice to PDF or XML
 - Admin can
   - fully manage users
   - fully manager services

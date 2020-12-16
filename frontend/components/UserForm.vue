@@ -71,7 +71,7 @@
 								>
 									<v-select
 										label="Role"
-										:readonly="edit"
+										:disabled="edit"
 										:items="roles"
 										v-model="data.role"
 										prepend-icon="mdi-account-question"
@@ -262,10 +262,13 @@ export default class UserForm extends Vue {
 					canLink: true,
 					canCreateAppointment: true
 				};
-				this.data.patient = this.item?.patient ? {...this.item?.patient} : {
+				this.data.patient = this.item?.patient ? {
+					...this.item?.patient,
+					dentistId: this.item.patient.dentistId ?? 0
+				} : {
 					pesel: null,
 					birthDate: null,
-					dentistId: null
+					dentistId: 0
 				};
 			}
 		} else this.form?.reset();
