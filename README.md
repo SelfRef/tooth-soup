@@ -25,6 +25,7 @@ A system supporting the work of a dentist.
 - Admin can
   - fully manage users
   - fully manager services
+- Light/Dark theme (with auto detect)
 
 ## Development & running
 
