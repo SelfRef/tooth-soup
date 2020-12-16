@@ -125,6 +125,7 @@
 									>
 										<v-menu
 											v-model="datePickerActive"
+											:close-on-content-click="false"
 										>
 											<template v-slot:activator="{ on, attrs }">
 												<v-text-field
@@ -140,8 +141,9 @@
 											<v-date-picker
 												:value="data.patient.birthDate | date"
 												@change="data.patient.birthDate = $event"
-												no-title
 												@input="datePickerActive = false"
+												:max="now.substr(0, 10)"
+												no-title
 											></v-date-picker>
 										</v-menu>
 									</v-col>
@@ -194,7 +196,8 @@ import { Vue, Component, Prop, Ref, Watch, Emit } from 'vue-property-decorator';
 import User from '~/interfaces/User';
 import Dentist from '~/interfaces/Dentist';
 import Patient from '~/interfaces/Patient';
-import { rules } from "~/lib/helpers";
+import '~/lib/extensions';
+import { rules, peselToDateString } from "~/lib/helpers";
 
 @Component({
 	filters: {
@@ -218,6 +221,10 @@ export default class UserForm extends Vue {
 
 	get role() {
 		return this.$store.getters['Auth/userRole'];
+	}
+
+	get now() {
+		return new Date().toLocalISO();
 	}
 
 	@Emit('update:active')

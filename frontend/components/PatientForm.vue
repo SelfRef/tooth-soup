@@ -37,6 +37,7 @@
 										>
 											<v-menu
 												v-model="datePickerActive"
+												:close-on-content-click="false"
 											>
 												<template v-slot:activator="{ on, attrs }">
 													<v-text-field
@@ -52,9 +53,9 @@
 												<v-date-picker
 													:value="patient.birthDate | date"
 													@change="patient.birthDate = $event"
-													no-title
 													@input="datePickerActive = false"
 													:max="now.substr(0, 10)"
+													no-title
 												></v-date-picker>
 											</v-menu>
 										</v-col>
